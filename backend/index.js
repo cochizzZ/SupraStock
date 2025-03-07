@@ -226,8 +226,95 @@ app.get('/popularinwomen', async (req,res)=>{
     
 })
 
+// crear middleware para obtener usuario
+
+    const fetchUser = async (req,res,next)=>{
+        const token = req.header('auth-token');
+        if (!token) {
+            res.status(401).send({errors:"Autenticacion requerida:ingresa un token valido"})
+        }
+        else {
+            try {
+                const data =jwt.verify(token, 'secret_ecom');
+                req.user = data.user;
+                next();
+            } catch (error) {
+                res.status(401).send({errors:"Autenticacion requerida:ingresa un token valido"})
+            }
+        }
+    }
 
 
+//crear punto de conexion para agregar productos en  CarData
+app.post('/addtocart', fetchUser, async (req, res) => {
+    try {
+        let userData = await Users.findOne({ _id: req.user.id });
+        console.log("Producto agregado al carrito",req.body.itemId);
+
+        if (!userData) {
+            return res.status(404).json({ success: false, message: "Usuario no encontrado" });
+        }
+        let cartData = { ...userData.cartData }; 
+        cartData[req.body.itemId] = (cartData[req.body.itemId] || 0) + 1;
+
+        await Users.findOneAndUpdate(
+            { _id: req.user.id },
+            { cartData: cartData }
+        );
+
+        res.json({ success: true, message: "Producto agregado al carrito" });
+
+    } catch (error) {
+        console.error("Error al agregar al carrito:", error);
+        res.status(500).json({ success: false, message: "Error interno del servidor" });
+    }
+});
+
+//crear punto de conexion para eliminar productos en  CartData
+app.post('/removefromcart', fetchUser, async (req, res) => {
+    try {
+        let userData = await Users.findOne({ _id: req.user.id });
+        console.log("Producto elimado del carrito",req.body.itemId);
+
+        if (!userData) {
+            return res.status(404).json({ success: false, message: "Usuario no encontrado" });
+        }
+
+        let cartData = { ...userData.cartData };
+
+        if (cartData[req.body.itemId] && cartData[req.body.itemId] > 0) {
+            cartData[req.body.itemId] -= 1; // Restar 1 unidad
+
+
+            if (cartData[req.body.itemId] === 0) {
+                delete cartData[req.body.itemId];
+            }
+        } else {
+            return res.status(400).json({ success: false, message: "El producto no está en el carrito" });
+        }
+
+        await Users.findOneAndUpdate(
+            { _id: req.user.id },
+            { cartData: cartData }
+        );
+
+        console.log("Producto eliminado del carrito:", req.body.itemId);
+        res.json({ success: true, message: "Producto eliminado del carrito" });
+
+    } catch (error) {
+        console.error("Error al eliminar del carrito:", error);
+        res.status(500).json({ success: false, message: "Error interno del servidor" });
+    }
+});
+
+
+//Crear Punto de conexion para obtener datos del carrito
+app.post('/getcart',fetchUser,async (req,res)=>{
+   console.log("Obtener Carrito");
+   let userData = await Users.findOne({_id:req.user.id});
+   res.json(userData.cartData);
+   
+})
 
 app.listen(port,(error)=>{
     if (!error) {
