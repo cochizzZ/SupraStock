@@ -80,36 +80,46 @@ const Product = mongoose.model("Product",{
     },
 })
 
-app.post('/addproduct',async(req,res)=>{
-    let products= await Product.find({});
-    let id;
-    if(products.length>0)
-    {
-        let last_product_array = products.slice(-1);
-        let last_product = last_product_array[0];
-        id = last_product.id+1;
-    }
-    else
-    {
-        id = 1;
-    }
-    const product = new Product({
+app.post('/addproduct', async (req, res) => {
+    try {
+        let products = await Product.find({});
+        let id = products.length > 0 ? products[products.length - 1].id + 1 : 1;
 
-        id:id,
-        name:req.body.name,
-        image:req.body.image,
-        category:req.body.category,
-        new_price:req.body.new_price,
-        old_price:req.body.old_price,
-    });
-    console.log(product);
-    await product.save();
-    console.log("Saved");
-    res.json({
-        success:true,
-        name:req.body.name,
-    })
-})
+        const { name, image, category, new_price, old_price } = req.body;
+
+        // Validar que los campos obligatorios no estén vacíos
+        if (!name || !image || !category || !new_price) {
+            return res.status(400).json({
+                success: false,
+                message: "Todos los campos (name, image, category, new_price) son obligatorios.",
+            });
+        }
+
+        const product = new Product({
+            id: id,
+            name: name,
+            image: image,
+            category: category,
+            new_price: new_price,
+            old_price: old_price || 0, // Si no hay old_price, establecerlo en 0
+        });
+
+        await product.save();
+        console.log("Producto guardado:", product);
+
+        res.json({
+            success: true,
+            message: "Producto agregado correctamente",
+        });
+    } catch (error) {
+        console.error("Error al agregar producto:", error);
+        res.status(500).json({
+            success: false,
+            message: "Error interno del servidor",
+        });
+    }
+});
+
 
 // Creacion de API para Remover Productos
 
