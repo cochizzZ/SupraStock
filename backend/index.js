@@ -8,6 +8,7 @@ const path = require("path");
 const cors = require("cors");
 const { type } = require("os");
 const { log } = require("console");
+const fs = require("fs");
 
 app.use(express.json());
 app.use(cors());
@@ -129,8 +130,13 @@ app.post('/addproduct', async (req, res) => {
 // Creacion de API para Remover Productos
 
 app.post('/removeproduct',async(req,res)=>{
+    let producto = await Product.findOne({id:req.body.id});
+    console.log(producto);
+    let productImage = producto.image.split('/').slice(-1)[0];
+    console.log(productImage);
+    fs.unlinkSync(`./upload/images/${productImage}`);
     await Product.findOneAndDelete({id:req.body.id});
-    console.log("Removed");
+    console.log("Removed product and image");
     res.json({
         success:true,
         name:req.body.name
