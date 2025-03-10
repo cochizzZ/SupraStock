@@ -10,6 +10,7 @@ const AddProduct = () => {
     category: "",
     new_price: "",
     old_price: "",
+    description: "",
   });
 
   const imageHandler = (e) => {
@@ -69,6 +70,17 @@ const AddProduct = () => {
           onChange={changeHandler}
           type="text"
           name="name"
+          placeholder="Escribe aquí"
+        />
+      </div>
+
+      <div className="add-product-itemfield">
+        <p>Descripción del producto</p>
+        <input
+          value={productDetails.description}
+          onChange={changeHandler}
+          type="text"
+          name="description"
           placeholder="Escribe aquí"
         />
       </div>

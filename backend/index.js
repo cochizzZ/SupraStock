@@ -78,6 +78,10 @@ const Product = mongoose.model("Product",{
         type:Boolean,
         default:true,
     },
+    description:{
+        type:String,
+        required:true,
+    }
 })
 
 app.post('/addproduct', async (req, res) => {
@@ -85,7 +89,7 @@ app.post('/addproduct', async (req, res) => {
         let products = await Product.find({});
         let id = products.length > 0 ? products[products.length - 1].id + 1 : 1;
 
-        const { name, image, category, new_price, old_price } = req.body;
+        const { name, image, category, new_price, old_price, description } = req.body;
 
         // Validar que los campos obligatorios no estén vacíos
         if (!name || !image || !category || !new_price) {
@@ -102,6 +106,7 @@ app.post('/addproduct', async (req, res) => {
             category: category,
             new_price: new_price,
             old_price: old_price || 0, // Si no hay old_price, establecerlo en 0
+            description: description
         });
 
         await product.save();
