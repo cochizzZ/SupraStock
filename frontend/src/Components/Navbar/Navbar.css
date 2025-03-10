@@ -5,6 +5,12 @@
     box-shadow: 0 1px 3px -2px black;
     align-items: center;
 }
+#nav-logo-click:hover{
+    text-decoration: none;
+}
+#nav-logo-click{
+    text-decoration: none;
+}
 .nav-logo{
     display: flex;
     align-items: center;

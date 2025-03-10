@@ -20,10 +20,12 @@ const Navbar = () => {
 
   return (
     <div className='navbar'>
-      <div className="nav-logo">
-        <img src={logo} alt="" />
-        <p>SHOPPER</p>
-      </div>
+      <a id="nav-logo-click"href="/">
+        <div className="nav-logo">
+          <img src={logo} alt="" />
+          <p>SHOPPER</p>
+        </div>
+      </a>
       <img className='nav-dropdown' onClick={dropdown_toggle} src={nav_dropdown} alt='dropdown button'/>
       <ul ref={menuRef} className="nav-menu">
         <li onClick={()=>{setMenu("shop")}}><Link style={{textDecoration: 'none'}} to='/'>Shop</Link>{menu==="shop"?<hr/>:<></>}</li>
