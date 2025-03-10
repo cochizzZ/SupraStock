@@ -70,8 +70,8 @@ const signup = async () =>{
         </div>
         <button onClick={()=> {state==="Login"?login():signup()}}>Continue</button>
         {state==="Sign Up"
-        ?<p className="loginsignup-login">Already have an account? <span onClick={()=>{setState("Login")}}>Login here</span></p>
-      :<p className="loginsignup-login">Create an account? <span onClick={()=>{setState("Sign Up")}} >Click here </span></p>}
+        ?<p className="loginsignup-login">Already have an account? <span id="span-login" onClick={()=>{setState("Login")}}>Login here</span></p>
+      :<p className="loginsignup-login">Create an account? <span id="span-login" onClick={()=>{setState("Sign Up")}} >Click here </span></p>}
         <div className="loginsignup-agree">
           <input type="checkbox" name='' id=''/>
           <p>By continuing, i agree to the terms of use & privacy policy.</p>

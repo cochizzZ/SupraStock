@@ -5,6 +5,10 @@
     padding-top: 100px;
 }
 
+#span-login:hover{
+    cursor: pointer;
+}
+
 .loginsignup-container{
     width: 580px;
     height: 600px;
