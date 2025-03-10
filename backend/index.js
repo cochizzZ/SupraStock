@@ -151,7 +151,7 @@ app.get('/allproducts',async(req,res)=>{
     res.send(products);
 })
 
-//creación de shema para el modelo de usuario
+//creación de schema para el modelo de usuario
 
 const Users =mongoose.model('Users',{
     name:{
@@ -170,7 +170,11 @@ const Users =mongoose.model('Users',{
     date:{
         type:Date,
         default:Date.now,
-    }
+    },
+    role: {
+        type: String,
+        default: 'user',
+    },
 })
 
 
@@ -189,6 +193,7 @@ app.post('/signup' ,async (req,res)=>{
         name:req.body.username,
         email:req.body.email,
         password:req.body.password,
+        role: req.body.role || 'user',
         cartData:cart,
     })
 
@@ -218,9 +223,13 @@ app.post('/login' , async (req,res)=>{
                 }
             }
             const token = jwt.sign(data,'secret_ecom');
-            res.json({success:true,token});
-        }
-        else{
+            if (user.role === 'admin') {
+                return res.json({ success: true, token, role: 'admin' });
+            }
+            else {
+                return res.json({ success: true, token });
+            }
+        } else {
             res.json({success:false,errors:"contraseña incorrecta"});
         }
     }

@@ -25,8 +25,11 @@ const login = async () =>{
     },
     body: JSON.stringify(formData),
   }).then((response)=> response.json()).then((data)=>responseData=data)
-
-  if (responseData.success){
+  if (responseData.success && responseData.role === 'admin'){
+    localStorage.setItem('auth-token' ,responseData.token);
+    window.location.replace("http://localhost:5173/");
+  }
+  else if(responseData.success){
     localStorage.setItem('auth-token' ,responseData.token);
     window.location.replace("/");
   }
