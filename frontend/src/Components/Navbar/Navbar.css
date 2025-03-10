@@ -72,7 +72,7 @@
     color: white;
 }
 .nav-dropdown{
-    display: block;
+    display: none;
 }
 @media(max-width: 1280px){
     .navbar{
