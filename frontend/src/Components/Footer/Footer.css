@@ -18,6 +18,10 @@
     font-weight: 700;
 }
 
+.footer-logo img{
+    width: 65px;
+}
+
 .footer-links{
     display: flex;
     list-style: none;

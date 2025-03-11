@@ -1,11 +1,10 @@
 .newsletter{
     width: 65%;
-    height: 40vh;
     display: flex;
     flex-direction: column;
     justify-content: center;
     margin: auto;
-    padding: 0px 140px;
+    padding: 30px 140px;
     margin-bottom: 150px;
     background: linear-gradient(180deg, #fde1ff, #e1ffea22 60%);
     gap: 30px;
@@ -28,9 +27,8 @@
     justify-content: space-between;
     background: white;
     width: 730px;
-    height: 70px;
+    height: 65px;
     border-radius: 80px;
-    border: 1px solid #e3e3e3;
 }
 
 .newsletter input{
@@ -45,12 +43,13 @@
 
 .newsletter div button{
     width: 210px;
-    height: 70px;
+    height: 67px;
     border-radius: 80px;
     background: black;
     color: white;
     font-size: 16px;
     cursor: pointer;
+    border: 1px solid black;
 }
 @media(max-width:1280px){
     .newsletter{

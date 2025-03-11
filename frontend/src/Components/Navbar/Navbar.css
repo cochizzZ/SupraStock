@@ -21,6 +21,11 @@
     font-size: 38px;
     font-weight: 600;
 }
+.nav-logo img{
+    width: 75px;
+    padding-right: 20px;
+}
+
 .nav-menu{
     display: flex;
     align-items: center;
