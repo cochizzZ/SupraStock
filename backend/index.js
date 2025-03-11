@@ -190,7 +190,7 @@ app.post('/signup' ,async (req,res)=>{
         cart[i]=0;
     }
     const user = new Users({
-        name:req.body.username,
+        name:req.body.name,
         email:req.body.email,
         password:req.body.password,
         role: req.body.role || 'user',
@@ -224,10 +224,10 @@ app.post('/login' , async (req,res)=>{
             }
             const token = jwt.sign(data,'secret_ecom');
             if (user.role === 'admin') {
-                return res.json({ success: true, token, role: 'admin' });
+                return res.json({ success: true, token, role: 'admin', username: user.name });
             }
             else {
-                return res.json({ success: true, token });
+                return res.json({ success: true, token, username: user.name });
             }
         } else {
             res.json({success:false,errors:"contraseña incorrecta"});

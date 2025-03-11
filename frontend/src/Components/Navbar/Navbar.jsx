@@ -13,6 +13,12 @@ const Navbar = () => {
     const {getTotalCartItems} = useContext(ShopContext);
     const menuRef = useRef(0);
 
+    const getUsername = () => {
+      if (localStorage.getItem('auth-token')) {
+        return localStorage.getItem('username');
+      }
+    }
+
     const dropdown_toggle = (e) => {
         menuRef.current.classList.toggle('nav-menu-visible');
         e.target.classList.toggle('open');
@@ -37,6 +43,7 @@ const Navbar = () => {
         {localStorage.getItem('auth-token')
         ? <button onClick={() => {
           localStorage.removeItem('auth-token');
+          localStorage.removeItem('username');
           window.location.replace('/');
         }}>
           Logout
@@ -45,6 +52,7 @@ const Navbar = () => {
       :<Link to='/login'><button>Login</button></Link>}
         <Link to='/cart'><img src={cart_icon} alt="" /></Link>
         <div className="nav-cart-count">{getTotalCartItems()}</div>
+        <div className="username">{getUsername()}</div>
       </div>
     </div>
   )
