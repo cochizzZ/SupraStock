@@ -9,6 +9,7 @@ const cors = require("cors");
 const { type } = require("os");
 const { log } = require("console");
 const fs = require("fs");
+const bcrypt = require("bcryptjs"); // Importamos bcryptjs para cifrar las contraseñas
 
 app.use(express.json());
 app.use(cors());
@@ -156,13 +157,16 @@ app.get('/allproducts',async(req,res)=>{
 const Users =mongoose.model('Users',{
     name:{
         type:String,
+        required:true,
     },
     email:{
         type:String,
         unique:true,
+        required:true,
     },
     password:{
         type:String,
+        required:true,
     },
     cartData:{
         type:Object,
@@ -177,66 +181,65 @@ const Users =mongoose.model('Users',{
     },
 })
 
-
-//crear un punto final para registrar al usuario 
-app.post('/signup' ,async (req,res)=>{
-
-    let check = await Users.findOne({email:req.body.email});
+// Modificación en el endpoint de registro (signup)
+app.post('/signup', async (req, res) => {
+    let check = await Users.findOne({ email: req.body.email });
     if (check) {
-        return res.status(400).json({success:false,errors:"se ha encontrado un usuario con la misma dirección de correo electrónico"})
-    }
-    let cart ={};
-    for (let i=0; i< 300; i++){
-        cart[i]=0;
-    }
-    const user = new Users({
-        name:req.body.name,
-        email:req.body.email,
-        password:req.body.password,
-        role: req.body.role || 'user',
-        cartData:cart,
-    })
-
-    await user.save();
-
-    const data = {
-        user:{
-            id:user.id
-        }
+        return res.status(400).json({ success: false, errors: "Se ha encontrado un usuario con la misma dirección de correo electrónico" });
     }
 
-    const token =jwt.sign(data,'secret_ecom');
-    res.json({success:true,token })
+    let cart = {};
+    for (let i = 0; i < 300; i++) {
+        cart[i] = 0;
+    }
 
-})
+    try {
+        // Generamos el "sal" para reforzar el hash
+        const salt = await bcrypt.genSalt(10);
+        // Ciframos la contraseña antes de almacenarla
+        const hashedPassword = await bcrypt.hash(req.body.password, salt);
 
-//creación de un punto final para el inicio de sesión del usuario
+        const user = new Users({
+            name: req.body.name,
+            email: req.body.email,
+            password: hashedPassword, // Guardamos la versión cifrada
+            role: req.body.role || 'user',
+            cartData: cart,
+        });
 
-app.post('/login' , async (req,res)=>{
-    let user = await Users.findOne({email:req.body.email});
+        await user.save();
+
+        const data = { user: { id: user.id } };
+        const token = jwt.sign(data, 'secret_ecom');
+        res.json({ success: true, token, username: user.name });
+    } catch (error) {
+        console.error("Error al registrar usuario:", error);
+        res.status(500).json({ success: false, message: "Error interno del servidor" });
+    }
+});
+
+// Modificación en el endpoint de login
+app.post('/login', async (req, res) => {
+    let user = await Users.findOne({ email: req.body.email });
     if (user) {
-        const passCompare = req.body.password === user.password;
+        // Comparamos la contraseña ingresada con la almacenada cifrada
+        const passCompare = await bcrypt.compare(req.body.password, user.password);
         if (passCompare) {
-            const data = {
-                user:{
-                    id:user.id
-                }
-            }
-            const token = jwt.sign(data,'secret_ecom');
+            const data = { user: { id: user.id } };
+            const token = jwt.sign(data, 'secret_ecom');
             if (user.role === 'admin') {
                 return res.json({ success: true, token, role: 'admin', username: user.name });
-            }
-            else {
+            } else {
                 return res.json({ success: true, token, username: user.name });
             }
         } else {
-            res.json({success:false,errors:"contraseña incorrecta"});
+            return res.json({ success: false, errors: "Contraseña incorrecta" });
         }
+    } else {
+        return res.json({ success: false, errors: "ID de correo electrónico incorrecto" });
     }
-    else {
-        res.json({success:false,errors:"ID de correo electrónico incorrecto "});
-    }
-})
+});
+
 
 //creación de un punto final para los datos de newcollection
 
