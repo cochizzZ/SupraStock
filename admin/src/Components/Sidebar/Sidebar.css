@@ -19,6 +19,11 @@
     background: #f6f6f6;
     gap: 20px;
     cursor: pointer;
+    justify-content: initial;
+}
+.sidebar-item img {
+    width: 30px;
+    height: 30px;
 }
 
 @media (max-width: 800px) {
