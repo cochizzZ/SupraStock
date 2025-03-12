@@ -24,38 +24,54 @@ const AddProduct = () => {
   const Add_Product = async () => {
     console.log("Producto antes de enviar:", productDetails);
 
+    // Verificar que todos los campos obligatorios estén llenos
+    if (!productDetails.name || !productDetails.category || !productDetails.new_price) {
+      alert("Por favor, complete todos los campos obligatorios.");
+      return;
+    }
+
     let responseData;
     let product = { ...productDetails }; // Se crea una copia del objeto para evitar mutaciones inesperadas
 
+    // Si hay una imagen, súbela primero
     if (image) {
       let formData = new FormData();
       formData.append("product", image);
 
-      await fetch("http://localhost:4000/upload", {
+      const imageResponse = await fetch("http://localhost:4000/upload", {
         method: "POST",
         headers: {
           Accept: "application/json",
         },
         body: formData,
-      })
-        .then((resp) => resp.json())
-        .then((data) => {
-          responseData = data;
-        });
+      }).then((resp) => resp.json());
 
-      if (responseData?.success) {
-        product.image = responseData.image_url; 
-        await fetch ('http://localhost:4000/addproduct',{
-            method:'POST',
-            headers:{
-                Accept:'application/json',
-                'Content-Type':'application/json',
-            },
-            body:JSON.stringify(product), 
-        }).then((resp)=>resp.json()).then((data)=>{
-            data.success?alert("Producto Agregado"):alert("Fallo")
-        })
+      console.log("Respuesta del servidor al subir imagen:", imageResponse);
+
+      if (imageResponse?.success) {
+        product.image = imageResponse.image_url;
+      } else {
+        alert("Fallo al subir la imagen");
+        return;
       }
+    }
+
+    // Luego, intenta agregar el producto a la base de datos
+    const productResponse = await fetch('http://localhost:4000/addproduct', {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(product),
+    }).then((resp) => resp.json());
+
+    console.log("Respuesta del servidor al agregar producto:", productResponse);
+
+    if (productResponse.success) {
+      alert("Producto e imagen agregados correctamente");
+    } else {
+      alert("Fallo al agregar el producto");
     }
 
     console.log("Producto final:", product);
@@ -117,6 +133,9 @@ const AddProduct = () => {
           name="category"
           className="add-product-selector"
         >
+          <option value="" disabled>
+            Seleccionar
+          </option>
           <option value="women">Mujer</option>
           <option value="men">Hombre</option>
           <option value="kid">Niños</option>
