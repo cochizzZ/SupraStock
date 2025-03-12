@@ -18,10 +18,14 @@ const Footer = () => {
       </ul>
       <div className="footer-social-icon">
         <div className="footer-icons-container">
-            <img src={instagram_icon} alt="" />
+          <a href="https://www.instagram.com/domastore17?igsh=bXZ4NGZ2MnV5c21r" target="_blank" rel="noopener noreferrer">
+            <img src={instagram_icon} alt="Instagram" />
+          </a>
         </div>
         <div className="footer-icons-container">
-            <img src={whatsapp_icon} alt="" />
+          <a href="https://wa.me/message/GTJSO3MSQQHMJ1" target="_blank" rel="noopener noreferrer">
+            <img src={whatsapp_icon} alt="WhatsApp" />
+          </a>
         </div>
       </div>
       <div className="footer-copyright">
