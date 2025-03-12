@@ -7,3 +7,19 @@
     padding: 10px 10px 10px 30px;
     outline: none;
 }
+
+@media(max-width:1280px){
+    #search{
+        width: 250px;
+    }
+}
+@media(max-width:1024px){
+    #search{
+        width: 180px;
+    }
+}
+@media(max-width:500px){
+    #search{
+        width: 95px;
+    }
+}

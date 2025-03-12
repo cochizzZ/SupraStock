@@ -145,6 +145,10 @@
     .hero{
         flex-direction: column;
     }
+    .hero-left{
+        padding-left: 50px;
+        padding-top: 30px;
+    }
     .hero-right{
         display: none;
     }
