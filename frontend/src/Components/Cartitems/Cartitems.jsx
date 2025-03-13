@@ -8,12 +8,12 @@ const Cartitems = () => {
     return (
         <div className='cartitems'>
             <div className="cartitems-format-main">
-                <p>Products</p>
-                <p>Title</p>
-                <p>Price</p>
-                <p>Quantity</p>
+                <p>Productos</p>
+                <p>Titulo</p>
+                <p>Nombre</p>
+                <p>Cantidad</p>
                 <p>Total</p>
-                <p>Remove</p>
+                <p>Eliminar</p>
             </div>
             <hr />
             {all_product.map((e)=>{

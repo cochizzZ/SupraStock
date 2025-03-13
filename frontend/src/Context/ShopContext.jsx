@@ -1,4 +1,5 @@
 import React, { createContext, useEffect, useState } from "react";
+import Swal from "sweetalert2";
 
 export const ShopContext = createContext(null);
 
@@ -74,7 +75,16 @@ const ShopContextProvider = ({ children }) => {
                 body: JSON.stringify({ itemId }),
             })
                 .then((response) => response.json())
-                .then((data) => console.log("Item removed from cart:", data))
+                .then((data) => {
+                    console.log("Item removed from cart:", data);
+                    Swal.fire({
+                        title: "Producto eliminado!",
+                        text: "El producto ha sido eliminado del carrito.",
+                        icon: "success",
+                        confirmButtonColor: "#3085d6",
+                        confirmButtonText: "OK",
+                    });
+                })
                 .catch((error) => console.error("Error removing from cart:", error));
         }
     };
