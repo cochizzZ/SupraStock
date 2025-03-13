@@ -1,0 +1,127 @@
+.descriptionbox{
+    margin: 120px 170px;
+}
+
+.descriptionbox-navigator{
+    display: flex;
+}
+
+.descriptionbox-nav-box{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    font-weight: 600;
+    width: 171px;
+    height: 70px;
+    border: 1px solid #d0d0d0;
+}
+
+.descriptionbox-nav-box.fade{
+    background: #FBFBFB;
+    color: #555;
+}
+
+.descriptionbox-description{
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+    border: 1px solid #D0D0D0;
+    padding: 48px;
+    padding-bottom: 70px;
+}
+
+.commentsbox {
+  border: 1px solid #e0e0e0;
+  padding: 20px;
+  margin-top: 20px;
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.commentsbox-header {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.commentsbox-nav-box {
+  padding: 10px 20px;
+  cursor: pointer;
+  border: 1px solid #e0e0e0;
+  background-color: #f9f9f9;
+  margin: 0 5px;
+}
+
+.commentsbox-nav-box.active {
+  font-weight: bold;
+  border-bottom: 2px solid #000;
+  background-color: #fff;
+}
+
+.commentsbox-content {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.commentsbox-comments {
+  max-height: 300px;
+  overflow-y: auto;
+  padding: 10px 0;
+  border: 1px solid #e0e0e0;
+  border-radius: 5px;
+  margin-bottom: 20px;
+}
+
+.comment {
+  margin-bottom: 20px;
+  padding: 10px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.comment p {
+  margin: 5px 0;
+}
+
+.commentsbox-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.commentsbox-form input,
+.commentsbox-form textarea {
+  padding: 10px;
+  border: 1px solid #e0e0e0;
+  border-radius: 5px;
+  width: 100%;
+}
+
+.commentsbox-form button {
+  padding: 10px;
+  background-color: #374151;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.commentsbox-form button:hover {
+  background-color: #4b5563;
+}
+
+@media(max-width:1280px){
+    .descriptionbox{
+        margin: 60px;
+    }
+}
+@media(max-width:800px){
+    .descriptionbox{
+        margin: 60px 20px;
+    }
+    .descriptionbox-description{
+        font-size: 14px;
+    }
+}
