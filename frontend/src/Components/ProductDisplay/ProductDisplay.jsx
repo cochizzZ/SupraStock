@@ -33,7 +33,7 @@ const ProductDisplay = (props) => {
           <div >{product.description}</div>
         </div>
         <div className="productdisplay-right-size">
-            <h1>Select Size</h1>
+            <h1>Seleccionar talla</h1>
             <div className="productdisplay-right-sizes">
                 <div>S</div>
                 <div>M</div>
@@ -42,9 +42,9 @@ const ProductDisplay = (props) => {
                 <div>XXL</div>
             </div>
         </div>
-        <button onClick={()=>{addToCart(product.id)}}>ADD TO CART</button>
-        <p className='productdisplay-right-category'><span>Category :</span>Women, T-Shirt, Crop Top</p>
-        <p className='productdisplay-right-category'><span>Tags :</span>Modern, Latest</p>
+        <button onClick={()=>{addToCart(product.id)}}>AGREGAR AL CARRITO</button>
+        <p className='productdisplay-right-category'><span>Categoria: </span>Mujer, conjunto</p>
+        <p className='productdisplay-right-category'><span>Tags: </span>Moderno, novedoso</p>
       </div>
     </div>
   )
