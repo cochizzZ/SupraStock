@@ -218,9 +218,12 @@
     }
 
     .nav-login-cart button {
-        width: 120px;
-        height: 45px;
+        width: 80px;
+        height: 33px;
         font-size: 16px;
+        background: white;
+        border-radius: 8px;
+        border-color: #80808063;
     }
 
     .nav-cart-count {
