@@ -4,6 +4,7 @@ import logo from '../Assets/logo.jpg';
 import cart_icon from '../Assets/cart_icon.png';
 import { Link } from 'react-router-dom';
 import { ShopContext } from '../../Context/ShopContext';
+import { UserContext } from '../../Context/UserContext';
 import nav_dropdown from '../Assets/nav_dropdown.png';
 import SearchBar from '../SearchBar/SearchBar';
 import SearchModal from '../SearchModal/SearchModal';
@@ -11,6 +12,7 @@ import SearchModal from '../SearchModal/SearchModal';
 const Navbar = () => {
   const [menu, setMenu] = useState("shop");
   const { getTotalCartItems } = useContext(ShopContext);
+  const { user } = useContext(UserContext);
   const menuRef = useRef(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -57,9 +59,9 @@ const Navbar = () => {
           </button>
 
           : <Link to='/login'><button>Login</button></Link>}
-        <Link to='/cart'><img class="cart-img"src={cart_icon} alt="" /></Link>
+        <Link to='/cart'><img className="cart-img" src={cart_icon} alt="" /></Link>
         <div className="nav-cart-count">{getTotalCartItems()}</div>
-        <div className="username">{getUsername()}</div>
+        {user && <Link to="/profile" className="username">{user.name}</Link>}
       </div>
       
     </div>

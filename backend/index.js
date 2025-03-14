@@ -154,32 +154,45 @@ app.get('/allproducts',async(req,res)=>{
 
 //creación de schema para el modelo de usuario
 
-const Users =mongoose.model('Users',{
-    name:{
-        type:String,
-        required:true,
+const Users = mongoose.model('Users', {
+    name: {
+        type: String,
+        required: true,
     },
-    email:{
-        type:String,
-        unique:true,
-        required:true,
+    email: {
+        type: String,
+        unique: true,
+        required: true,
     },
-    password:{
-        type:String,
-        required:true,
+    password: {
+        type: String,
+        required: true,
     },
-    cartData:{
-        type:Object,
+    photo: {
+        type: String,
     },
-    date:{
-        type:Date,
-        default:Date.now,
+    address: {
+        type: String,
+    },
+    phone: {
+        type: String,
+    },
+    wishlist: {
+        type: Array,
+        default: [],
+    },
+    cartData: {
+        type: Object,
+    },
+    date: {
+        type: Date,
+        default: Date.now,
     },
     role: {
         type: String,
         default: 'user',
     },
-})
+});
 
 // Modificación en el endpoint de registro (signup)
 app.post('/signup', async (req, res) => {
@@ -364,6 +377,29 @@ app.get('/verifyAdmin', async (req, res) => {
         res.send({ success: true });
     } catch (error) {
         res.status(401).send({ success: false, errors: "Autenticación requerida: ingresa un token válido" });
+    }
+});
+
+// Endpoint para obtener el perfil del usuario
+app.get('/user', fetchUser, async (req, res) => {
+    try {
+        const user = await Users.findById(req.user.id);
+        res.json({ user });
+    } catch (error) {
+        console.error("Error fetching user data:", error);
+        res.status(500).json({ success: false, message: "Error interno del servidor" });
+    }
+});
+
+// Endpoint para actualizar el perfil del usuario
+app.post('/updateProfile', fetchUser, async (req, res) => {
+    try {
+        const { name, photo, address, phone, email } = req.body;
+        const user = await Users.findByIdAndUpdate(req.user.id, { name, photo, address, phone, email }, { new: true });
+        res.json({ success: true, user });
+    } catch (error) {
+        console.error("Error updating user profile:", error);
+        res.status(500).json({ success: false, message: "Error interno del servidor" });
     }
 });
 

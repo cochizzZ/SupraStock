@@ -4,13 +4,15 @@ import './index.css';
 import App from './App';
 import ShopContextProvider from './Context/ShopContext';
 import ProductContextProvider from './Context/ProductContext';
+import UserContextProvider from './Context/UserContext';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <ShopContextProvider>
     <ProductContextProvider>
-      <App />
+      <UserContextProvider>
+        <App />
+      </UserContextProvider>
     </ProductContextProvider>
   </ShopContextProvider>
 );
-

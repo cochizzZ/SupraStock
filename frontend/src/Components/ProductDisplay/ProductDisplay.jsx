@@ -4,7 +4,6 @@ import star_icon from "../Assets/star_icon.png";
 import star_dull_icon from "../Assets/star_dull_icon.png";
 import { ShopContext } from '../../Context/ShopContext';
 
-
 const ProductDisplay = (props) => {
     const {product} = props;
     const {addToCart} = useContext(ShopContext);
@@ -43,7 +42,7 @@ const ProductDisplay = (props) => {
             </div>
         </div>
         <button onClick={()=>{addToCart(product.id)}}>AGREGAR AL CARRITO</button>
-        <p className='productdisplay-right-category'><span>Categoria: </span>Mujer, conjunto</p>
+        <p className='productdisplay-right-category'><span>Categoria: </span>Mujer, conjunto</p> 
         <p className='productdisplay-right-category'><span>Tags: </span>Moderno, novedoso</p>
       </div>
     </div>
