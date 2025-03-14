@@ -1,15 +1,23 @@
 .add-product{
     box-sizing: border-box;
     width: 100%;
-    max-width: 800px;
+    max-width: 900px;
     padding: 30px 50px;
     margin: 20px 30px;
     border-radius: 6px;
     background: white;
 }
+.add-product-title {
+    font-size: 32px;
+    font-weight: bold;
+    color: black;
+    text-align: center;
+    margin-top: 5px;
+    margin-bottom: 30px;
+}
 .add-product-itemfield{
     width: 100%;
-    color: #7b7b7b;
+    color: black;
     font-size: 16px;
 }
 .add-product-itemfield input {
@@ -30,7 +38,7 @@
 }
 .add-product-selector{
     padding: 10px;
-    width: 100px;
+    width: 116px;
     height: 50px;
     font-size: 14px;
     color: #7b7b7b;
@@ -38,11 +46,11 @@
     border-radius: 4px;
 }
 .add-product-thumbnail-img{
-    height: 120px;
-    width: 120px;
+    height: 70px;
+    width: 70px;
     border-radius: 10px;
     object-fit: contain;
-    margin: 10px;
+    margin-top: 30px;
 }
 .addproduct-btn{
     margin-top: 20px;

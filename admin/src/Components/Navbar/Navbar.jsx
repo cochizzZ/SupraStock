@@ -1,17 +1,17 @@
-import React from 'react'
-import './Navbar.css'
-import navlogo from '../../assets/nav-logo.svg'
-import navProfile from '../../assets/nav-profile.svg'
+import React from 'react';
+import { Link } from 'react-router-dom'; // Importamos Link
+import './Navbar.css';
+import navlogo from '../../assets/nav-logo.svg';
 
 const Navbar = () => {
   return (
-    <a href="/">
-      <div className='navbar'>
-     <img src={navlogo} alt="" className="nav-logo" />
-     <img src={navProfile} className='nav-profile'   alt="" />
-      </div>
-    </a>
-  )
+    <div className='navbar'>
+      <Link to="/" className="nav-home"> {/* Enlace envolviendo logo y título */}
+        <img src={navlogo} alt="Logo" className="nav-logo" />
+        <h1 className="nav-title">Panel de Administrador</h1>
+      </Link>
+    </div>
+  );
 }
 
-export default Navbar
+export default Navbar;

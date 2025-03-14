@@ -17,7 +17,7 @@ const Sidebar = () => {
         <Link to={'/listproduct'} style={{textDecoration: "none"}}>
             <div className="sidebar-item">
                 <img src={list_product_icon} alt="" />
-                <p>Lista productos</p>
+                <p>Lista de productos</p>
             </div>
         </Link>
         <Link to={'/logout'} style={{textDecoration: "none"}}>

@@ -30,7 +30,6 @@ const AddProduct = () => {
       return;
     }
 
-    let responseData;
     let product = { ...productDetails }; // Se crea una copia del objeto para evitar mutaciones inesperadas
 
     // Si hay una imagen, súbela primero
@@ -79,8 +78,9 @@ const AddProduct = () => {
 
   return (
     <div className="add-product">
+      <h2 className="add-product-title">Añadir Productos</h2>
       <div className="add-product-itemfield">
-        <p>Nombre del Producto</p>
+        <p>Nombre del producto</p>
         <input
           value={productDetails.name}
           onChange={changeHandler}
@@ -114,7 +114,7 @@ const AddProduct = () => {
         </div>
 
         <div className="add-product-itemfield">
-          <p>Precio de Oferta</p>
+          <p>Precio de oferta</p>
           <input
             value={productDetails.new_price}
             onChange={changeHandler}
@@ -126,7 +126,7 @@ const AddProduct = () => {
       </div>
 
       <div className="add-product-itemfield">
-        <p>Categoría del Producto</p>
+        <p>Categoría del producto</p>
         <select
           value={productDetails.category}
           onChange={changeHandler}
