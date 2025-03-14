@@ -5,14 +5,13 @@ import { Routes, Route } from 'react-router-dom';
 import AddProduct from '../../Components/AddProduct/AddProduct';
 import ListProduct from '../../Components/ListProduct/ListProduct';
 import Logout from '../../Components/Logout/Logout';
+import Dashboard from '../../Components/Dashboard/Dashboard';
 
 const Admin = () => {
   return (
     <div className='admin'>
       <Sidebar />
-
       <div className="admin-content">
-        {/* Mostrar solo en la ruta /admin */}
         <Routes>
           <Route path="/" element={
             <div className="admin-welcome">
@@ -25,13 +24,13 @@ const Admin = () => {
               </div>
               <p className="admin-note">Usa el menú lateral para navegar entre las secciones.</p>
             </div>
-          }/>
+          } />
+          <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/addproduct" element={<AddProduct />} />
           <Route path="/listproduct" element={<ListProduct />} />
           <Route path="/logout" element={<Logout />} />
         </Routes>
       </div>
-
     </div>
   );
 };
