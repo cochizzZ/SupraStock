@@ -83,21 +83,26 @@ const Product = mongoose.model("Product",{
     description:{
         type:String,
         required:true,
+    },
+    stock: { // Nuevo campo agregado
+        type: Number,
+        required: true,
+        default: 0,
     }
-})
+    })
 
 app.post('/addproduct', async (req, res) => {
     try {
         let products = await Product.find({});
         let id = products.length > 0 ? products[products.length - 1].id + 1 : 1;
 
-        const { name, image, category, new_price, old_price, description } = req.body;
+        const { name, image, category, new_price, old_price, description, stock } = req.body;
 
         // Validar que los campos obligatorios no estén vacíos
-        if (!name || !image || !category || !new_price) {
+        if (!name || !image || !category || !new_price || stock === undefined) {
             return res.status(400).json({
                 success: false,
-                message: "Todos los campos (name, image, category, new_price) son obligatorios.",
+                message: "Todos los campos (name, image, category, new_price, stock) son obligatorios.",
             });
         }
 
@@ -108,7 +113,8 @@ app.post('/addproduct', async (req, res) => {
             category: category,
             new_price: new_price,
             old_price: old_price || 0, // Si no hay old_price, establecerlo en 0
-            description: description
+            description: description,
+            stock: stock // Nuevo campo agregado
         });
 
         await product.save();

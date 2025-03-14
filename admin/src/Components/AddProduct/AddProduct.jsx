@@ -11,6 +11,7 @@ const AddProduct = () => {
     new_price: "",
     old_price: "",
     description: "",
+    stock: "", // Nuevo campo agregado
   });
 
   const imageHandler = (e) => {
@@ -25,7 +26,7 @@ const AddProduct = () => {
     console.log("Producto antes de enviar:", productDetails);
 
     // Verificar que todos los campos obligatorios estén llenos
-    if (!productDetails.name || !productDetails.category || !productDetails.new_price) {
+    if (!productDetails.name || !productDetails.category || !productDetails.new_price || !productDetails.stock) {
       alert("Por favor, complete todos los campos obligatorios.");
       return;
     }
@@ -69,6 +70,17 @@ const AddProduct = () => {
 
     if (productResponse.success) {
       alert("Producto e imagen agregados correctamente");
+      // Limpiar todos los campos del formulario
+      setProductDetails({
+        name: "",
+        image: "",
+        category: "",
+        new_price: "",
+        old_price: "",
+        description: "",
+        stock: "",
+      });
+      setImage(null);
     } else {
       alert("Fallo al agregar el producto");
     }
@@ -125,6 +137,17 @@ const AddProduct = () => {
         </div>
       </div>
 
+      <div className="add-product-itemfield">
+        <p>Cantidad en stock</p> {/* Nuevo campo agregado */}
+        <input
+          value={productDetails.stock}
+          onChange={changeHandler}
+          type="number"
+          name="stock"
+          placeholder="Ingrese la cantidad en stock"
+        />
+      </div>
+      
       <div className="add-product-itemfield">
         <p>Categoría del producto</p>
         <select
