@@ -31,14 +31,14 @@
 }
 
 .dropdown-icon {
-    margin-left: 0.5rem;
+    margin-left: 0.9rem;
 }
 
 .dropdown-menu {
     position: absolute;
     top: 100%;
     right: 0;
-    background-color: #f3e5f5;
+    background-color: #ffe4e178;
     /* Color rosado o morado suave */
     border: 1px solid #ccc;
     border-radius: 4px;
@@ -67,7 +67,9 @@
     text-align: left;
     width: 100%;
     /* Asegurar que los elementos ocupen todo el ancho */
+    font-size: 15px;
 }
+
 
 .dropdown-menu a:hover,
 .dropdown-menu button:hover {
@@ -78,7 +80,6 @@
 .logout-button {
     text-align: left;
     padding: 1px;
-    background: none;
     border: none;
     cursor: pointer;
     color: #000;
@@ -157,12 +158,11 @@
     gap: 45px;
 }
 
-.nav-login-cart button {
-    width: 100px;
+.nav-login-cart .dropdown-toggle {
     height: 30px;
     outline: none;
     border: 1px solid #7a7a7a;
-    border-radius: 75px;
+    border-radius: 11px;
     color: #515151;
     font-size: 20px;
     font-weight: 500;
@@ -240,8 +240,8 @@
     }
 
     .nav-login-cart button {
-        width: 80px;
-        height: 35px;
+        width: 83px;
+        height: 25px;
         font-size: 14px;
     }
 

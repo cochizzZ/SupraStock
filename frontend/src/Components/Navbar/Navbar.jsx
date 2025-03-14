@@ -12,16 +12,10 @@ import SearchModal from '../SearchModal/SearchModal';
 const Navbar = () => {
   const [menu, setMenu] = useState("shop");
   const { getTotalCartItems } = useContext(ShopContext);
-  const { user, logout } = useContext(UserContext);
+  const { user } = useContext(UserContext);
   const menuRef = useRef(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-
-  const getUsername = () => {
-    if (localStorage.getItem('auth-token')) {
-      return localStorage.getItem('username');
-    }
-  };
 
   const dropdown_toggle = (e) => {
     menuRef.current.classList.toggle('nav-menu-visible');
