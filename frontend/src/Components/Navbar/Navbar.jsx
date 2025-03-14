@@ -12,9 +12,10 @@ import SearchModal from '../SearchModal/SearchModal';
 const Navbar = () => {
   const [menu, setMenu] = useState("shop");
   const { getTotalCartItems } = useContext(ShopContext);
-  const { user } = useContext(UserContext);
+  const { user, logout } = useContext(UserContext);
   const menuRef = useRef(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   const getUsername = () => {
     if (localStorage.getItem('auth-token')) {
@@ -29,6 +30,16 @@ const Navbar = () => {
 
   const handleSearch = () => {
     setIsModalOpen(true);
+  };
+
+  const toggleDropdown = () => {
+    setIsDropdownOpen(!isDropdownOpen);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('auth-token');
+    localStorage.removeItem('username');
+    window.location.replace('/');
   };
 
   return (
@@ -49,21 +60,25 @@ const Navbar = () => {
         <li onClick={() => { setMenu("kids") }}><Link style={{ textDecoration: 'none' }} to='/kids'>Niños</Link>{menu === "kids" ? <hr /> : <></>}</li>
       </ul>
       <div className="nav-login-cart">
-        {localStorage.getItem('auth-token')
-          ? <button onClick={() => {
-            localStorage.removeItem('auth-token');
-            localStorage.removeItem('username');
-            window.location.replace('/');
-          }}>
-            Logout
-          </button>
-
-          : <Link to='/login'><button>Login</button></Link>}
+        {!localStorage.getItem('auth-token') && <Link to='/login'><button>Login</button></Link>}
         <Link to='/cart'><img className="cart-img" src={cart_icon} alt="" /></Link>
         <div className="nav-cart-count">{getTotalCartItems()}</div>
-        {user && <Link to="/profile" className="username">{user.name}</Link>}
+        {user && (
+          <div className="navbar-user">
+            <button onClick={toggleDropdown} className="dropdown-toggle">
+              {user.name} <span className="dropdown-icon">▼</span>
+            </button>
+            {isDropdownOpen && (
+              <div className="dropdown-menu">
+                <p>{user.name}</p>
+                <Link to="/profile">Configuración</Link>
+                {user.role === 'admin' && <a href="http://localhost:5173" target="_blank" rel="noopener noreferrer">Panel de Admin</a>}
+                <button onClick={handleLogout} className="logout-button">Cerrar Sesión</button>
+              </div>
+            )}
+          </div>
+        )}
       </div>
-      
     </div>
   );
 };
