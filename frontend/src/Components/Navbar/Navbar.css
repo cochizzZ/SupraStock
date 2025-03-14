@@ -194,6 +194,15 @@
 .cart-img {
     width: 30px;
 }
+.nav-login-cart button {
+    width: 80px;
+    height: 33px;
+    font-size: 16px;
+    background: white;
+    border-radius: 8px;
+    border-color: #80808063;
+}
+
 
 @media(max-width: 1280px) {
     .navbar {
