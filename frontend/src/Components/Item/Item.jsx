@@ -17,17 +17,20 @@ const Item = (props) => {
         <img onClick={() => window.scrollTo(0, 0)} src={props.image} alt="" />
       </Link>
       <p>{props.name}</p>
-      <div className="item-prices">
+      <div className="container-items-info">
+      <div className="item-prices"> 
         <div className="item-price-new">
           ${props.new_price}
         </div>
         <div className="item-price-old">
           ${props.old_price}
+          
         </div>
       </div>
-      <button onClick={handleAddToCart} className="add-to-cart-btn">
+      <button onClick={handleAddToCart} className="cart">
         <img src={addToCartIcon} alt="Agregar al carrito" />
       </button>
+      </div>
     </div>
   );
 };

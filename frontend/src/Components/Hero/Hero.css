@@ -85,9 +85,6 @@
     .hero-right img{
         width: 300px;
     }
-    body {
-        background-color: #020;
-    }
 }
 @media(max-width:1024px){
     .hero-left{
@@ -111,9 +108,6 @@
     .hero-right img{
         width: 400px;
     }
-    body {
-        background-color: green
-    }
 }
 @media(max-width:800px){
     .hero-left{
@@ -136,9 +130,6 @@
     }
     .hero-right img{
         width: 300px;
-    }
-    body {
-        background-color: gray;
     }
 }
 @media(max-width:500px){
@@ -165,8 +156,5 @@
         width: 200px;
         height: 45px;
         font-size: 14px;
-    }
-    body{
-        background-color: red;
     }
 }
