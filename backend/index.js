@@ -298,7 +298,9 @@ app.post('/login', async (req, res) => {
 
 app.get('/newcollections', async (req, res) => {
     let products = await Product.find({});
-    let newcollection = products.slice(1).slice(-8);
+    console.log("products: "+products)
+    let newcollection = products.slice(0).slice(-8);
+    console.log("newcollection: "+newcollection);
     console.log("NewCollection Fetched");
     res.send(newcollection);
 })
@@ -487,6 +489,46 @@ app.get('/api/orders', async (req, res) => {
       message: 'Error interno del servidor',
     });
   }
+});
+
+// Endpoint para actualizar un producto
+app.post('/updateproduct', async (req, res) => {
+    try {
+        const { id, name, description, new_price, old_price, category, image } = req.body;
+
+        // Validar que los campos obligatorios no estén vacíos
+        if (!id || !name || !description || !new_price || !category) {
+            return res.status(400).json({
+                success: false,
+                message: "Todos los campos (id, name, description, new_price, category) son obligatorios.",
+            });
+        }
+
+        const updatedProduct = await Product.findOneAndUpdate(
+            { id: id },
+            { name, description, new_price, old_price, category, image },
+            { new: true }
+        );
+
+        if (!updatedProduct) {
+            return res.status(404).json({
+                success: false,
+                message: "Producto no encontrado.",
+            });
+        }
+
+        res.json({
+            success: true,
+            message: "Producto actualizado correctamente",
+            product: updatedProduct,
+        });
+    } catch (error) {
+        console.error("Error al actualizar producto:", error);
+        res.status(500).json({
+            success: false,
+            message: "Error interno del servidor",
+        });
+    }
 });
 
 app.listen(port, (error) => {
