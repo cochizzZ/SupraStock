@@ -28,7 +28,6 @@
     margin-left: 20px; 
 }
 
-/* Responsive */
 @media (max-width: 800px) {
     .navbar {
         padding: 15px 30px;
@@ -41,4 +40,8 @@
     .nav-title {
         font-size: 20px; 
     }
+
+}
+@media (max-width: 500px) {
+
 }

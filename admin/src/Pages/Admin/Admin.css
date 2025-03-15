@@ -72,6 +72,12 @@
 
     .admin-welcome {
         width: 90%; 
-        padding: 25px;
+        padding: 40px;
+    }
+}
+@media (max-width: 500px) {
+    .admin {
+        flex-direction: row;
+        align-items: flex-start;
     }
 }
