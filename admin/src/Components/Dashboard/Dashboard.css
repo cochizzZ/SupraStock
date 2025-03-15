@@ -50,22 +50,29 @@
     padding: 8px 16px;
     border-radius: 4px;
     cursor: pointer;
+    margin-right: 8px;
 }
 
 .dashboard-item button:hover {
     background: #0056b3;
 }
 
+.button-container {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px;
+}
+
 /* Estilos adicionales para la sección de estadísticas */
 .statistics-item {
     display: flex;
     align-items: center;
-    background: #e0f7fa;
-    border: 1px solid #b2ebf2;
+    border: 1px solid #ddd;
     border-radius: 8px;
     padding: 16px;
     margin-bottom: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    background: #fff;
 }
 
 .statistics-item i {

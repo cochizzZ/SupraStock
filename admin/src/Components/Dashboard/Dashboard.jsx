@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import './Dashboard.css';
 import SalesModal from './SalesModal';
 import UsersModal from './UsersModal';
+import { jsPDF } from 'jspdf';
 
 const Dashboard = () => {
   const [statistics, setStatistics] = useState({});
@@ -56,6 +57,52 @@ const Dashboard = () => {
     fetchData();
   }, []);
 
+  const generatePDF = (section) => {
+    const doc = new jsPDF();
+    let y = 10;
+
+    if (section === 'statistics') {
+      doc.text('Estadísticas', 10, y);
+      y += 10;
+      doc.text(`Total de Productos: ${statistics.totalProducts}`, 10, y);
+      y += 10;
+      doc.text(`Total de Usuarios: ${statistics.totalUsers}`, 10, y);
+      y += 10;
+      doc.text(`Total de Órdenes: ${statistics.totalOrders}`, 10, y);
+      y += 10;
+      doc.text(`Total de Ventas: $${statistics.totalSales}`, 10, y);
+    } else if (section === 'users') {
+      doc.text('Usuarios', 10, y);
+      y += 10;
+      users.forEach(user => {
+        doc.text(`Nombre: ${user.name}`, 10, y);
+        y += 10;
+        doc.text(`Email: ${user.email}`, 10, y);
+        y += 10;
+        doc.text(`Fecha: ${new Date(user.date).toLocaleDateString()}`, 10, y);
+        y += 10;
+      });
+    } else if (section === 'sales') {
+      doc.text('Última Venta', 10, y);
+      y += 10;
+      if (sales.length > 0) {
+        const latestSale = sales[sales.length - 1];
+        latestSale.products.forEach(product => {
+          doc.text(`Producto: ${product.product_name}`, 10, y);
+          y += 10;
+          doc.text(`Total a Pagar: $${product.price * product.quantity}`, 10, y);
+          y += 10;
+          doc.text(`Fecha: ${new Date(latestSale.date).toLocaleDateString()}`, 10, y);
+          y += 10;
+        });
+      } else {
+        doc.text('No hay ventas disponibles', 10, y);
+      }
+    }
+
+    doc.save(`${section}.pdf`);
+  };
+
   if (loading) {
     return <div className="dashboard">Loading...</div>;
   }
@@ -89,6 +136,9 @@ const Dashboard = () => {
             <i className="fas fa-dollar-sign"></i>
             <p>Total de Ventas: ${statistics.totalSales}</p>
           </div>
+          <div className="button-container">
+            <button onClick={() => generatePDF('statistics')}>Imprimir</button>
+          </div>
         </div>
         <div className="dashboard-item">
           <h2>Usuarios</h2>
@@ -101,7 +151,10 @@ const Dashboard = () => {
               </li>
             ))}
           </ul>
-          <button onClick={() => setShowUsersModal(true)}>Ver más</button>
+          <div className="button-container">
+            <button onClick={() => setShowUsersModal(true)}>Ver más</button>
+            <button onClick={() => generatePDF('users')}>Imprimir</button>
+          </div>
         </div>
         <div className="dashboard-item">
           <h2>Última Venta</h2>
@@ -114,7 +167,10 @@ const Dashboard = () => {
                   <p><strong>Fecha:</strong> {new Date(latestSale.date).toLocaleDateString()}</p>
                 </li>
               ))}
-              <button onClick={() => setShowSalesModal(true)}>Ver más</button>
+              <div className="button-container">
+                <button onClick={() => setShowSalesModal(true)}>Ver más</button>
+                <button onClick={() => generatePDF('sales')}>Imprimir</button>
+              </div>
             </ul>
           ) : (
             <p>No hay ventas disponibles</p>
