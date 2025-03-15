@@ -19,7 +19,7 @@ mongoose.connect("mongodb+srv://JuanRM:JuanTDP10@stp.jlm2k.mongodb.net/suprastoc
 
 // Creacion de API
 
-app.get("/",(req,res)=>{
+app.get("/", (req, res) => {
     res.send("Express App is Running")
 })
 
@@ -27,69 +27,69 @@ app.get("/",(req,res)=>{
 
 const storage = multer.diskStorage({
     destination: './upload/images',
-    filename:(req,file,cb)=>{
+    filename: (req, file, cb) => {
         return cb(null, `${file.fieldname}_${Date.now()}${path.extname(file.originalname)}`)
     }
 })
 
-const upload = multer({storage:storage})
+const upload = multer({ storage: storage })
 
 // Creacion de API para subir imagenes
 
-app.use('/images',express.static('upload/images'))
+app.use('/images', express.static('upload/images'))
 
-app.post("/upload",upload.single('product'),(req,res)=>{
+app.post("/upload", upload.single('product'), (req, res) => {
     res.json({
-        success:1,
-        image_url:`http://localhost:${port}/images/${req.file.filename}`
+        success: 1,
+        image_url: `http://localhost:${port}/images/${req.file.filename}`
     })
 })
 
 // Esquema para la creación de productos
 
-const Product = mongoose.model("Product",{
-    id:{
-        type:Number,
-        required:true,
+const Product = mongoose.model("Product", {
+    id: {
+        type: Number,
+        required: true,
     },
-    name:{
-        type:String,
-        required:true,
+    name: {
+        type: String,
+        required: true,
     },
-    image:{
-        type:String,
-        required:true,
+    image: {
+        type: String,
+        required: true,
     },
-    category:{
-        type:String,
-        required:true,
+    category: {
+        type: String,
+        required: true,
     },
-    new_price:{
-        type:Number,
-        required:true,
+    new_price: {
+        type: Number,
+        required: true,
     },
-    old_price:{
-        type:Number,
-        required:true,
+    old_price: {
+        type: Number,
+        required: true,
     },
-    date:{
-        type:Date,
-        default:Date.now,
+    date: {
+        type: Date,
+        default: Date.now,
     },
-    available:{
-        type:Boolean,
-        default:true,
+    available: {
+        type: Boolean,
+        default: true,
     },
-    description:{
-        type:String,
-        required:true,
+    description: {
+        type: String,
+        required: true,
     },
     stock: { // Nuevo campo agregado
         type: Number,
         required: true,
         default: 0,
     }
-    })
+})
 
 app.post('/addproduct', async (req, res) => {
     try {
@@ -133,26 +133,25 @@ app.post('/addproduct', async (req, res) => {
     }
 });
 
-
 // Creacion de API para Remover Productos
 
-app.post('/removeproduct',async(req,res)=>{
-    let producto = await Product.findOne({id:req.body.id});
+app.post('/removeproduct', async (req, res) => {
+    let producto = await Product.findOne({ id: req.body.id });
     console.log(producto);
     let productImage = producto.image.split('/').slice(-1)[0];
     console.log(productImage);
     fs.unlinkSync(`./upload/images/${productImage}`);
-    await Product.findOneAndDelete({id:req.body.id});
+    await Product.findOneAndDelete({ id: req.body.id });
     console.log("Removed product and image");
     res.json({
-        success:true,
-        name:req.body.name
+        success: true,
+        name: req.body.name
     })
 })
 
 // Creación de API para obtener todos los productos
 
-app.get('/allproducts',async(req,res)=>{
+app.get('/allproducts', async (req, res) => {
     let products = await Product.find({});
     console.log("All products Fetched");
     res.send(products);
@@ -197,6 +196,42 @@ const Users = mongoose.model('Users', {
     role: {
         type: String,
         default: 'user',
+    },
+});
+
+// Esquema para la creación de órdenes
+const Order = mongoose.model("Order", {
+    user_id: {
+        type: String,
+        required: true,
+    },
+    products: [
+        {
+            product_id: {
+                type: String,
+                required: true,
+            },
+            quantity: {
+                type: Number,
+                required: true,
+            },
+            price: {
+                type: Number,
+                required: true,
+            },
+        },
+    ],
+    total: {
+        type: Number,
+        required: true,
+    },
+    status: {
+        type: String,
+        default: 'Pending',
+    },
+    date: {
+        type: Date,
+        default: Date.now,
     },
 });
 
@@ -259,10 +294,9 @@ app.post('/login', async (req, res) => {
     }
 });
 
-
 //creación de un punto final para los datos de newcollection
 
-app.get('/newcollections', async (req,res)=>{
+app.get('/newcollections', async (req, res) => {
     let products = await Product.find({});
     let newcollection = products.slice(1).slice(-8);
     console.log("NewCollection Fetched");
@@ -270,43 +304,42 @@ app.get('/newcollections', async (req,res)=>{
 })
 
 //creación de un punto final para la sección de mujeres populares
-app.get('/popularinwomen', async (req,res)=>{
-    let products = await Product.find({category:"women"});
-    let popular_in_women = products.slice(0,4);
+app.get('/popularinwomen', async (req, res) => {
+    let products = await Product.find({ category: "women" });
+    let popular_in_women = products.slice(0, 4);
     console.log("Popular in women fetched");
     res.send(popular_in_women);
-    
+
 })
 
 // crear middleware para obtener usuario
 
-    const fetchUser = async (req,res,next)=>{
-        const token = req.header('auth-token');
-        if (!token) {
-            res.status(401).send({errors:"Autenticacion requerida:ingresa un token valido"})
-        }
-        else {
-            try {
-                const data =jwt.verify(token, 'secret_ecom');
-                req.user = data.user;
-                next();
-            } catch (error) {
-                res.status(401).send({errors:"Autenticacion requerida:ingresa un token valido"})
-            }
+const fetchUser = async (req, res, next) => {
+    const token = req.header('auth-token');
+    if (!token) {
+        res.status(401).send({ errors: "Autenticacion requerida:ingresa un token valido" })
+    }
+    else {
+        try {
+            const data = jwt.verify(token, 'secret_ecom');
+            req.user = data.user;
+            next();
+        } catch (error) {
+            res.status(401).send({ errors: "Autenticacion requerida:ingresa un token valido" })
         }
     }
-
+}
 
 //crear punto de conexion para agregar productos en  CarData
 app.post('/addtocart', fetchUser, async (req, res) => {
     try {
         let userData = await Users.findOne({ _id: req.user.id });
-        console.log("Producto agregado al carrito",req.body.itemId);
+        console.log("Producto agregado al carrito", req.body.itemId);
 
         if (!userData) {
             return res.status(404).json({ success: false, message: "Usuario no encontrado" });
         }
-        let cartData = { ...userData.cartData }; 
+        let cartData = { ...userData.cartData };
         cartData[req.body.itemId] = (cartData[req.body.itemId] || 0) + 1;
 
         await Users.findOneAndUpdate(
@@ -326,7 +359,7 @@ app.post('/addtocart', fetchUser, async (req, res) => {
 app.post('/removefromcart', fetchUser, async (req, res) => {
     try {
         let userData = await Users.findOne({ _id: req.user.id });
-        console.log("Producto elimado del carrito",req.body.itemId);
+        console.log("Producto elimado del carrito", req.body.itemId);
 
         if (!userData) {
             return res.status(404).json({ success: false, message: "Usuario no encontrado" });
@@ -336,7 +369,6 @@ app.post('/removefromcart', fetchUser, async (req, res) => {
 
         if (cartData[req.body.itemId] && cartData[req.body.itemId] > 0) {
             cartData[req.body.itemId] -= 1; // Restar 1 unidad
-
 
             if (cartData[req.body.itemId] === 0) {
                 delete cartData[req.body.itemId];
@@ -359,13 +391,12 @@ app.post('/removefromcart', fetchUser, async (req, res) => {
     }
 });
 
-
 //Crear Punto de conexion para obtener datos del carrito
-app.post('/getcart',fetchUser,async (req,res)=>{
-   console.log("Obtener Carrito");
-   let userData = await Users.findOne({_id:req.user.id});
-   res.json(userData.cartData);
-   
+app.post('/getcart', fetchUser, async (req, res) => {
+    console.log("Obtener Carrito");
+    let userData = await Users.findOne({ _id: req.user.id });
+    res.json(userData.cartData);
+
 })
 
 app.get('/verifyAdmin', async (req, res) => {
@@ -409,12 +440,60 @@ app.post('/updateProfile', fetchUser, async (req, res) => {
     }
 });
 
-app.listen(port,(error)=>{
-    if (!error) {
-        console.log("Server Running on Port"+port)
+// Endpoint para agregar nuevas órdenes
+app.post('/addorder', async (req, res) => {
+    try {
+        const { user_id, products, total, status } = req.body;
+
+        if (!user_id || !products || !total) {
+            return res.status(400).json({
+                success: false,
+                message: "Los campos user_id, products y total son obligatorios.",
+            });
+        }
+
+        const order = new Order({
+            user_id,
+            products,
+            total,
+            status: status || 'Pending',
+        });
+
+        await order.save();
+        console.log("Orden guardada:", order);
+
+        res.json({
+            success: true,
+            message: "Orden agregada correctamente",
+        });
+    } catch (error) {
+        console.error("Error al agregar orden:", error);
+        res.status(500).json({
+            success: false,
+            message: "Error interno del servidor",
+        });
     }
-    else
-    {
-        console.log("Error : "+error)
+});
+
+// Endpoint para obtener todas las órdenes
+app.get('/api/orders', async (req, res) => {
+  try {
+    const orders = await Order.find({});
+    res.json(orders);
+  } catch (error) {
+    console.error('Error fetching orders:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error interno del servidor',
+    });
+  }
+});
+
+app.listen(port, (error) => {
+    if (!error) {
+        console.log("Server Running on Port" + port)
+    }
+    else {
+        console.log("Error : " + error)
     }
 })

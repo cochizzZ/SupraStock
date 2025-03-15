@@ -65,7 +65,8 @@ const Navbar = () => {
             {isDropdownOpen && (
               <div className="dropdown-menu">
                 <p>{user.name}</p>
-                <Link to="/profile">Configuración</Link>
+                <Link to="/profile">Perfil</Link>
+                <Link to="/orders">Historial de Compras</Link> {/* Agregar Historial de Compras */}
                 {user.role === 'admin' && <a href="http://localhost:5173" target="_blank" rel="noopener noreferrer">Panel de Admin</a>}
                 <button onClick={handleLogout} className="logout-button">Cerrar Sesión</button>
               </div>
