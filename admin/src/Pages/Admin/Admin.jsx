@@ -6,6 +6,7 @@ import AddProduct from '../../Components/AddProduct/AddProduct';
 import ListProduct from '../../Components/ListProduct/ListProduct';
 import Logout from '../../Components/Logout/Logout';
 import Dashboard from '../../Components/Dashboard/Dashboard';
+import OrderManagement from '../../Components/OrderManagement/OrderManagement'; // Importar OrderManagement
 
 const Admin = () => {
   return (
@@ -28,6 +29,7 @@ const Admin = () => {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/addproduct" element={<AddProduct />} />
           <Route path="/listproduct" element={<ListProduct />} />
+          <Route path="/orders" element={<OrderManagement />} /> {/* Agregar la ruta para OrderManagement */}
           <Route path="/logout" element={<Logout />} />
         </Routes>
       </div>

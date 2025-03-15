@@ -1,0 +1,128 @@
+.list-order-container {
+  padding: 20px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.list-order-container h2 {
+  margin-bottom: 20px;
+  font-size: 24px;
+  font-weight: bold;
+  color: #333;
+}
+
+.list-order-table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: white;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.list-order-table th, .list-order-table td {
+  border: 1px solid #ddd;
+  padding: 12px;
+  text-align: left;
+}
+
+.list-order-table th {
+  background-color: #f2f2f2;
+  font-weight: bold;
+}
+
+.list-order-table tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+.list-order-table tr:hover {
+  background-color: #ddd;
+}
+
+.list-order-table ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.list-order-table li {
+  margin-bottom: 5px;
+}
+
+.order-management-container {
+  padding: 20px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.order-management-container h2 {
+  margin-bottom: 20px;
+  font-size: 24px;
+  font-weight: bold;
+  color: #333;
+}
+
+.order-management-content {
+  display: flex;
+  gap: 20px;
+}
+
+.order-management-filters {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.order-management-filters input,
+.order-management-filters select {
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.order-management-table-container {
+  flex-grow: 1;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.order-management-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.order-management-table th, .order-management-table td {
+  border: 1px solid #ddd;
+  padding: 12px;
+  text-align: left;
+}
+
+.order-management-table th {
+  background-color: #f2f2f2;
+  font-weight: bold;
+}
+
+.order-management-table tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+.order-management-table tr:hover {
+  background-color: #ddd;
+}
+
+.order-management-table ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.order-management-table li {
+  margin-bottom: 5px;
+}

@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import dashboard_icon from '../../assets/dashboard_icon.svg'; // Asegúrate de tener un icono para el Dashboard
 import add_product_icon from '../../assets/Product_Cart.svg';
 import list_product_icon from '../../assets/Product_list_icon.svg';
+import orders_icon from '../../assets/orders_icon.svg'; // Asegúrate de tener un icono para las órdenes
 import logout_icon from '../../assets/logout-svgrepo-com.svg';
 
 const Sidebar = () => {
@@ -19,6 +20,12 @@ const Sidebar = () => {
             <div className="sidebar-item">
                 <img src={list_product_icon} alt="Lista de productos" />
                 <p>Lista de productos</p>
+            </div>
+        </Link>
+        <Link to={'/orders'} style={{textDecoration: "none"}}>
+            <div className="sidebar-item">
+                <img src={orders_icon} alt="Lista de Órdenes" />
+                <p>Lista de Órdenes</p>
             </div>
         </Link>
         <Link to={'/dashboard'} style={{textDecoration: "none"}}>
