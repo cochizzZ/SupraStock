@@ -198,7 +198,13 @@
     border-radius: 8px;
     border-color: #80808063;
 }
-
+.nav-login-cart button {
+    width: 83px;
+    height: 25px;
+    font-size: 14px;
+    background: white;
+    border-color: #80808014;
+}
 
 @media(max-width: 1280px) {
     .navbar {
@@ -251,6 +257,8 @@
         width: 83px;
         height: 25px;
         font-size: 14px;
+        background: white;
+        border-color: #80808014;
     }
 
     .nav-login-cart img {
