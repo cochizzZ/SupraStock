@@ -10,13 +10,18 @@ const { type } = require("os");
 const { log } = require("console");
 const fs = require("fs");
 const bcrypt = require("bcryptjs");
+const bodyParser = require('body-parser');
 
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(bodyParser.json());
 
 // Conexion con la base de datos de MongoDB
-mongoose.connect("mongodb+srv://JuanRM:JuanTDP10@stp.jlm2k.mongodb.net/suprastock");
+mongoose.connect("mongodb+srv://JuanRM:JuanTDP10@stp.jlm2k.mongodb.net/suprastock", {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+});
 
 // Creacion de API
 
@@ -48,7 +53,7 @@ app.post("/upload", upload.single('product'), (req, res) => {
 
 // Esquema para la creación de productos
 
-const Product = mongoose.model("Product", {
+const Product = mongoose.model("Product", new mongoose.Schema({
     id: {
         type: Number,
         required: true,
@@ -90,7 +95,7 @@ const Product = mongoose.model("Product", {
         required: true,
         default: 0,
     }
-})
+}));
 
 // Endpoint para agregar un producto
 app.post('/addproduct', async (req, res) => {
@@ -161,7 +166,7 @@ app.get('/allproducts', async (req, res) => {
 
 //creación de schema para el modelo de usuario
 
-const Users = mongoose.model('Users', {
+const Users = mongoose.model('Users', new mongoose.Schema({
     name: {
         type: String,
         required: true,
@@ -199,10 +204,10 @@ const Users = mongoose.model('Users', {
         type: String,
         default: 'user',
     },
-});
+}));
 
 // Esquema para la creación de órdenes
-const Order = mongoose.model("Order", {
+const Order = mongoose.model("Order", new mongoose.Schema({
     user_id: {
         type: String,
         required: true,
@@ -235,7 +240,7 @@ const Order = mongoose.model("Order", {
         type: Date,
         default: Date.now,
     },
-});
+}));
 
 // Modificación en el endpoint de registro (signup)
 app.post('/signup', async (req, res) => {
@@ -480,14 +485,10 @@ app.post('/addorder', async (req, res) => {
 // Endpoint para obtener todas las órdenes
 app.get('/api/orders', async (req, res) => {
   try {
-    const orders = await Order.find({});
+    const orders = await Order.find();
     res.json(orders);
   } catch (error) {
-    console.error('Error fetching orders:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Error interno del servidor',
-    });
+    res.status(500).send(error);
   }
 });
 
@@ -582,6 +583,63 @@ app.get('/api/users', async (req, res) => {
             message: 'Error interno del servidor',
         });
     }
+});
+
+// Endpoint para obtener detalles de un usuario
+app.get('/api/users/:id', async (req, res) => {
+  try {
+    const user = await Users.findById(req.params.id);
+    if (!user) {
+      return res.status(404).send('User not found');
+    }
+    res.json(user);
+  } catch (error) {
+    res.status(500).send(error);
+  }
+});
+
+// Endpoint para obtener detalles de un producto
+app.get('/api/products/:id', async (req, res) => {
+  try {
+    const product = await Product.findById(req.params.id);
+    if (!product) {
+      return res.status(404).send('Product not found');
+    }
+    res.json(product);
+  } catch (error) {
+    res.status(500).send(error);
+  }
+});
+
+// Endpoint para actualizar el ID del usuario en las órdenes
+app.post('/api/update-user-id-in-orders', async (req, res) => {
+  const { oldUserId, newUserId } = req.body;
+
+  if (!oldUserId || !newUserId) {
+    return res.status(400).json({
+      success: false,
+      message: "Los campos oldUserId y newUserId son obligatorios.",
+    });
+  }
+
+  try {
+    const result = await Order.updateMany(
+      { user_id: oldUserId },
+      { $set: { user_id: newUserId } }
+    );
+
+    res.json({
+      success: true,
+      message: "ID del usuario actualizado en las órdenes correctamente",
+      result,
+    });
+  } catch (error) {
+    console.error("Error al actualizar el ID del usuario en las órdenes:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error interno del servidor",
+    });
+  }
 });
 
 // Iniciar el servidor

@@ -14,7 +14,32 @@ const OrderManagement = () => {
     const fetchOrders = async () => {
       try {
         const response = await axios.get('http://localhost:4000/api/orders');
-        setOrders(response.data);
+        const ordersWithDetails = await Promise.all(response.data.map(async (order) => {
+          try {
+            const userResponse = await axios.get(`http://localhost:4000/api/users/${order.user_id}`);
+            const productsWithNames = await Promise.all(order.products.map(async (product) => {
+              try {
+                const productResponse = await axios.get(`http://localhost:4000/api/products/${product.product_id}`);
+                return {
+                  ...product,
+                  product_name: productResponse.data.name,
+                };
+              } catch (productError) {
+                console.error(`Error fetching product ${product.product_id}:`, productError);
+                return product;
+              }
+            }));
+            return {
+              ...order,
+              user_name: userResponse.data.name,
+              products: productsWithNames,
+            };
+          } catch (userError) {
+            console.error(`Error fetching user ${order.user_id}:`, userError);
+            return order;
+          }
+        }));
+        setOrders(ordersWithDetails);
       } catch (error) {
         console.error('Error fetching orders:', error);
       }
@@ -54,7 +79,7 @@ const OrderManagement = () => {
   };
 
   const filteredOrders = orders.filter(order =>
-    order.user_id.toLowerCase().includes(searchUser.toLowerCase()) &&
+    order.user_name?.toLowerCase().includes(searchUser.toLowerCase()) &&
     (filterStatus === '' || order.status === filterStatus) &&
     (filterDate === '' || new Date(order.date).toLocaleDateString() === new Date(filterDate).toLocaleDateString())
   );
@@ -85,8 +110,8 @@ const OrderManagement = () => {
         <div className="order-management-cards">
           {filteredOrders.map(order => (
             <div className="order-card" key={order._id}>
-              <p><strong>Usuario:</strong> {order.user_id}</p>
-              <p><strong>Producto:</strong> {order.products[0].product_id}</p>
+              <p><strong>Usuario:</strong> {order.user_name || order.user_id}</p>
+              <p><strong>Producto:</strong> {order.products[0].product_name || order.products[0].product_id}</p>
               <p><strong>Total Productos:</strong> {order.products.length}</p>
               <p><strong>Total a Pagar:</strong> {order.total}</p>
               <button onClick={() => setSelectedOrder(order)}>Visualizar</button>
