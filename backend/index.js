@@ -9,10 +9,11 @@ const cors = require("cors");
 const { type } = require("os");
 const { log } = require("console");
 const fs = require("fs");
-const bcrypt = require("bcryptjs"); // Importamos bcryptjs para cifrar las contraseñas
+const bcrypt = require("bcryptjs");
 
-app.use(express.json());
 app.use(cors());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 // Conexion con la base de datos de MongoDB
 mongoose.connect("mongodb+srv://JuanRM:JuanTDP10@stp.jlm2k.mongodb.net/suprastock");
@@ -84,13 +85,14 @@ const Product = mongoose.model("Product", {
         type: String,
         required: true,
     },
-    stock: { // Nuevo campo agregado
+    stock: {
         type: Number,
         required: true,
         default: 0,
     }
 })
 
+// Endpoint para agregar un producto
 app.post('/addproduct', async (req, res) => {
     try {
         let products = await Product.find({});
@@ -98,7 +100,7 @@ app.post('/addproduct', async (req, res) => {
 
         const { name, image, category, new_price, old_price, description, stock } = req.body;
 
-        // Validar que los campos obligatorios no estén vacíos
+// Validar que los campos obligatorios no estén vacíos
         if (!name || !image || !category || !new_price || stock === undefined) {
             return res.status(400).json({
                 success: false,
@@ -112,9 +114,9 @@ app.post('/addproduct', async (req, res) => {
             image: image,
             category: category,
             new_price: new_price,
-            old_price: old_price || 0, // Si no hay old_price, establecerlo en 0
+            old_price: old_price || 0,
             description: description,
-            stock: stock // Nuevo campo agregado
+            stock: stock
         });
 
         await product.save();
@@ -248,15 +250,15 @@ app.post('/signup', async (req, res) => {
     }
 
     try {
-        // Generamos el "sal" para reforzar el hash
+// Generamos el "sal" para reforzar el hash
         const salt = await bcrypt.genSalt(10);
-        // Ciframos la contraseña antes de almacenarla
+// Ciframos la contraseña antes de almacenarla
         const hashedPassword = await bcrypt.hash(req.body.password, salt);
 
         const user = new Users({
             name: req.body.name,
             email: req.body.email,
-            password: hashedPassword, // Guardamos la versión cifrada
+            password: hashedPassword,
             role: req.body.role || 'user',
             cartData: cart,
         });
@@ -276,7 +278,6 @@ app.post('/signup', async (req, res) => {
 app.post('/login', async (req, res) => {
     let user = await Users.findOne({ email: req.body.email });
     if (user) {
-        // Comparamos la contraseña ingresada con la almacenada cifrada
         const passCompare = await bcrypt.compare(req.body.password, user.password);
         if (passCompare) {
             const data = { user: { id: user.id } };
@@ -311,7 +312,6 @@ app.get('/popularinwomen', async (req, res) => {
     let popular_in_women = products.slice(0, 4);
     console.log("Popular in women fetched");
     res.send(popular_in_women);
-
 })
 
 // crear middleware para obtener usuario
@@ -370,7 +370,7 @@ app.post('/removefromcart', fetchUser, async (req, res) => {
         let cartData = { ...userData.cartData };
 
         if (cartData[req.body.itemId] && cartData[req.body.itemId] > 0) {
-            cartData[req.body.itemId] -= 1; // Restar 1 unidad
+            cartData[req.body.itemId] -= 1;
 
             if (cartData[req.body.itemId] === 0) {
                 delete cartData[req.body.itemId];
@@ -398,9 +398,9 @@ app.post('/getcart', fetchUser, async (req, res) => {
     console.log("Obtener Carrito");
     let userData = await Users.findOne({ _id: req.user.id });
     res.json(userData.cartData);
-
 })
 
+// Endpoint para verificar si el usuario es administrador
 app.get('/verifyAdmin', async (req, res) => {
     const token = req.header('auth-token');
     console.log('Verifying admin:', token);
@@ -491,12 +491,26 @@ app.get('/api/orders', async (req, res) => {
   }
 });
 
+// Endpoint para obtener todas las órdenes
+app.get('/api/sales', async (req, res) => {
+    try {
+        const orders = await Order.find({});
+        res.json(orders);
+    } catch (error) {
+        console.error('Error fetching orders:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error interno del servidor',
+        });
+    }
+});
+
 // Endpoint para actualizar un producto
 app.post('/updateproduct', async (req, res) => {
     try {
         const { id, name, description, new_price, old_price, category, image } = req.body;
 
-        // Validar que los campos obligatorios no estén vacíos
+// Validar que los campos obligatorios no estén vacíos
         if (!id || !name || !description || !new_price || !category) {
             return res.status(400).json({
                 success: false,
@@ -531,6 +545,46 @@ app.post('/updateproduct', async (req, res) => {
     }
 });
 
+// Endpoint para obtener estadísticas
+app.get('/api/statistics', async (req, res) => {
+    try {
+        const totalProducts = await Product.countDocuments({});
+        const totalUsers = await Users.countDocuments({});
+        const totalOrders = await Order.countDocuments({});
+        const totalSales = await Order.aggregate([
+            { $group: { _id: null, total: { $sum: "$total" } } }
+        ]);
+
+        res.json({
+            totalProducts,
+            totalUsers,
+            totalOrders,
+            totalSales: totalSales[0] ? totalSales[0].total : 0
+        });
+    } catch (error) {
+        console.error('Error fetching statistics:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error interno del servidor',
+        });
+    }
+});
+
+// Endpoint para obtener todos los usuarios
+app.get('/api/users', async (req, res) => {
+    try {
+        const users = await Users.find({});
+        res.json(users);
+    } catch (error) {
+        console.error('Error fetching users:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error interno del servidor',
+        });
+    }
+});
+
+// Iniciar el servidor
 app.listen(port, (error) => {
     if (!error) {
         console.log("Server Running on Port" + port)

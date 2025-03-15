@@ -1,26 +1,35 @@
 .dashboard {
     padding: 20px;
-  }
-  
-  .dashboard h1 {
+}
+
+.dashboard h1 {
     font-size: 2rem;
     margin-bottom: 20px;
-  }
-  
-  .dashboard-content {
+}
+
+.dashboard-content {
     display: flex;
     gap: 20px;
-  }
-  
-  .dashboard-item {
+}
+
+.dashboard-item {
     flex: 1;
     padding: 20px;
     border: 1px solid #ccc;
     border-radius: 8px;
     background-color: #f9f9f9;
-  }
-  
-  .dashboard-item h2 {
+}
+
+.dashboard-item h2 {
     font-size: 1.5rem;
     margin-bottom: 10px;
-  }
+}
+
+.dashboard-item ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.dashboard-item li {
+    margin-bottom: 5px;
+}
