@@ -81,6 +81,7 @@ const Dashboard = () => {
         y += 10;
         doc.text(`Fecha: ${new Date(user.date).toLocaleDateString()}`, 10, y);
         y += 10;
+        y += 10; // Agregar espacio entre usuarios
       });
     } else if (section === 'sales') {
       doc.text('Última Venta', 10, y);
@@ -94,6 +95,7 @@ const Dashboard = () => {
           y += 10;
           doc.text(`Fecha: ${new Date(latestSale.date).toLocaleDateString()}`, 10, y);
           y += 10;
+          y += 10; // Agregar espacio entre productos
         });
       } else {
         doc.text('No hay ventas disponibles', 10, y);
