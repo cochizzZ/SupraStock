@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import './OrderManagement.css';
+import OrderModal from './OrderModal';
 
 const OrderManagement = () => {
   const [orders, setOrders] = useState([]);
   const [searchUser, setSearchUser] = useState('');
   const [filterStatus, setFilterStatus] = useState('');
   const [filterDate, setFilterDate] = useState('');
+  const [selectedOrder, setSelectedOrder] = useState(null);
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -80,46 +82,21 @@ const OrderManagement = () => {
             <option value="Shipped">Enviado</option>
           </select>
         </div>
-        <div className="order-management-table-container">
-          <table className="order-management-table">
-            <thead>
-              <tr>
-                <th>ID de Orden</th>
-                <th>ID de Usuario</th>
-                <th>Productos</th>
-                <th>Total</th>
-                <th>Estado</th>
-                <th>Fecha</th>
-                <th>Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredOrders.map(order => (
-                <tr key={order._id}>
-                  <td>{order._id}</td>
-                  <td>{order.user_id}</td>
-                  <td>
-                    <ul>
-                      {order.products.map(product => (
-                        <li key={product.product_id}>
-                          {product.product_id} - Cantidad: {product.quantity} - Precio: {product.price}
-                        </li>
-                      ))}
-                    </ul>
-                  </td>
-                  <td>{order.total}</td>
-                  <td>{order.status}</td>
-                  <td>{new Date(order.date).toLocaleString()}</td>
-                  <td>
-                    <button onClick={() => updateOrderStatus(order._id, 'Completed')}>Marcar como Completada</button>
-                    <button onClick={() => deleteOrder(order._id)}>Eliminar</button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <div className="order-management-cards">
+          {filteredOrders.map(order => (
+            <div className="order-card" key={order._id}>
+              <p><strong>Usuario:</strong> {order.user_id}</p>
+              <p><strong>Producto:</strong> {order.products[0].product_id}</p>
+              <p><strong>Total Productos:</strong> {order.products.length}</p>
+              <p><strong>Total a Pagar:</strong> {order.total}</p>
+              <button onClick={() => setSelectedOrder(order)}>Visualizar</button>
+            </div>
+          ))}
         </div>
       </div>
+      {selectedOrder && (
+        <OrderModal order={selectedOrder} onClose={() => setSelectedOrder(null)} />
+      )}
     </div>
   );
 };

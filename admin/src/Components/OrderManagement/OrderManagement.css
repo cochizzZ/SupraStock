@@ -126,3 +126,35 @@
 .order-management-table li {
   margin-bottom: 5px;
 }
+
+.order-management-cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.order-card {
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 16px;
+  width: 200px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.order-card p {
+  margin: 8px 0;
+}
+
+.order-card button {
+  background: #007bff;
+  color: #fff;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.order-card button:hover {
+  background: #0056b3;
+}
