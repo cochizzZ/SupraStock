@@ -153,6 +153,13 @@
     align-items: center;
     gap: 45px;
 }
+.nav-login-cart button {
+    width: 83px;
+    height: 25px;
+    font-size: 14px;
+    border-color: #80808014;
+    background: none;
+}
 
 .nav-login-cart .dropdown-toggle {
     height: 30px;
@@ -257,6 +264,7 @@
         height: 25px;
         font-size: 14px;
         border-color: #80808014;
+        background: none;
     }
 
     .nav-login-cart img {
