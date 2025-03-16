@@ -18,10 +18,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
 // Conexion con la base de datos de MongoDB
-mongoose.connect("mongodb+srv://JuanRM:JuanTDP10@stp.jlm2k.mongodb.net/suprastock", {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-});
+mongoose.connect("mongodb+srv://JuanRM:JuanTDP10@stp.jlm2k.mongodb.net/suprastock",);
 
 // Creacion de API
 
@@ -328,7 +325,7 @@ const fetchUser = async (req, res, next) => {
     }
     else {
         try {
-            const data = jwt.verify(token, 'secret_ecom');
+            // const data = jwt.verify(token, 'secret_ecom');
             req.user = data.user;
             next();
         } catch (error) {
