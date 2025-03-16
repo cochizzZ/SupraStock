@@ -4,6 +4,7 @@ import './UserOrders.css';
 
 const UserOrders = () => {
   const [orders, setOrders] = useState([]);
+  const [products, setProducts] = useState({});
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -13,32 +14,31 @@ const UserOrders = () => {
             'auth-token': localStorage.getItem('auth-token')
           }
         });
-        setOrders(response.data);
+        const ordersData = response.data;
+        setOrders(ordersData);
+
+        // Fetch product details for each product in the orders
+        const productIds = new Set();
+        ordersData.forEach(order => {
+          order.products.forEach(product => {
+            productIds.add(product.product_id);
+          });
+        });
+
+        const productDetails = {};
+        await Promise.all([...productIds].map(async productId => {
+          const productResponse = await axios.get(`http://localhost:4000/api/products/${productId}`);
+          productDetails[productId] = productResponse.data;
+        }));
+
+        setProducts(productDetails);
       } catch (error) {
-        console.error('Error fetching orders:', error);
+        console.error('Error fetching orders or products:', error);
       }
     };
 
     fetchOrders();
   }, []);
-
-  const cancelOrder = async (orderId) => {
-    try {
-      await axios.put(`http://localhost:4000/api/user/orders/${orderId}/cancel`, {}, {
-        headers: {
-          'auth-token': localStorage.getItem('auth-token')
-        }
-      });
-      const response = await axios.get('http://localhost:4000/api/user/orders', {
-        headers: {
-          'auth-token': localStorage.getItem('auth-token')
-        }
-      });
-      setOrders(response.data);
-    } catch (error) {
-      console.error('Error canceling order:', error);
-    }
-  };
 
   return (
     <div className="user-orders-container">
@@ -46,37 +46,42 @@ const UserOrders = () => {
       <table className="user-orders-table">
         <thead>
           <tr>
-            <th>ID de Orden</th>
-            <th>Productos</th>
+            <th>Imagen</th>
+            <th>Producto</th>
+            <th>Cantidad</th>
+            <th>Precio</th>
             <th>Total</th>
             <th>Estado</th>
             <th>Fecha</th>
-            <th>Acciones</th>
           </tr>
         </thead>
         <tbody>
-          {orders.map(order => (
-            <tr key={order._id}>
-              <td>{order._id}</td>
-              <td>
-                <ul>
-                  {order.products.map(product => (
-                    <li key={product.product_id}>
-                      {product.product_id} - Cantidad: {product.quantity} - Precio: {product.price}
-                    </li>
-                  ))}
-                </ul>
-              </td>
-              <td>{order.total}</td>
-              <td>{order.status}</td>
-              <td>{new Date(order.date).toLocaleString()}</td>
-              <td>
-                {order.status === 'Pending' && (
-                  <button onClick={() => cancelOrder(order._id)}>Cancelar</button>
-                )}
-              </td>
+          {orders.length > 0 ? (
+            orders.map(order => (
+              order.products.map(product => {
+                const productDetails = products[product.product_id];
+                return (
+                  <tr key={product.product_id}>
+                    <td>
+                      {productDetails && (
+                        <img src={productDetails.image} alt={productDetails.name} className="product-image" />
+                      )}
+                    </td>
+                    <td>{productDetails ? productDetails.name : 'Cargando...'}</td>
+                    <td>{product.quantity}</td>
+                    <td>${product.price}</td>
+                    <td>${product.price * product.quantity}</td>
+                    <td>{order.status}</td>
+                    <td>{new Date(order.date).toLocaleString()}</td>
+                  </tr>
+                );
+              })
+            ))
+          ) : (
+            <tr>
+              <td colSpan="7">No hay órdenes disponibles</td>
             </tr>
-          ))}
+          )}
         </tbody>
       </table>
     </div>
