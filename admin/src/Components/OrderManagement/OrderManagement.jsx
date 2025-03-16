@@ -123,6 +123,9 @@ const OrderManagement = () => {
           </div>
         ))}
       </div>
+      {selectedOrder && (
+        <OrderModal order={selectedOrder} onClose={() => setSelectedOrder(null)} />
+      )}
     </div>
   );
 };

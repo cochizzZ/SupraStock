@@ -30,10 +30,6 @@
     align-items: center;
 }
 
-.dropdown-icon {
-    margin-left: 0.9rem;
-}
-
 .dropdown-menu {
     position: absolute;
     top: 100%;
@@ -194,7 +190,7 @@
 .cart-img {
     width: 30px;
 }
-.nav-login-cart button {
+.nav-login-cart .dropdown-toggle {
     width: 80px;
     height: 33px;
     font-size: 16px;
@@ -202,7 +198,12 @@
     border-radius: 8px;
     border-color: #80808063;
 }
-
+.nav-login-cart button {
+    width: 83px;
+    height: 25px;
+    font-size: 14px;
+    border-color: #80808014;
+}
 
 @media(max-width: 1280px) {
     .navbar {
@@ -226,7 +227,7 @@
         gap: 30px;
     }
 
-    .nav-login-cart button {
+    .nav-login-cart .dropdown-toggle {
         width: 80px;
         height: 33px;
         font-size: 16px;
@@ -255,6 +256,7 @@
         width: 83px;
         height: 25px;
         font-size: 14px;
+        border-color: #80808014;
     }
 
     .nav-login-cart img {

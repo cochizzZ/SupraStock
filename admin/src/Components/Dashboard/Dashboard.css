@@ -1,26 +1,87 @@
 .dashboard {
     padding: 20px;
-  }
-  
-  .dashboard h1 {
+}
+
+.dashboard h1 {
     font-size: 2rem;
     margin-bottom: 20px;
-  }
-  
-  .dashboard-content {
+}
+
+.dashboard-content {
     display: flex;
     gap: 20px;
-  }
-  
-  .dashboard-item {
+}
+
+.dashboard-item {
     flex: 1;
     padding: 20px;
     border: 1px solid #ccc;
     border-radius: 8px;
     background-color: #f9f9f9;
-  }
-  
-  .dashboard-item h2 {
+}
+
+.dashboard-item h2 {
     font-size: 1.5rem;
     margin-bottom: 10px;
-  }
+}
+
+.dashboard-item ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.dashboard-item li {
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.dashboard-item li p {
+    margin: 8px 0;
+}
+
+.dashboard-item button {
+    background: #007bff;
+    color: #fff;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-right: 8px;
+}
+
+.dashboard-item button:hover {
+    background: #0056b3;
+}
+
+.button-container {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px;
+}
+
+/* Estilos adicionales para la sección de estadísticas */
+.statistics-item {
+    display: flex;
+    align-items: center;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    background: #fff;
+}
+
+.statistics-item i {
+    font-size: 1.5rem;
+    margin-right: 10px;
+    color: #007bff;
+}
+
+.statistics-item p {
+    margin: 0;
+    font-size: 1.2rem;
+}

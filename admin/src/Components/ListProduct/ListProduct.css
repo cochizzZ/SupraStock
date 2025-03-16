@@ -17,7 +17,7 @@
 
 .listproduct-format-main{
     display: grid;
-    grid-template-columns: repeat(7, 1fr);
+    grid-template-columns: repeat(8, 1fr);
     gap: 10px;
     width: 100%;
     padding: 10px 0;
@@ -34,7 +34,7 @@
 
 .listproduct-format{
     display: grid;
-    grid-template-columns: repeat(7, 1fr);
+    grid-template-columns: repeat(8, 1fr);
     gap: 10px;
     align-items: center;
     font-weight: 500;
@@ -75,4 +75,14 @@
      .listproduct-product-icon{
         height: 60px;
      }
+}
+.edit-button {
+    border: none;
+    background: none;
+}
+
+.edit-image {
+    width: 25px;
+    height: 25px;
+    cursor: pointer;
 }

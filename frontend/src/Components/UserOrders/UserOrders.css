@@ -1,6 +1,6 @@
 .user-orders-container {
   padding: 20px;
-  background-color: #f9f9f9;
+  background-color: #f9f9f9; /* Cambiar a un tono más claro de beige */
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
@@ -10,14 +10,13 @@
   font-size: 24px;
   font-weight: bold;
   color: #333;
+  text-align: center;
 }
 
 .user-orders-table {
   width: 100%;
   border-collapse: collapse;
-  background-color: white;
-  border-radius: 8px;
-  overflow: hidden;
+  margin-bottom: 20px;
 }
 
 .user-orders-table th, .user-orders-table td {
@@ -27,24 +26,38 @@
 }
 
 .user-orders-table th {
-  background-color: #f2f2f2;
-  font-weight: bold;
+  background-color: #e6e6fa; /* Cambiar a un tono morado suave */
+  color: #333;
+  padding-top: 12px;
+  padding-bottom: 12px;
 }
 
 .user-orders-table tr:nth-child(even) {
-  background-color: #f9f9f9;
+  background-color: #ffffff; /* Cambiar a blanco */
 }
 
-.user-orders-table tr:hover {
-  background-color: #ddd;
+.product-image {
+  width: 50px;
+  height: 50px;
+  object-fit: cover;
+  border-radius: 4px;
 }
 
-.user-orders-table ul {
-  list-style-type: none;
-  padding: 0;
-  margin: 0;
+.user-orders-table td {
+  vertical-align: middle;
 }
 
-.user-orders-table li {
-  margin-bottom: 5px;
+.user-orders-table th, .user-orders-table td {
+  text-align: center;
+}
+
+@media (max-width: 768px) {
+  .user-orders-table th, .user-orders-table td {
+    padding: 8px;
+  }
+
+  .product-image {
+    width: 40px;
+    height: 40px;
+  }
 }

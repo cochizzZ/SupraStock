@@ -1,9 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import './ListProduct.css';
 import cross_icon from '../../assets/cross_icon.png';
+import lapicito from '../../assets/lapicito.svg';
+import EditProduct from '../EditProduct/EditProduct';
 
 const ListProduct = () => {
   const [allproducts, setAllProducts] = useState([]);
+  const [editingProduct, setEditingProduct] = useState(null);
 
   const fetchInfo = async () => {
     await fetch('http://localhost:4000/allproducts')
@@ -29,6 +32,19 @@ const ListProduct = () => {
     await fetchInfo();
   };
 
+  const handleEdit = (product) => {
+    setEditingProduct(product);
+  };
+
+  const handleUpdate = (updatedProduct) => {
+    setAllProducts((prevProducts) =>
+      prevProducts.map((product) =>
+        product.id === updatedProduct.id ? updatedProduct : product
+      )
+    );
+    setEditingProduct(null);
+  };
+
   return (
     <div className='list-product'>
       <h1>Lista de Productos</h1>
@@ -38,7 +54,8 @@ const ListProduct = () => {
         <p>Precio</p>
         <p>Precio oferta</p>
         <p>Categoria</p>
-        <p>Stock</p> {/* Nueva columna para el stock */}
+        <p>Stock</p>
+        <p>Editar</p>
         <p>Eliminar</p>
       </div>
       <div className="listproduct-allproducts">
@@ -52,7 +69,8 @@ const ListProduct = () => {
                 <p>${product.old_price}</p>
                 <p>${product.new_price}</p>
                 <p>{product.category}</p>
-                <p>{product.stock}</p> {/* Mostrar el valor del stock */}
+                <p>{product.stock}</p>
+                <button class="edit-button" onClick={() => handleEdit(product)}><img class="edit-image" src={lapicito}></img></button>
                 <img onClick={() => { remove_product(product.id) }} className='listproduct-remove-icon' src={cross_icon} alt="" />
               </div>
               <hr />
@@ -60,6 +78,9 @@ const ListProduct = () => {
           );
         })}
       </div>
+      {editingProduct && (
+        <EditProduct product={editingProduct} onUpdate={handleUpdate} />
+      )}
     </div>
   );
 };
