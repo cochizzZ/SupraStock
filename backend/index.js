@@ -301,9 +301,7 @@ app.post('/login', async (req, res) => {
 
 app.get('/newcollections', async (req, res) => {
     let products = await Product.find({});
-    console.log("products: "+products)
     let newcollection = products.slice(0).slice(-8);
-    console.log("newcollection: "+newcollection);
     console.log("NewCollection Fetched");
     res.send(newcollection);
 })
@@ -325,7 +323,7 @@ const fetchUser = async (req, res, next) => {
     }
     else {
         try {
-            // const data = jwt.verify(token, 'secret_ecom');
+            const data = jwt.verify(token, 'secret_ecom');
             req.user = data.user;
             next();
         } catch (error) {
