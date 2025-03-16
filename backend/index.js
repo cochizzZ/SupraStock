@@ -611,6 +611,20 @@ app.get('/api/products/:id', async (req, res) => {
   }
 });
 
+// Endpoint para obtener los detalles de un producto por ID
+app.get('/api/products/:productId', async (req, res) => {
+  try {
+    const product = await Product.findById(req.params.productId);
+    if (!product) {
+      return res.status(404).json({ message: 'Producto no encontrado' });
+    }
+    res.json(product);
+  } catch (error) {
+    console.error('Error fetching product:', error);
+    res.status(500).json({ message: 'Error interno del servidor' });
+  }
+});
+
 // Endpoint para actualizar el ID del usuario en las órdenes
 app.post('/api/update-user-id-in-orders', async (req, res) => {
   const { oldUserId, newUserId } = req.body;
@@ -642,12 +656,25 @@ app.post('/api/update-user-id-in-orders', async (req, res) => {
   }
 });
 
+// Endpoint para obtener las órdenes de un usuario específico
+app.get('/api/user/orders', fetchUser, async (req, res) => {
+    try {
+        const orders = await Order.find({ user_id: req.user.id });
+        res.json(orders);
+    } catch (error) {
+        console.error('Error fetching user orders:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error interno del servidor',
+        });
+    }
+});
+
 // Iniciar el servidor
 app.listen(port, (error) => {
     if (!error) {
-        console.log("Server Running on Port" + port)
-    }
-    else {
-        console.log("Error : " + error)
+        console.log("Server Running on Port " + port);
+    } else {
+        console.log("Error : " + error);
     }
 })
