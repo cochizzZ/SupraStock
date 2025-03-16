@@ -1,0 +1,74 @@
+/* Contenedor principal del formulario */
+.edit-user-container {
+    max-width: 400px;
+    margin: 20px auto;
+    padding: 20px;
+    background: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    font-family: 'Arial', sans-serif;
+  }
+  
+  /* Título del formulario */
+  h2 {
+    text-align: center;
+    color: #333;
+  }
+  
+  /* Etiquetas de los campos */
+  label {
+    display: block;
+    font-weight: bold;
+    margin-top: 10px;
+    color: #555;
+  }
+  
+  /* Estilos para los inputs y select */
+  input, select {
+    width: 100%;
+    padding: 8px;
+    margin-top: 5px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 14px;
+    outline: none;
+    transition: all 0.3s ease-in-out;
+  }
+  
+  input:focus, select:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+  }
+  
+  /* Botones */
+  button {
+    width: 100%;
+    padding: 10px;
+    margin-top: 15px;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background 0.3s ease-in-out;
+  }
+  
+  /* Botón de actualizar */
+  .update-btn {
+    background: #28a745;
+    color: white;
+  }
+  
+  .update-btn:hover {
+    background: #218838;
+  }
+  
+  /* Botón de cancelar */
+  .cancel-btn {
+    background: #dc3545;
+    color: white;
+  }
+  
+  .cancel-btn:hover {
+    background: #c82333;
+  }
+  
