@@ -15,13 +15,6 @@
     const bcrypt = require("bcryptjs");
     const bodyParser = require('body-parser');
     const userRoutes = require('./routes/users');
-    
-
-<<<<<<< HEAD
-// Conexion con la base de datos de MongoDB
-mongoose.connect("mongodb+srv://JuanRM:JuanTDP10@stp.jlm2k.mongodb.net/suprastock",);
-=======
->>>>>>> 42f8401 (Agregacion lista de usuarios delete and update)
 
     app.use(cors());
     app.use(express.json());
@@ -313,15 +306,6 @@ mongoose.connect("mongodb+srv://JuanRM:JuanTDP10@stp.jlm2k.mongodb.net/suprastoc
     });
 
     //creación de un punto final para los datos de newcollection
-
-<<<<<<< HEAD
-app.get('/newcollections', async (req, res) => {
-    let products = await Product.find({});
-    let newcollection = products.slice(0).slice(-8);
-    console.log("NewCollection Fetched");
-    res.send(newcollection);
-})
-=======
     app.get('/newcollections', async (req, res) => {
         let products = await Product.find({});
         console.log("products: "+products)
@@ -330,7 +314,6 @@ app.get('/newcollections', async (req, res) => {
         console.log("NewCollection Fetched");
         res.send(newcollection);
     })
->>>>>>> 42f8401 (Agregacion lista de usuarios delete and update)
 
     //creación de un punto final para la sección de mujeres populares
     app.get('/popularinwomen', async (req, res) => {
@@ -759,7 +742,6 @@ router.delete('/api/users/:id', async (req, res) => {
   module.exports = router;
     
 
-<<<<<<< HEAD
 // Endpoint para obtener todos los usuarios
 app.get('/api/users', async (req, res) => {
     try {
@@ -859,15 +841,6 @@ app.get('/api/user/orders', fetchUser, async (req, res) => {
     }
 });
 
-// Iniciar el servidor
-app.listen(port, (error) => {
-    if (!error) {
-        console.log("Server Running on Port " + port);
-    } else {
-        console.log("Error : " + error);
-    }
-})
-=======
     // Iniciar el servidor
     app.listen(port, (error) => {
         if (!error) {
@@ -877,4 +850,3 @@ app.listen(port, (error) => {
             console.log("Error : " + error)
         }
     })
->>>>>>> 42f8401 (Agregacion lista de usuarios delete and update)
