@@ -54,7 +54,7 @@ const Navbar = () => {
         <li onClick={() => { setMenu("kids") }}><Link style={{ textDecoration: 'none' }} to='/kids'>Niños</Link>{menu === "kids" ? <hr /> : <></>}</li>
       </ul>
       <div className="nav-login-cart">
-        {!localStorage.getItem('auth-token') && <Link to='/login'><button>Login</button></Link>}
+        {!localStorage.getItem('auth-token') && <Link to='/login'><button className='login-button'>Iniciar Sesión</button></Link>}
         <Link to='/cart'><img className="cart-img" src={cart_icon} alt="" /></Link>
         <div className="nav-cart-count">{getTotalCartItems()}</div>
         {user && (

@@ -22,12 +22,32 @@
 }
 
 .dropdown-toggle {
-    background: none;
-    border: none;
-    cursor: pointer;
-    font-size: 1rem;
     display: flex;
     align-items: center;
+    gap: 5px; /* Espaciado entre el nombre y la flecha */
+    padding: 5px 10px;
+    font-size: 16px;
+    background: white;
+    border-radius: 8px;
+    border: 1px solid #80808063;
+    cursor: pointer;
+    max-width: fit-content; /* Se ajusta dinámicamente al contenido */
+}
+
+.dropdown-name {
+    white-space: nowrap; /* Evita que el nombre haga saltos de línea */
+    overflow: hidden;
+    text-overflow: ellipsis; /* Muestra "..." si el nombre es muy largo */
+    max-width: 150px; /* Controla el ancho máximo */
+}
+
+.dropdown-icon {
+    font-size: 14px;
+    transition: transform 0.3s ease;
+}
+
+.dropdown-toggle:hover .dropdown-icon {
+    transform: rotate(180deg);
 }
 
 .dropdown-menu {
@@ -35,14 +55,12 @@
     top: 100%;
     right: 0;
     background-color: #ffe4e178;
-    /* Color rosado o morado suave */
     border: 1px solid #ccc;
     border-radius: 4px;
     padding: 1rem;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
     z-index: 1000;
     width: 200px;
-    /* Ajustar el ancho del menú desplegable */
 }
 
 .dropdown-menu p {
@@ -55,22 +73,18 @@
     display: block;
     margin: 0.5rem 0;
     text-decoration: none;
-    /* Quitar subrayado */
     color: #000;
     background: none;
     border: none;
     cursor: pointer;
     text-align: left;
     width: 100%;
-    /* Asegurar que los elementos ocupen todo el ancho */
     font-size: 15px;
 }
-
 
 .dropdown-menu a:hover,
 .dropdown-menu button:hover {
     color: #333;
-    /* Color ligeramente más claro al pasar el ratón */
 }
 
 .logout-button {
@@ -80,16 +94,12 @@
     cursor: pointer;
     color: #000;
     white-space: nowrap;
-    /* Evitar que el texto se divida en varias líneas */
     width: 100%;
-    /* Asegurar que el botón ocupe todo el ancho */
     padding-right: 130px;
-    /* Ajustar el espacio a la derecha del botón */
 }
 
 .logout-button:hover {
     color: #333;
-    /* Color ligeramente más claro al pasar el ratón */
 }
 
 .cart-img {
@@ -153,16 +163,22 @@
     align-items: center;
     gap: 45px;
 }
-.nav-login-cart button {
-    width: 83px;
-    height: 25px;
-    font-size: 14px;
-    border-color: #80808014;
-    background: none;
+
+.nav-login-cart .login-button {
+    width: 120px;
+    height: 40px;
+    font-size: 16px;
+    font-weight: 500;
+    color: #333; 
+    background: rgba(255, 255, 255, 0.6); 
+    border: 2px solid #ccc; 
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
 }
 
 .nav-login-cart .dropdown-toggle {
-    height: 30px;
+    height: 90px;
     outline: none;
     border: 1px solid #7a7a7a;
     border-radius: 11px;
@@ -197,20 +213,20 @@
 .cart-img {
     width: 30px;
 }
+
 .nav-login-cart .dropdown-toggle {
-    width: 80px;
+    width: auto; /* Se ajusta al contenido */
     height: 33px;
     font-size: 16px;
     background: white;
     border-radius: 8px;
-    border-color: #80808063;
+    border: 1px solid #80808063;
+    padding: 5px 10px; /* Espaciado interno */
+    display: flex;
+    align-items: center;
+    gap: 5px;
 }
-.nav-login-cart button {
-    width: 83px;
-    height: 25px;
-    font-size: 14px;
-    border-color: #80808014;
-}
+
 
 @media(max-width: 1280px) {
     .navbar {
@@ -235,12 +251,13 @@
     }
 
     .nav-login-cart .dropdown-toggle {
-        width: 80px;
+        width: auto;
         height: 33px;
         font-size: 16px;
         background: white;
         border-radius: 8px;
-        border-color: #80808063;
+        border: 1px solid #80808063;
+        padding: 5px 10px;
     }
 
     .nav-cart-count {
