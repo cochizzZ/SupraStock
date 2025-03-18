@@ -13,6 +13,12 @@ const LoginSignup = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      state === "Iniciar Sesión" ? login() : signup();
+    }
+  };
+
   const login = async () => {
     console.log("Login Function Executed", formData);
     let responseData;
@@ -64,18 +70,14 @@ const LoginSignup = () => {
       <div className="loginsignup-container">
         <h1>{state}</h1>
         <div className="loginsignup-fields">
-          {state === "Registro" ? <input name='name' value={formData.name} onChange={changeHandler} type="text" placeholder='Tu nombre' /> : <></>}
-          <input name='email' value={formData.email} onChange={changeHandler} type="email" placeholder='Correo Electrónico' />
-          <input name='password' value={formData.password} onChange={changeHandler} type="password" placeholder='Contraseña' />
+          {state === "Registro" ? <input name='name' value={formData.name} onChange={changeHandler} onKeyDown={handleKeyDown} type="text" placeholder='Tu nombre' /> : <></>}
+          <input name='email' value={formData.email} onChange={changeHandler} onKeyDown={handleKeyDown} type="email" placeholder='Correo Electrónico' />
+          <input name='password' value={formData.password} onChange={changeHandler} onKeyDown={handleKeyDown} type="password" placeholder='Contraseña' />
         </div>
         <button onClick={() => { state === "Iniciar Sesión" ? login() : signup() }}>Continuar</button>
         {state === "Registro"
           ? <p className="loginsignup-login">¿Ya tienes una cuenta? <span id="span-login" onClick={() => { setState("Iniciar Sesión") }}>Inicia sesión aquí</span></p>
           : <p className="loginsignup-login">¿Crear una cuenta? <span id="span-login" onClick={() => { setState("Registro") }}>Haz clic aquí</span></p>}
-        <div className="loginsignup-agree">
-          <input type="checkbox" name='' id='' />
-          <p>Al continuar, acepto los términos de uso y la política de privacidad.</p>
-        </div>
       </div>
     </div>
   );
