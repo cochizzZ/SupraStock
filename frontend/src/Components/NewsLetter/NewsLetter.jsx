@@ -1,17 +1,60 @@
-import React from 'react'
-import './NewsLetter.css'
+import React, { useState } from "react";
+import emailjs from "emailjs-com";
+import "./NewsLetter.css";
 
 const NewsLetter = () => {
-  return (
-    <div className='newsletter'>
-      <h1>Get Exclusive Ofeers On Your Email</h1>
-      <p>Subscribe to our newletter and stay updated</p>
-      <div>
-        <input type="email" placeholder='Your Email id'/>
-        <button>Subscribe</button>
-      </div>
-    </div>
-  )
-}
+  const [email, setEmail] = useState("");
+  const [message, setMessage] = useState("");
 
-export default NewsLetter
+  const handleSubscribe = (e) => {
+    e.preventDefault();
+
+    if (!email) {
+      setMessage("Por favor, introduce un correo válido.");
+      return;
+    }
+
+    // Parámetros que se enviarán a EmailJS (deben coincidir con los de la plantilla)
+    const templateParams = {
+      user_email: email, // Asegúrate de que la variable coincide con la plantilla
+    };
+
+    emailjs
+      .send(
+        "service_59zq1xr", // Reemplaza con tu Service ID
+        "template_p6zpkn6", // Reemplaza con tu Template ID
+        templateParams,
+        "KLMNrpDbx9FwwUPUF" // Reemplaza con tu Public Key
+      )
+      .then(
+        (response) => {
+          console.log("SUCCESS!", response.status, response.text);
+          setMessage("¡Suscripción exitosa! Revisa tu correo.");
+          setEmail("");
+        },
+        (error) => {
+          console.error("Error al enviar el correo: ", error);
+          setMessage("Hubo un error. Inténtalo nuevamente.");
+        }
+      );
+  };
+
+  return (
+    <div className="newsletter">
+      <h1>Obtén Ofertas Exclusivas</h1>
+      <p>Suscríbete a nuestra tienda y mantente actualizado</p>
+      <form onSubmit={handleSubscribe}>
+        <input
+          type="email"
+          placeholder="Tu correo electrónico"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
+        <button type="submit">Suscribirse</button>
+      </form>
+      {message && <p className="message">{message}</p>}
+    </div>
+  );
+};
+
+export default NewsLetter;
