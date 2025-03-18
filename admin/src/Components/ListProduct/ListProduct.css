@@ -1,4 +1,4 @@
-.list-product{
+.list-product {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -15,13 +15,13 @@
     margin-bottom: 20px;
 }
 
-.listproduct-format-main{
+.listproduct-format-main {
     display: grid;
     grid-template-columns: repeat(8, 1fr);
     gap: 10px;
     width: 100%;
     padding: 10px 0;
-    color:#454545;
+    color: #454545;
     font-size: 15px;
     font-weight: 600;
     align-items: center;
@@ -32,7 +32,7 @@
     font-weight: bold;
 }
 
-.listproduct-format{
+.listproduct-format {
     display: grid;
     grid-template-columns: repeat(8, 1fr);
     gap: 10px;
@@ -41,41 +41,44 @@
     padding: 10px 0;
 }
 
-.listproduct-product-icon{
+.listproduct-product-icon {
     width: 50px;
     height: 50px;
     object-fit: cover;
 }
 
-.listproduct-remove-icon{
+.listproduct-remove-icon {
     width: 20px;
     height: 20px;
     cursor: pointer;
     margin: auto;
 }
 
-.listproduct-allproducts{
+.listproduct-allproducts {
     overflow-y: auto;
     margin-top: 20px;
 }
 
-@media(max-width:800px){
-     .list-product{
+@media(max-width:800px) {
+    .list-product {
         box-sizing: border-box;
         width: 95%;
         height: 100%;
         padding: 10px 30px;
         margin: 20px auto;
-     }
-     .listproduct-format-main{
+    }
+
+    .listproduct-format-main {
         padding: 15px 0px;
         color: #454545;
         font-size: 12px;
-     }
-     .listproduct-product-icon{
+    }
+
+    .listproduct-product-icon {
         height: 60px;
-     }
+    }
 }
+
 .edit-button {
     border: none;
     background: none;
@@ -85,4 +88,23 @@
     width: 25px;
     height: 25px;
     cursor: pointer;
+}
+
+.tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.tabs button {
+    padding: 10px 20px;
+    border: none;
+    background-color: #f0f0f0;
+    cursor: pointer;
+}
+
+.tabs button.active {
+    background-color: #5ca7f8;
+    color: white;
+    font-weight: bold;
 }

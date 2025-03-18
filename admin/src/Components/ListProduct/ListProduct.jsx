@@ -7,6 +7,7 @@ import EditProduct from '../EditProduct/EditProduct';
 const ListProduct = () => {
   const [allproducts, setAllProducts] = useState([]);
   const [editingProduct, setEditingProduct] = useState(null);
+  const [activeTab, setActiveTab] = useState('available'); // 'available' or 'unavailable'
 
   const fetchInfo = async () => {
     await fetch('http://localhost:4000/allproducts')
@@ -45,9 +46,27 @@ const ListProduct = () => {
     setEditingProduct(null);
   };
 
+  const filteredProducts = allproducts.filter((product) =>
+    activeTab === 'available' ? product.available : !product.available
+  );
+
   return (
     <div className='list-product'>
       <h1>Lista de Productos</h1>
+      <div className="tabs">
+        <button
+          className={activeTab === 'available' ? 'active' : ''}
+          onClick={() => setActiveTab('available')}
+        >
+          Productos Disponibles
+        </button>
+        <button
+          className={activeTab === 'unavailable' ? 'active' : ''}
+          onClick={() => setActiveTab('unavailable')}
+        >
+          Productos No Disponibles
+        </button>
+      </div>
       <div className="listproduct-format-main">
         <p>Productos</p>
         <p>Nombre</p>
@@ -60,7 +79,7 @@ const ListProduct = () => {
       </div>
       <div className="listproduct-allproducts">
         <hr />
-        {allproducts.map((product, index) => {
+        {filteredProducts.map((product, index) => {
           return (
             <React.Fragment key={index}>
               <div className="listproduct-format-main listproduct-format" id={product.id}>
@@ -70,8 +89,15 @@ const ListProduct = () => {
                 <p>${product.new_price}</p>
                 <p>{product.category}</p>
                 <p>{product.stock}</p>
-                <button class="edit-button" onClick={() => handleEdit(product)}><img class="edit-image" src={lapicito}></img></button>
-                <img onClick={() => { remove_product(product.id) }} className='listproduct-remove-icon' src={cross_icon} alt="" />
+                <button className="edit-button" onClick={() => handleEdit(product)}>
+                  <img className="edit-image" src={lapicito} alt="Editar" />
+                </button>
+                <img
+                  onClick={() => { remove_product(product.id); }}
+                  className='listproduct-remove-icon'
+                  src={cross_icon}
+                  alt="Eliminar"
+                />
               </div>
               <hr />
             </React.Fragment>

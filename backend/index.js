@@ -140,20 +140,28 @@ app.post('/addproduct', async (req, res) => {
 });
 
 // Creacion de API para Remover Productos
-
 app.post('/removeproduct', async (req, res) => {
-    let producto = await Product.findOne({ id: req.body.id });
-    console.log(producto);
-    let productImage = producto.image.split('/').slice(-1)[0];
-    console.log(productImage);
-    fs.unlinkSync(`./upload/images/${productImage}`);
-    await Product.findOneAndDelete({ id: req.body.id });
-    console.log("Removed product and image");
-    res.json({
-        success: true,
-        name: req.body.name
-    })
-})
+    try {
+        let producto = await Product.findOne({ id: req.body.id });
+        if (!producto) {
+            return res.status(404).json({ success: false, message: "Producto no encontrado" });
+        }
+
+        console.log(producto);
+        producto.available = false;
+        await producto.save();
+
+        console.log("Producto actualizado a no disponible");
+        res.json({
+            success: true,
+            message: "Producto actualizado a no disponible",
+            name: req.body.name
+        });
+    } catch (error) {
+        console.error("Error al actualizar el producto:", error);
+        res.status(500).json({ success: false, message: "Error interno del servidor" });
+    }
+});
 
 // Creación de API para obtener todos los productos
 
