@@ -7,6 +7,7 @@
   border-radius: 6px;
   background: white;
 }
+
 .edit-product-title {
   font-size: 32px;
   font-weight: bold;
@@ -15,11 +16,13 @@
   margin-top: 5px;
   margin-bottom: 30px;
 }
+
 .edit-product-itemfield {
   width: 100%;
   color: black;
   font-size: 16px;
 }
+
 .edit-product-itemfield input {
   box-sizing: border-box;
   width: 100%;
@@ -31,10 +34,12 @@
   color: #7b7b7b;
   font-family: 'poppins';
 }
+
 .editproduct-price {
   display: flex;
   gap: 40px;
 }
+
 .edit-product-selector {
   padding: 10px;
   width: 116px;
@@ -44,6 +49,7 @@
   border: 1px solid #7b7b7b8d;
   border-radius: 4px;
 }
+
 .edit-product-thumbnail-img {
   height: 70px;
   width: 70px;
@@ -51,6 +57,7 @@
   object-fit: contain;
   margin-top: 30px;
 }
+
 .editproduct-btn {
   margin-top: 20px;
   width: 160px;

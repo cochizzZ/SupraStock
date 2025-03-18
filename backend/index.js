@@ -515,19 +515,19 @@ app.get('/api/sales', async (req, res) => {
 // Endpoint para actualizar un producto
 app.post('/updateproduct', async (req, res) => {
     try {
-        const { id, name, description, new_price, old_price, category, image } = req.body;
+        const { id, name, description, new_price, old_price, category, image, stock } = req.body;
 
         // Validar que los campos obligatorios no estén vacíos
-        if (!id || !name || !description || !new_price || !category) {
+        if (!id || !name || !description || !new_price || !category || stock === undefined) {
             return res.status(400).json({
                 success: false,
-                message: "Todos los campos (id, name, description, new_price, category) son obligatorios.",
+                message: "Todos los campos (id, name, description, new_price, category, stock) son obligatorios.",
             });
         }
 
         const updatedProduct = await Product.findOneAndUpdate(
             { id: id },
-            { name, description, new_price, old_price, category, image },
+            { name, description, new_price, old_price, category, image, stock },
             { new: true }
         );
 

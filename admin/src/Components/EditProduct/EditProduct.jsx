@@ -12,6 +12,7 @@ const EditProduct = ({ product, onUpdate }) => {
     old_price: product.old_price,
     category: product.category,
     image: product.image,
+    stock: product.stock, // Añadir el campo de stock
   });
 
   const imageHandler = (e) => {
@@ -123,6 +124,17 @@ const EditProduct = ({ product, onUpdate }) => {
             placeholder="Ingrese el precio"
           />
         </div>
+      </div>
+
+      <div className="edit-product-itemfield">
+        <p>Cantidad en stock</p> {/* Nuevo campo agregado */}
+        <input
+          value={productDetails.stock}
+          onChange={changeHandler}
+          type="number"
+          name="stock"
+          placeholder="Ingrese la cantidad en stock"
+        />
       </div>
 
       <div className="edit-product-itemfield">
