@@ -360,11 +360,11 @@ app.post('/addtocart', fetchUser, async (req, res) => {
     }
 });
 
-//crear punto de conexion para eliminar productos en  CartData
+//crear punto de conexion para eliminar productos en CartData
 app.post('/removefromcart', fetchUser, async (req, res) => {
     try {
         let userData = await Users.findOne({ _id: req.user.id });
-        console.log("Producto elimado del carrito", req.body.itemId);
+        console.log("Producto eliminado del carrito", req.body.itemId);
 
         if (!userData) {
             return res.status(404).json({ success: false, message: "Usuario no encontrado" });
@@ -605,40 +605,6 @@ app.put('/api/users/:id', async (req, res) => {
     }
 });
 
-// Endpoint para actualizar los datos de un usuario
-app.post('/updateuser', fetchUser, async (req, res) => {
-    try {
-        const { name, email, photo, address, phone } = req.body;
-
-        // Verificar si el usuario existe
-        const user = await Users.findById(req.user.id);
-        if (!user) {
-            return res.status(404).json({
-                success: false,
-                message: "Usuario no encontrado.",
-            });
-        }
-
-        // Actualizar los datos del usuario
-        const updatedUser = await Users.findByIdAndUpdate(
-            req.user.id,
-            { name, email, photo, address, phone },
-            { new: true }
-        );
-
-        res.json({
-            success: true,
-            message: "Usuario actualizado correctamente",
-            user: updatedUser,
-        });
-    } catch (error) {
-        console.error("Error al actualizar usuario:", error);
-        res.status(500).json({
-            success: false,
-            message: "Error interno del servidor",
-        });
-    }
-});
 router.delete('/api/users/:id', async (req, res) => {
     try {
         const { id } = req.params;
