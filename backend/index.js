@@ -205,41 +205,37 @@ const Users = mongoose.model('Users', new mongoose.Schema({
     },
 }));
 
-// Esquema para la creación de órdenes
-const Order = mongoose.model("Order", new mongoose.Schema({
-    user_id: {
-        type: String,
-        required: true,
-    },
+//creación de schema para el modelo de ordenes
+const OrderSchema = new mongoose.Schema({
+    user_id: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
     products: [
         {
-            product_id: {
-                type: String,
-                required: true,
-            },
-            quantity: {
-                type: Number,
-                required: true,
-            },
-            price: {
-                type: Number,
-                required: true,
-            },
+            product_id: { type: mongoose.Schema.Types.ObjectId, ref: "Product", required: true },
+            quantity: { type: Number, required: true },
+            price: { type: Number, required: true },
         },
     ],
-    total: {
-        type: Number,
-        required: true,
+    total: { type: Number, required: true },
+    status: { type: String, enum: ["Pending", "Processing", "Shipped", "Completed", "Cancelled"], default: "Pending" },
+    date: { type: Date, default: Date.now },
+
+    // Información del cliente ( Para realizar las ordenes seria como el add)
+    customer_info: {
+        name: { type: String, required: true },
+        address: { type: String, required: true },
+        city: { type: String, required: true },
+        postal_code: { type: String, required: true },
+        email: { type: String, required: true },
+        phone: { type: String, required: true },
     },
-    status: {
-        type: String,
-        default: 'Pending',
-    },
-    date: {
-        type: Date,
-        default: Date.now,
-    },
-}));
+
+    // Relación con el pago (se guarda el ID del pago)
+    payment_id: { type: mongoose.Schema.Types.ObjectId, ref: "Payment", required: true },
+});
+
+const Order = mongoose.model("Order", OrderSchema);
+module.exports = Order;
+
 
 // Modificación en el endpoint de registro (signup)
 app.post('/signup', async (req, res) => {
@@ -400,7 +396,20 @@ app.post('/removefromcart', fetchUser, async (req, res) => {
 app.post('/getcart', fetchUser, async (req, res) => {
     console.log("Obtener Carrito");
     let userData = await Users.findOne({ _id: req.user.id });
-    res.json(userData.cartData);
+    
+    // Obtener todos los productos disponibles
+    let allProducts = await Product.find({});
+    let validProductIds = new Set(allProducts.map(product => product.id));
+    
+    // Filtrar productos eliminados del carrito
+    let validCartData = {};
+    for (let itemId in userData.cartData) {
+        if (validProductIds.has(Number(itemId))) {
+            validCartData[itemId] = userData.cartData[itemId];
+        }
+    }
+    
+    res.json(validCartData);
 })
 
 // Endpoint para verificar si el usuario es administrador
