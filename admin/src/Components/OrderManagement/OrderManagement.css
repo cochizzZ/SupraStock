@@ -17,88 +17,6 @@
   margin-bottom: 20px;
 }
 
-.order-management-list {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-}
-
-.order-card {
-  background: white;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  border: 1px solid #ddd;
-  width: 100%;
-  max-width: 800px;
-  margin: 0 auto;
-  box-sizing: border-box;
-}
-
-.order-grid {
-  display: grid;
-  grid-template-columns: 200px auto;
-  gap: 10px;
-  align-items: center;
-  width: 100%;
-}
-
-.label {
-  font-weight: bold;
-  color: #555;
-}
-
-.value {
-  background: #f1f1f1;
-  padding: 8px;
-  border-radius: 4px;
-  overflow-wrap: break-word;
-  max-width: 100%;
-}
-
-.product-table {
-  width: 100%;
-  border-collapse: collapse;
-  table-layout: fixed;
-}
-
-.product-table th,
-.product-table td {
-  border: 1px solid #ddd;
-  padding: 8px;
-  text-align: center;
-  word-wrap: break-word;
-}
-
-.order-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-  margin-top: 10px;
-}
-
-.order-actions button {
-  padding: 8px 12px;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: 0.3s;
-}
-
-.order-actions .complete {
-  background-color: #4caf50;
-  color: white;
-}
-
-.order-actions .delete {
-  background-color: #e74c3c;
-  color: white;
-}
-
-.order-actions button:hover {
-  opacity: 0.8;
-}
-
 .order-management-filters {
   display: flex;
   justify-content: center;
@@ -128,6 +46,141 @@
   box-shadow: 0 2px 4px rgba(76, 175, 80, 0.3);
 }
 
+.order-management-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.order-card {
+  background: white;
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border: 1px solid #ddd;
+  box-sizing: border-box;
+  }
+
+.order-info {
+  margin-bottom: 10px;
+}
+
+.label {
+  font-weight: bold;
+  color: #555;
+}
+
+.value {
+  background: #f1f1f1;
+  padding: 8px;
+  border-radius: 4px;
+  overflow-wrap: break-word;
+  max-width: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.order-actions {
+  display: flex;
+  justify-content: space-between;
+}
+
+.view {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 8px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.delete {
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  padding: 8px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+    background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  box-sizing: border-box;
+  overflow-y: auto;
+}
+
+.modal-content {
+  background: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  width: 100%;
+  max-width: 600px;
+  position: relative;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  font-size: 24px;
+  cursor: pointer;
+}
+
+.close-modal {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-top: 20px;
+}
+
+.order-details {
+  margin-top: 20px;
+}
+
+.product-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.product-table th, .product-table td {
+  border: 1px solid #ddd;
+  padding: 8px;
+}
+
+.product-table th {
+  background-color: #f2f2f2;
+}
+
+.toggle-id-visibility {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-left: 10px;
+  font-size: 14px;
+}
+
+@media (max-width: 1200px) {
+  .order-card {
+    width: calc(33.33% - 20px);
+  }
+}
+
 @media (max-width: 800px) {
   .order-management-container {
     max-width: 95vw;
@@ -139,11 +192,7 @@
   }
 
   .order-card {
-    max-width: 100%;
-  }
-
-  .order-grid {
-    grid-template-columns: 1fr;
+    width: calc(50% - 20px);
   }
 
   .order-actions {
@@ -161,5 +210,11 @@
   .order-management-filters select {
     width: 100%;
     max-width: 300px;
+  }
+}
+
+@media (max-width: 500px) {
+  .order-card {
+    width: 100%;
   }
 }

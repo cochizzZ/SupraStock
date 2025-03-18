@@ -7,6 +7,10 @@ const OrderManagement = () => {
   const [searchUser, setSearchUser] = useState("");
   const [filterStatus, setFilterStatus] = useState("");
   const [filterDate, setFilterDate] = useState("");
+  const [showDeleted, setShowDeleted] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState(null);
+  const [showFullOrderId, setShowFullOrderId] = useState(false);
+  const [showFullUserId, setShowFullUserId] = useState(false);
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -38,8 +42,27 @@ const OrderManagement = () => {
     return new Intl.NumberFormat("es-CO").format(price);
   };
 
+  const handleDeleteOrder = async (orderId) => {
+    console.log("Deleting order with ID:", orderId); // Verificar el orderId
+    try {
+      await axios.put(`http://localhost:4000/api/orders/${orderId}`, { available: false });
+      setOrders((prevOrders) =>
+        prevOrders.map((order) =>
+          order._id === orderId ? { ...order, available: false } : order
+        )
+      );
+    } catch (error) {
+      console.error("Error al eliminar la orden:", error);
+    }
+  };
+
+  const toggleShowDeleted = () => {
+    setShowDeleted((prev) => !prev);
+  };
+
   const filteredOrders = orders.filter(
     (order) =>
+      order.available === !showDeleted &&
       order.user_id.toLowerCase().includes(searchUser.toLowerCase()) &&
       (filterStatus === "" || order.status === filterStatus) &&
       (filterDate === "" ||
@@ -47,10 +70,29 @@ const OrderManagement = () => {
           new Date(filterDate).toLocaleDateString())
   );
 
+  const handleViewOrder = (order) => {
+    setSelectedOrder(order);
+  };
+
+  const closeModal = () => {
+    setSelectedOrder(null);
+  };
+
+  const toggleOrderIdVisibility = () => {
+    setShowFullOrderId((prev) => !prev);
+  };
+
+  const toggleUserIdVisibility = () => {
+    setShowFullUserId((prev) => !prev);
+  };
+
   return (
     <div className="order-management-container">
       <h2>Gestión de Órdenes</h2>
       <div className="order-management-filters">
+        <button onClick={toggleShowDeleted}>
+          {showDeleted ? "Ver Órdenes Activas" : "Ver Órdenes Eliminadas"}
+        </button>
         <input
           type="text"
           placeholder="Buscar por Usuario"
@@ -71,58 +113,119 @@ const OrderManagement = () => {
       </div>
 
       <div className="order-management-list">
-        {filteredOrders.map((order) => (
+        {filteredOrders.map((order, index) => (
           <div key={order._id} className="order-card">
-            <div className="order-grid">
-              <div className="label">ID de Orden:</div>
-              <div className="value">{order._id}</div>
+            <div className="order-info">
+              <div className="label">Orden #{index + 1}</div>
+              <div className="label">Nombre:</div>
+              <div className="value">{order.customer_info?.name || "N/A"}</div>
 
-              <div className="label">ID de Usuario:</div>
-              <div className="value">{order.user_id}</div>
+              <div className="label">Correo:</div>
+              <div className="value">{order.customer_info?.email || "N/A"}</div>
 
-              <div className="label">Productos:</div>
-              <div className="value">
-                <table className="product-table">
-                  <thead>
-                    <tr>
-                      <th>Código</th>
-                      <th>Cantidad</th>
-                      <th>Precio</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {order.products.map((product) => (
-                      <tr key={product.product_id}>
-                        <td>{product.product_id}</td>
-                        <td>{product.quantity}</td>
-                        <td>${formatPrice(product.price)}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-
-              <div className="label">Total:</div>
-              <div className="value">${formatPrice(order.total)}</div>
-
-              <div className="label">Estado:</div>
-              <div className="value status">{translateStatus(order.status)}</div>
+              <div className="label">Teléfono:</div>
+              <div className="value">{order.customer_info?.phone || "N/A"}</div>
 
               <div className="label">Fecha:</div>
               <div className="value">{new Date(order.date).toLocaleString()}</div>
+
+              <div className="label">Estado:</div>
+              <div className="value status">{translateStatus(order.status)}</div>
             </div>
 
             <div className="order-actions">
-              <button className="complete" onClick={() => console.log("Marcar como completada")}>
-                Marcar como Completada
+              <button className="view" onClick={() => handleViewOrder(order)}>
+                Visualizar
               </button>
-              <button className="delete" onClick={() => console.log("Eliminar orden")}>
-                Eliminar
-              </button>
+              {!showDeleted && (
+                <button className="delete" onClick={() => handleDeleteOrder(order._id)}>
+                  Eliminar
+                </button>
+              )}
             </div>
           </div>
         ))}
       </div>
+
+      {selectedOrder && (
+        <div className="modal">
+          <div className="modal-content">
+            <span className="close" onClick={closeModal}>&times;</span>
+            <h2>Detalles de la Orden</h2>
+            <div className="order-details">
+              <div className="section">
+                <h3>Información de la Venta</h3>
+                <div className="label">ID de Orden:</div>
+                <div className="value">
+                  {showFullOrderId ? selectedOrder._id : ""}
+                  <button onClick={toggleOrderIdVisibility} className="toggle-id-visibility">
+                    {showFullOrderId ? "Ocultar ID" : "Visualizar ID"}
+                  </button>
+                </div>
+                <div className="label">Estado:</div>
+                <div className="value status">{translateStatus(selectedOrder.status)}</div>
+                <div className="label">Fecha:</div>
+                <div className="value">{new Date(selectedOrder.date).toLocaleString()}</div>
+                <div className="label">Total:</div>
+                <div className="value">${formatPrice(selectedOrder.total)}</div>
+                <div className="label">Productos:</div>
+                <div className="value">
+                  <table className="product-table">
+                    <thead>
+                      <tr>
+                        <th>Imagen</th>
+                        <th>Nombre</th>
+                        <th>Cantidad</th>
+                        <th>Precio por Unidad</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {selectedOrder.products.map((product) => (
+                        <tr key={product.product_id}>
+                          <td>
+                            <img src={product.image_url} alt={product.name} style={{ width: '50px', height: '50px' }} />
+                          </td>
+                          <td>{product.name}</td>
+                          <td>{product.quantity}</td>
+                          <td>${formatPrice(product.price)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <div className="section">
+                <h3>Información de Contacto</h3>
+                <div className="label">ID de Usuario:</div>
+                <div className="value">
+                  {showFullUserId ? selectedOrder.user_id : ""}
+                  <button onClick={toggleUserIdVisibility} className="toggle-id-visibility">
+                    {showFullUserId ? "Ocultar ID" : "Visualizar ID"}
+                  </button>
+                </div>
+                <div className="label">Nombre:</div>
+                <div className="value">{selectedOrder.customer_info?.name || "N/A"}</div>
+                <div className="label">Correo:</div>
+                <div className="value">{selectedOrder.customer_info?.email || "N/A"}</div>
+                <div className="label">Teléfono:</div>
+                <div className="value">{selectedOrder.customer_info?.phone || "N/A"}</div>
+              </div>
+
+              <div className="section">
+                <h3>Información de Envío</h3>
+                <div className="label">Ciudad:</div>
+                <div className="value">{selectedOrder.customer_info?.city || "N/A"}</div>
+                <div className="label">Dirección:</div>
+                <div className="value">{selectedOrder.customer_info?.address || "N/A"}</div>
+                <div className="label">Código Postal:</div>
+                <div className="value">{selectedOrder.customer_info?.postal_code || "N/A"}</div>
+              </div>
+            </div>
+            <button className="close-modal" onClick={closeModal}>Cerrar</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
