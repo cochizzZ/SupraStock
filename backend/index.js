@@ -525,9 +525,12 @@ app.post('/updateproduct', async (req, res) => {
             });
         }
 
+        // Determinar el estado de disponibilidad basado en el stock
+        const available = stock > 0;
+
         const updatedProduct = await Product.findOneAndUpdate(
             { id: id },
-            { name, description, new_price, old_price, category, image, stock },
+            { name, description, new_price, old_price, category, image, stock, available },
             { new: true }
         );
 
