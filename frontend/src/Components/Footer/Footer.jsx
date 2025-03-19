@@ -1,20 +1,31 @@
-import React from 'react'
-import './Footer.css'
-import footer_logo from '../Assets/logo.jpg'
-import instagram_icon from '../Assets/instagram_icon.png'
-import whatsapp_icon from '../Assets/whatsapp_icon.png'
+import React from 'react';
+import { Link } from 'react-router-dom';
+import './Footer.css';
+import footer_logo from '../Assets/logo.jpg';
+import instagram_icon from '../Assets/instagram_icon.png';
+import whatsapp_icon from '../Assets/whatsapp_icon.png';
 
 const Footer = () => {
+  const email = "emmanuelriosierml@gmail.com";
+  const subject = encodeURIComponent("Solicitud de ayuda");
+  const body = encodeURIComponent("Hola, tengo una consulta sobre...");
+
+  const gmailLink = `https://mail.google.com/mail/?view=cm&fs=1&to=${email}&su=${subject}&body=${body}`;
+
   return (
     <div className='footer'>
       <div className="footer-logo">
-        <img src={footer_logo} alt="" />
+        <img src={footer_logo} alt="Logo BoutiqueAntojitos" />
         <p>BoutiqueAntojitos</p>
       </div>
       <ul className="footer-links">
-        <li>¿Quienes somos?</li>
-        <li>Ayuda</li>
-        <li>Contacto</li>
+        <li><Link to="/about">¿Quiénes somos?</Link></li>
+        <li>
+          <a href={gmailLink} target="_blank" rel="noopener noreferrer" className="footer-link">Ayuda</a>
+        </li>
+        <li>
+          <a href={gmailLink} target="_blank" rel="noopener noreferrer" className="footer-link">Contacto</a>
+        </li>
       </ul>
       <div className="footer-social-icon">
         <div className="footer-icons-container">
@@ -30,10 +41,10 @@ const Footer = () => {
       </div>
       <div className="footer-copyright">
         <hr />
-        <p>Copyright @ 2025 - All Right Reserved</p>
+        <p>Copyright @ 2025 - All Rights Reserved</p>
       </div>
     </div>
-  )
+  );
 }
 
-export default Footer
+export default Footer;
