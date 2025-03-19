@@ -26,6 +26,14 @@ const OrderForm = () => {
             console.log('Order submitted:', formData);
             alert('Orden confirmada. ¡Gracias por tu compra!');
 
+            // Verificar que userId no sea undefined
+            if (!userId) {
+                console.error('Error: userId is undefined');
+                return;
+            }
+
+            console.log('userId:', userId); // Verificar el valor de userId
+
             // Obtener los productos seleccionados del carrito
             const selectedProducts = all_product.filter(product => cartItems[product.id] > 0).map(product => ({
                 product_id: product.id,
@@ -33,7 +41,7 @@ const OrderForm = () => {
                 price: product.new_price
             }));
 
-            // Crear la orden
+            // Crear la orden con los datos del pago incluidos
             const orderData = {
                 user_id: userId,
                 products: selectedProducts,
@@ -45,30 +53,27 @@ const OrderForm = () => {
                     postal_code: formData.postalCode,
                     email: formData.email,
                     phone: formData.phone,
+                },
+                payment_info: {
+                    method: formData.paymentMethod,
+                    status: 'Pending',
+                    transaction_id: '1234567890', // Simulación de un ID de transacción
                 }
             };
 
             console.log('Order data:', orderData);
 
-            // Simular la creación de un pago
-            const paymentData = {
-                method: formData.paymentMethod,
-                status: 'Pending',
-                transaction_id: '1234567890', // Simulación de un ID de transacción
-            };
-
             try {
                 const orderResponse = await axios.post('http://localhost:4000/api/orders', orderData);
-                const orderId = orderResponse.data._id;
-
-                // Crear el pago asociado a la orden
-                paymentData.order_id = orderId;
-                await axios.post('http://localhost:4000/api/payments', paymentData);
+                console.log('Order created successfully:', orderResponse.data);
 
                 // Limpiar el almacenamiento local después de crear la orden
                 localStorage.removeItem('orderData');
             } catch (error) {
-                console.error('Error creating order or payment:', error);
+                console.error('Error creating order:', error);
+                if (error.response) {
+                    console.error('Error response:', error.response.data); // Agregar este log para ver el error detallado
+                }
             }
         }
     };
