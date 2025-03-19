@@ -12,6 +12,7 @@ const fs = require("fs");
 const bcrypt = require("bcryptjs");
 const bodyParser = require('body-parser');
 const userRoutes = require('./routes/users');
+
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -22,6 +23,10 @@ app.use('/api/users', userRoutes);
 mongoose.connect("mongodb+srv://JuanRM:JuanTDP10@stp.jlm2k.mongodb.net/suprastock", {
     useNewUrlParser: true,
     useUnifiedTopology: true,
+}).then(() => {
+    console.log('Conectado a la base de datos');
+}).catch((error) => {
+    console.error('Error al conectar a la base de datos:', error);
 });
 
 // Creacion de API
@@ -218,6 +223,7 @@ const OrderSchema = new mongoose.Schema({
     total: { type: Number, required: true },
     status: { type: String, enum: ["Pending", "Processing", "Shipped", "Completed", "Cancelled"], default: "Pending" },
     date: { type: Date, default: Date.now },
+    available: { type: Boolean, default: true },
 
     // Información del cliente ( Para realizar las ordenes seria como el add)
     customer_info: {
@@ -230,8 +236,11 @@ const OrderSchema = new mongoose.Schema({
     },
 
     // Relación con el pago (se guarda el ID del pago)
-    payment_id: { type: mongoose.Schema.Types.ObjectId, ref: "Payment", required: true },
-});
+    payment_info: {
+        method: { type: String, required: true }, // "PSE", "Tarjeta de crédito"
+        status: {type: String,enum: ["Pending", "Paid", "Failed"],default: "Pending"},
+        transaction_id: { type: String } // Se asigna solo si el pago es exitoso
+    }});
 
 const Order = mongoose.model("Order", OrderSchema);
 module.exports = Order;
@@ -396,11 +405,11 @@ app.post('/removefromcart', fetchUser, async (req, res) => {
 app.post('/getcart', fetchUser, async (req, res) => {
     console.log("Obtener Carrito");
     let userData = await Users.findOne({ _id: req.user.id });
-    
+
     // Obtener todos los productos disponibles
     let allProducts = await Product.find({});
     let validProductIds = new Set(allProducts.map(product => product.id));
-    
+
     // Filtrar productos eliminados del carrito
     let validCartData = {};
     for (let itemId in userData.cartData) {
@@ -408,7 +417,7 @@ app.post('/getcart', fetchUser, async (req, res) => {
             validCartData[itemId] = userData.cartData[itemId];
         }
     }
-    
+
     res.json(validCartData);
 })
 
@@ -457,12 +466,12 @@ app.post('/updateProfile', fetchUser, async (req, res) => {
 // Endpoint para agregar nuevas órdenes
 app.post('/addorder', async (req, res) => {
     try {
-        const { user_id, products, total, status } = req.body;
+        const { user_id, products, total, customer_info } = req.body;
 
-        if (!user_id || !products || !total) {
+        if (!user_id || !products || !total || !customer_info) {
             return res.status(400).json({
                 success: false,
-                message: "Los campos user_id, products y total son obligatorios.",
+                message: "Los campos user_id, products, total y customer_info son obligatorios.",
             });
         }
 
@@ -470,7 +479,8 @@ app.post('/addorder', async (req, res) => {
             user_id,
             products,
             total,
-            status: status || 'Pending',
+            customer_info,
+            status: 'Pending',
         });
 
         await order.save();
@@ -496,20 +506,6 @@ app.get('/api/orders', async (req, res) => {
         res.json(orders);
     } catch (error) {
         res.status(500).send(error);
-    }
-});
-
-// Endpoint para obtener todas las órdenes
-app.get('/api/sales', async (req, res) => {
-    try {
-        const orders = await Order.find({});
-        res.json(orders);
-    } catch (error) {
-        console.error('Error fetching orders:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Error interno del servidor',
-        });
     }
 });
 
@@ -678,37 +674,6 @@ app.get('/api/products/:productId', async (req, res) => {
     }
 });
 
-// Endpoint para actualizar el ID del usuario en las órdenes
-app.post('/api/update-user-id-in-orders', async (req, res) => {
-    const { oldUserId, newUserId } = req.body;
-
-    if (!oldUserId || !newUserId) {
-        return res.status(400).json({
-            success: false,
-            message: "Los campos oldUserId y newUserId son obligatorios.",
-        });
-    }
-
-    try {
-        const result = await Order.updateMany(
-            { user_id: oldUserId },
-            { $set: { user_id: newUserId } }
-        );
-
-        res.json({
-            success: true,
-            message: "ID del usuario actualizado en las órdenes correctamente",
-            result,
-        });
-    } catch (error) {
-        console.error("Error al actualizar el ID del usuario en las órdenes:", error);
-        res.status(500).json({
-            success: false,
-            message: "Error interno del servidor",
-        });
-    }
-});
-
 // Endpoint para obtener las órdenes de un usuario específico
 app.get('/api/user/orders', fetchUser, async (req, res) => {
     try {
@@ -732,3 +697,93 @@ app.listen(port, (error) => {
         console.log("Error : " + error)
     }
 })
+
+// Ruta para actualizar una orden
+app.put('/orders/:orderId', async (req, res) => {
+    try {
+        const { orderId } = req.params;
+        const updatedOrder = await Order.findByIdAndUpdate(orderId, req.body, { new: true });
+        if (!updatedOrder) {
+            return res.status(404).send('Order not found');
+        }
+        res.send(updatedOrder);
+    } catch (error) {
+        res.status(500).send(error);
+    }
+});
+
+// Ruta para crear una orden de prueba
+app.post('/api/orders', async (req, res) => {
+    try {
+        const newOrder = new Order(req.body);
+        await newOrder.save();
+        res.status(201).send(newOrder);
+    } catch (error) {
+        res.status(500).send(error);
+    }
+});
+
+app.put('/api/orders/:orderId', async (req, res) => {
+    try {
+        const { orderId } = req.params;
+        const updatedOrder = await Order.findByIdAndUpdate(orderId, req.body, { new: true });
+        if (!updatedOrder) {
+            return res.status(404).send('Order not found');
+        }
+        res.send(updatedOrder);
+    } catch (error) {
+        res.status(500).send(error);
+    }
+});
+
+exports.updateOrder = async (req, res) => {
+    try {
+        const order = await Order.findByIdAndUpdate(req.params.id, req.body, { new: true });
+        if (!order) {
+            return res.status(404).send({ message: 'Order not found' });
+        }
+        res.send(order);
+    } catch (error) {
+        res.status(500).send({ message: 'Error updating order', error });
+    }
+};
+
+module.exports = router;
+// Endpoint para crear una orden
+app.post('/api/orders', async (req, res) => {
+    try {
+        const { user_id, products, total, customer_info } = req.body;
+
+        if (!user_id || !products || !total || !customer_info) {
+            return res.status(400).json({
+                success: false,
+                message: "Los campos user_id, products, total y customer_info son obligatorios.",
+            });
+        }
+
+        const newOrder = new Order({
+            user_id,
+            products,
+            total,
+            customer_info,
+            status: 'Pending',
+        });
+
+        await newOrder.save();
+        res.status(201).send(newOrder);
+    } catch (error) {
+        console.error('Error al crear la orden:', error);
+        res.status(500).send({ message: 'Error al crear la orden', error });
+    }
+});
+
+// Endpoint para crear un pago
+app.post('/api/payments', async (req, res) => {
+    try {
+        const newPayment = new Payment(req.body);
+        await newPayment.save();
+        res.status(201).send(newPayment);
+    } catch (error) {
+        res.status(500).send({ message: 'Error al crear el pago', error });
+    }
+});
