@@ -12,6 +12,7 @@ const getDefaultCart = () => {
 };
 
 const ShopContextProvider = ({ children }) => {
+    const [userId, setUserId] = useState(null);
     const [all_product, setAll_Product] = useState([]);
     const [cartItems, setCartItems] = useState(getDefaultCart());
 
@@ -25,6 +26,11 @@ const ShopContextProvider = ({ children }) => {
 
     // Cargar el carrito del usuario si está autenticado
     useEffect(() => {
+        const storedUserId = localStorage.getItem("userId");
+        if (storedUserId) {
+            setUserId(storedUserId);
+        }
+
         if (localStorage.getItem("auth-token")) {
             fetch("http://localhost:4000/getcart", {
                 method: "POST",
@@ -40,6 +46,25 @@ const ShopContextProvider = ({ children }) => {
                 .catch((error) => console.error("Error fetching cart:", error));
         }
     }, []);
+
+    // Función para manejar el login
+    const handleLogin = async (email, password) => {
+        const response = await fetch("http://localhost:4000/login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email, password })
+        });
+
+        const data = await response.json();
+        if (data.success) {
+            localStorage.setItem("auth-token", data.token);
+            localStorage.setItem("userId", data.userId); // Guardar userId en localStorage
+            setUserId(data.userId); // Establecer userId en el estado
+            window.location.reload(); // Refrescar para aplicar cambios
+        } else {
+            alert(data.errors);
+        }
+    };
 
     // Agregar un producto al carrito
     const addToCart = (itemId) => {
@@ -170,6 +195,7 @@ const ShopContextProvider = ({ children }) => {
 
     // Proveer las funciones al contexto
     const contextValue = {
+        userId,
         getTotalCartItems,
         getTotalCartAmount,
         all_product,
@@ -177,6 +203,7 @@ const ShopContextProvider = ({ children }) => {
         addToCart,
         removeFromCart,
         updateCart,
+        handleLogin, // Añadir handleLogin al contexto
     };
 
     return <ShopContext.Provider value={contextValue}>{children}</ShopContext.Provider>;

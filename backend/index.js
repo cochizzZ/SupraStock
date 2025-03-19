@@ -225,7 +225,7 @@ const OrderSchema = new mongoose.Schema({
     date: { type: Date, default: Date.now },
     available: { type: Boolean, default: true },
 
-    // Información del cliente ( Para realizar las ordenes seria como el add)
+    // Información del cliente
     customer_info: {
         name: { type: String, required: true },
         address: { type: String, required: true },
@@ -235,7 +235,7 @@ const OrderSchema = new mongoose.Schema({
         phone: { type: String, required: true },
     },
 
-    // Relación con el pago (se guarda el ID del pago)
+    // Información del pago
     payment_info: {
         method: { type: String, required: true }, // "PSE", "Tarjeta de crédito"
         status: { type: String, enum: ["Pending", "Paid", "Failed"], default: "Pending" },
@@ -703,16 +703,6 @@ app.get('/api/user/orders', fetchUser, async (req, res) => {
     }
 });
 
-// Iniciar el servidor
-app.listen(port, (error) => {
-    if (!error) {
-        console.log("Server Running on Port" + port)
-    }
-    else {
-        console.log("Error : " + error)
-    }
-})
-
 // Ruta para actualizar una orden
 app.put('/orders/:orderId', async (req, res) => {
     try {
@@ -767,12 +757,12 @@ module.exports = router;
 // Endpoint para crear una orden
 app.post('/api/orders', async (req, res) => {
     try {
-        const { user_id, products, total, customer_info } = req.body;
+        const { user_id, products, total, customer_info, payment_info } = req.body;
 
-        if (!user_id || !products || !total || !customer_info) {
+        if (!user_id || !products || !total || !customer_info || !payment_info) {
             return res.status(400).json({
                 success: false,
-                message: "Los campos user_id, products, total y customer_info son obligatorios.",
+                message: "Los campos user_id, products, total, customer_info y payment_info son obligatorios.",
             });
         }
 
@@ -781,6 +771,7 @@ app.post('/api/orders', async (req, res) => {
             products,
             total,
             customer_info,
+            payment_info,
             status: 'Pending',
         });
 
@@ -802,3 +793,13 @@ app.post('/api/payments', async (req, res) => {
         res.status(500).send({ message: 'Error al crear el pago', error });
     }
 });
+
+// Iniciar el servidor
+app.listen(port, (error) => {
+    if (!error) {
+        console.log("Server Running on Port" + port)
+    }
+    else {
+        console.log("Error : " + error)
+    }
+})

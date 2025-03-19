@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import './CSS/LoginSignup.css';
+import { ShopContext } from '../Context/ShopContext';
 
 const LoginSignup = () => {
+  const { handleLogin } = useContext(ShopContext);
   const [state, setState] = useState("Iniciar Sesión");
   const [formData, setFormData] = useState({
     name: "",
@@ -63,6 +65,11 @@ const LoginSignup = () => {
     } else {
       alert(responseData.errors);
     }
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    handleLogin(formData.email, formData.password);
   };
 
   return (
