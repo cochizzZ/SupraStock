@@ -238,9 +238,10 @@ const OrderSchema = new mongoose.Schema({
     // Relación con el pago (se guarda el ID del pago)
     payment_info: {
         method: { type: String, required: true }, // "PSE", "Tarjeta de crédito"
-        status: {type: String,enum: ["Pending", "Paid", "Failed"],default: "Pending"},
+        status: { type: String, enum: ["Pending", "Paid", "Failed"], default: "Pending" },
         transaction_id: { type: String } // Se asigna solo si el pago es exitoso
-    }});
+    }
+});
 
 const Order = mongoose.model("Order", OrderSchema);
 module.exports = Order;
@@ -286,15 +287,28 @@ app.post('/signup', async (req, res) => {
 // Modificación en el endpoint de login
 app.post('/login', async (req, res) => {
     let user = await Users.findOne({ email: req.body.email });
+
     if (user) {
         const passCompare = await bcrypt.compare(req.body.password, user.password);
         if (passCompare) {
             const data = { user: { id: user.id } };
             const token = jwt.sign(data, 'secret_ecom');
+
             if (user.role === 'admin') {
-                return res.json({ success: true, token, role: 'admin', username: user.name });
+                return res.json({
+                    success: true,
+                    token,
+                    userId: user.id, // ← Enviar el userId al frontend
+                    role: 'admin',
+                    username: user.name
+                });
             } else {
-                return res.json({ success: true, token, username: user.name });
+                return res.json({
+                    success: true,
+                    token,
+                    userId: user.id, // ← Enviar el userId al frontend
+                    username: user.name
+                });
             }
         } else {
             return res.json({ success: false, errors: "Contraseña incorrecta" });
@@ -303,6 +317,7 @@ app.post('/login', async (req, res) => {
         return res.json({ success: false, errors: "ID de correo electrónico incorrecto" });
     }
 });
+
 
 //creación de un punto final para los datos de newcollection
 app.get('/newcollections', async (req, res) => {
