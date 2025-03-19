@@ -12,6 +12,7 @@ const fs = require("fs");
 const bcrypt = require("bcryptjs");
 const bodyParser = require('body-parser');
 const userRoutes = require('./routes/users');
+
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -22,6 +23,10 @@ app.use('/api/users', userRoutes);
 mongoose.connect("mongodb+srv://JuanRM:JuanTDP10@stp.jlm2k.mongodb.net/suprastock", {
     useNewUrlParser: true,
     useUnifiedTopology: true,
+}).then(() => {
+    console.log('Conectado a la base de datos');
+}).catch((error) => {
+    console.error('Error al conectar a la base de datos:', error);
 });
 
 // Creacion de API
@@ -213,41 +218,42 @@ const Users = mongoose.model('Users', new mongoose.Schema({
     },
 }));
 
-// Esquema para la creación de órdenes
-const Order = mongoose.model("Order", new mongoose.Schema({
-    user_id: {
-        type: String,
-        required: true,
-    },
+//creación de schema para el modelo de ordenes
+const OrderSchema = new mongoose.Schema({
+    user_id: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
     products: [
         {
-            product_id: {
-                type: String,
-                required: true,
-            },
-            quantity: {
-                type: Number,
-                required: true,
-            },
-            price: {
-                type: Number,
-                required: true,
-            },
+            product_id: { type: mongoose.Schema.Types.ObjectId, ref: "Product", required: true },
+            quantity: { type: Number, required: true },
+            price: { type: Number, required: true },
         },
     ],
-    total: {
-        type: Number,
-        required: true,
+    total: { type: Number, required: true },
+    status: { type: String, enum: ["Pending", "Processing", "Shipped", "Completed", "Cancelled"], default: "Pending" },
+    date: { type: Date, default: Date.now },
+    available: { type: Boolean, default: true },
+
+    // Información del cliente
+    customer_info: {
+        name: { type: String, required: true },
+        address: { type: String, required: true },
+        city: { type: String, required: true },
+        postal_code: { type: String, required: true },
+        email: { type: String, required: true },
+        phone: { type: String, required: true },
     },
-    status: {
-        type: String,
-        default: 'Pending',
-    },
-    date: {
-        type: Date,
-        default: Date.now,
-    },
-}));
+
+    // Información del pago
+    payment_info: {
+        method: { type: String, required: true }, // "PSE", "Tarjeta de crédito"
+        status: { type: String, enum: ["Pending", "Paid", "Failed"], default: "Pending" },
+        transaction_id: { type: String } // Se asigna solo si el pago es exitoso
+    }
+});
+
+const Order = mongoose.model("Order", OrderSchema);
+module.exports = Order;
+
 
 // Modificación en el endpoint de registro (signup)
 app.post('/signup', async (req, res) => {
@@ -289,15 +295,28 @@ app.post('/signup', async (req, res) => {
 // Modificación en el endpoint de login
 app.post('/login', async (req, res) => {
     let user = await Users.findOne({ email: req.body.email });
+
     if (user) {
         const passCompare = await bcrypt.compare(req.body.password, user.password);
         if (passCompare) {
             const data = { user: { id: user.id } };
             const token = jwt.sign(data, 'secret_ecom');
+
             if (user.role === 'admin') {
-                return res.json({ success: true, token, role: 'admin', username: user.name });
+                return res.json({
+                    success: true,
+                    token,
+                    userId: user.id, // ← Enviar el userId al frontend
+                    role: 'admin',
+                    username: user.name
+                });
             } else {
-                return res.json({ success: true, token, username: user.name });
+                return res.json({
+                    success: true,
+                    token,
+                    userId: user.id, // ← Enviar el userId al frontend
+                    username: user.name
+                });
             }
         } else {
             return res.json({ success: false, errors: "Contraseña incorrecta" });
@@ -306,6 +325,7 @@ app.post('/login', async (req, res) => {
         return res.json({ success: false, errors: "ID de correo electrónico incorrecto" });
     }
 });
+
 
 //creación de un punto final para los datos de newcollection
 app.get('/newcollections', async (req, res) => {
@@ -408,7 +428,20 @@ app.post('/removefromcart', fetchUser, async (req, res) => {
 app.post('/getcart', fetchUser, async (req, res) => {
     console.log("Obtener Carrito");
     let userData = await Users.findOne({ _id: req.user.id });
-    res.json(userData.cartData);
+
+    // Obtener todos los productos disponibles
+    let allProducts = await Product.find({});
+    let validProductIds = new Set(allProducts.map(product => product.id));
+
+    // Filtrar productos eliminados del carrito
+    let validCartData = {};
+    for (let itemId in userData.cartData) {
+        if (validProductIds.has(Number(itemId))) {
+            validCartData[itemId] = userData.cartData[itemId];
+        }
+    }
+
+    res.json(validCartData);
 })
 
 // Endpoint para verificar si el usuario es administrador
@@ -456,12 +489,12 @@ app.post('/updateProfile', fetchUser, async (req, res) => {
 // Endpoint para agregar nuevas órdenes
 app.post('/addorder', async (req, res) => {
     try {
-        const { user_id, products, total, status } = req.body;
+        const { user_id, products, total, customer_info } = req.body;
 
-        if (!user_id || !products || !total) {
+        if (!user_id || !products || !total || !customer_info) {
             return res.status(400).json({
                 success: false,
-                message: "Los campos user_id, products y total son obligatorios.",
+                message: "Los campos user_id, products, total y customer_info son obligatorios.",
             });
         }
 
@@ -469,7 +502,8 @@ app.post('/addorder', async (req, res) => {
             user_id,
             products,
             total,
-            status: status || 'Pending',
+            customer_info,
+            status: 'Pending',
         });
 
         await order.save();
@@ -495,20 +529,6 @@ app.get('/api/orders', async (req, res) => {
         res.json(orders);
     } catch (error) {
         res.status(500).send(error);
-    }
-});
-
-// Endpoint para obtener todas las órdenes
-app.get('/api/sales', async (req, res) => {
-    try {
-        const orders = await Order.find({});
-        res.json(orders);
-    } catch (error) {
-        console.error('Error fetching orders:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Error interno del servidor',
-        });
     }
 });
 
@@ -680,37 +700,6 @@ app.get('/api/products/:productId', async (req, res) => {
     }
 });
 
-// Endpoint para actualizar el ID del usuario en las órdenes
-app.post('/api/update-user-id-in-orders', async (req, res) => {
-    const { oldUserId, newUserId } = req.body;
-
-    if (!oldUserId || !newUserId) {
-        return res.status(400).json({
-            success: false,
-            message: "Los campos oldUserId y newUserId son obligatorios.",
-        });
-    }
-
-    try {
-        const result = await Order.updateMany(
-            { user_id: oldUserId },
-            { $set: { user_id: newUserId } }
-        );
-
-        res.json({
-            success: true,
-            message: "ID del usuario actualizado en las órdenes correctamente",
-            result,
-        });
-    } catch (error) {
-        console.error("Error al actualizar el ID del usuario en las órdenes:", error);
-        res.status(500).json({
-            success: false,
-            message: "Error interno del servidor",
-        });
-    }
-});
-
 // Endpoint para obtener las órdenes de un usuario específico
 app.get('/api/user/orders', fetchUser, async (req, res) => {
     try {
@@ -722,6 +711,97 @@ app.get('/api/user/orders', fetchUser, async (req, res) => {
             success: false,
             message: 'Error interno del servidor',
         });
+    }
+});
+
+// Ruta para actualizar una orden
+app.put('/orders/:orderId', async (req, res) => {
+    try {
+        const { orderId } = req.params;
+        const updatedOrder = await Order.findByIdAndUpdate(orderId, req.body, { new: true });
+        if (!updatedOrder) {
+            return res.status(404).send('Order not found');
+        }
+        res.send(updatedOrder);
+    } catch (error) {
+        res.status(500).send(error);
+    }
+});
+
+// Ruta para crear una orden de prueba
+app.post('/api/orders', async (req, res) => {
+    try {
+        const newOrder = new Order(req.body);
+        await newOrder.save();
+        res.status(201).send(newOrder);
+    } catch (error) {
+        res.status(500).send(error);
+    }
+});
+
+app.put('/api/orders/:orderId', async (req, res) => {
+    try {
+        const { orderId } = req.params;
+        const updatedOrder = await Order.findByIdAndUpdate(orderId, req.body, { new: true });
+        if (!updatedOrder) {
+            return res.status(404).send('Order not found');
+        }
+        res.send(updatedOrder);
+    } catch (error) {
+        res.status(500).send(error);
+    }
+});
+
+exports.updateOrder = async (req, res) => {
+    try {
+        const order = await Order.findByIdAndUpdate(req.params.id, req.body, { new: true });
+        if (!order) {
+            return res.status(404).send({ message: 'Order not found' });
+        }
+        res.send(order);
+    } catch (error) {
+        res.status(500).send({ message: 'Error updating order', error });
+    }
+};
+
+module.exports = router;
+// Endpoint para crear una orden
+app.post('/api/orders', async (req, res) => {
+    try {
+        const { user_id, products, total, customer_info, payment_info } = req.body;
+
+        if (!user_id || !products || !total || !customer_info || !payment_info) {
+            return res.status(400).json({
+                success: false,
+                message: "Los campos user_id, products, total, customer_info y payment_info son obligatorios.",
+            });
+        }
+
+        const newOrder = new Order({
+            user_id,
+            products,
+            total,
+            customer_info,
+            payment_info,
+            status: 'Pending',
+        });
+
+        await newOrder.save();
+        res.status(201).send(newOrder);
+    } catch (error) {
+        console.error('Error al crear la orden:', error);
+        res.status(500).send({ message: 'Error al crear la orden', error });
+    }
+});
+
+// Endpoint para crear un pago
+app.post('/api/payments', async (req, res) => {
+    try {
+        const newPayment = new Payment(req.body);
+        await newPayment.save();
+        res.status(201).send(newPayment);
+    } catch (error) {
+        res.status(500).send({ message: 'Error al crear el pago', error });
     }
 });
 
