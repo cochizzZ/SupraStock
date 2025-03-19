@@ -2,14 +2,35 @@ import React, { useContext } from 'react';
 import './Cartitems.css';
 import { ShopContext } from '../../Context/ShopContext';
 import remove_icon from '../Assets/cart_cross_icon.png';
+import { useNavigate } from 'react-router-dom';
 
 const Cartitems = () => {
-    const { getTotalCartAmount, all_product, cartItems, removeFromCart, updateCart } = useContext(ShopContext);
+    const { getTotalCartAmount, all_product, cartItems, removeFromCart, updateCart, userId } = useContext(ShopContext);
+    const navigate = useNavigate();
 
     const updateCartQuantity = (itemId, newQuantity) => {
         if (newQuantity >= 1) {
             updateCart(itemId, newQuantity);
         }
+    };
+
+    const handleProceedToCheckout = () => {
+        const selectedProducts = all_product.filter(product => cartItems[product.id] > 0).map(product => ({
+            productId: product.id,
+            quantity: cartItems[product.id]
+        }));
+
+        const orderData = {
+            userId,
+            products: selectedProducts,
+            totalAmount: getTotalCartAmount()
+        };
+
+        // Almacenar la información de la orden en el almacenamiento local
+        localStorage.setItem('orderData', JSON.stringify(orderData));
+
+        // Redirigir a la página de creación de la orden
+        navigate('/order');
     };
 
     return (
@@ -66,7 +87,7 @@ const Cartitems = () => {
                             <h3>${getTotalCartAmount()}</h3>
                         </div>
                     </div>
-                    <button>Proceder al pago</button>
+                    <button onClick={handleProceedToCheckout}>Proceder al pago</button>
                 </div>
                 <div className="cartitems-promocode">
                     <p>If you have a promo code, enter it here</p>
