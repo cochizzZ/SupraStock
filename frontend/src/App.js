@@ -16,6 +16,7 @@ import Cartitems from './Components/Cartitems/Cartitems';
 import ShopContextProvider from './Context/ShopContext';
 import OrderForm from './Components/OrderForm/OrderForm';
 import LoginSignup from './Pages/LoginSignup';
+import AboutUs from './Pages/AboutUs';
 
 const App = () => {
     return (
@@ -25,6 +26,7 @@ const App = () => {
                 <Routes>
                     <Route path='/' element={<Shop />} />
                     <Route path="/login" element={<LoginSignup />} />
+                    <Route path='/about' element={<AboutUs />} />
                     <Route path="/profile" element={<UserProfile />} />
                     <Route path="/orders" element={<UserOrders />} />
                     <Route path='/mens' element={<ShopCategory banner={men_banner} category="men" />} />
