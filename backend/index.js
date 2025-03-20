@@ -285,7 +285,7 @@ app.post('/signup', async (req, res) => {
 
         const data = { user: { id: user.id } };
         const token = jwt.sign(data, 'secret_ecom');
-        res.json({ success: true, token, username: user.name });
+        res.json({ success: true, token, username: user.name, userId: user.id });
     } catch (error) {
         console.error("Error al registrar usuario:", error);
         res.status(500).json({ success: false, message: "Error interno del servidor" });
@@ -295,18 +295,19 @@ app.post('/signup', async (req, res) => {
 // Modificación en el endpoint de login
 app.post('/login', async (req, res) => {
     let user = await Users.findOne({ email: req.body.email });
-
+    console.log("User:", user);
     if (user) {
         const passCompare = await bcrypt.compare(req.body.password, user.password);
         if (passCompare) {
-            const data = { user: { id: user.id } };
+            const data = { user: { id: user._id } };
             const token = jwt.sign(data, 'secret_ecom');
-
+            console.log("_id:", user._id);
+            console.log("data:", data.user.id);
             if (user.role === 'admin') {
                 return res.json({
                     success: true,
                     token,
-                    userId: user.id, // ← Enviar el userId al frontend
+                    userId: user._id, // ← Enviar el userId al frontend
                     role: 'admin',
                     username: user.name
                 });
@@ -314,7 +315,7 @@ app.post('/login', async (req, res) => {
                 return res.json({
                     success: true,
                     token,
-                    userId: user.id, // ← Enviar el userId al frontend
+                    userId: user._id, // ← Enviar el userId al frontend
                     username: user.name
                 });
             }
@@ -330,7 +331,6 @@ app.post('/login', async (req, res) => {
 //creación de un punto final para los datos de newcollection
 app.get('/newcollections', async (req, res) => {
     let products = await Product.find({});
-    console.log("products: " + products)
     let newcollection = products.slice(0).slice(-8);
     console.log("newcollection: " + newcollection);
     console.log("NewCollection Fetched");
@@ -525,9 +525,19 @@ app.post('/addorder', async (req, res) => {
 // Endpoint para obtener todas las órdenes
 app.get('/api/orders', async (req, res) => {
     try {
-        const orders = await Order.find();
+        const orders = await Order.find()
+            .populate({
+                path: 'products.product_id',
+                select: 'name image', // Selecciona los campos necesarios
+            })
+            .populate({
+                path: 'user_id',
+                select: 'name email', // Opcional: incluir datos del usuario
+            });
+
         res.json(orders);
     } catch (error) {
+        console.error('Error fetching orders:', error);
         res.status(500).send(error);
     }
 });
@@ -728,16 +738,6 @@ app.put('/orders/:orderId', async (req, res) => {
     }
 });
 
-// Ruta para crear una orden de prueba
-app.post('/api/orders', async (req, res) => {
-    try {
-        const newOrder = new Order(req.body);
-        await newOrder.save();
-        res.status(201).send(newOrder);
-    } catch (error) {
-        res.status(500).send(error);
-    }
-});
 
 app.put('/api/orders/:orderId', async (req, res) => {
     try {
@@ -766,9 +766,11 @@ exports.updateOrder = async (req, res) => {
 
 module.exports = router;
 // Endpoint para crear una orden
+// Endpoint para crear una orden
 app.post('/api/orders', async (req, res) => {
     try {
         const { user_id, products, total, customer_info, payment_info } = req.body;
+        console.log("Orden recibida:", req.body);
 
         if (!user_id || !products || !total || !customer_info || !payment_info) {
             return res.status(400).json({
@@ -777,15 +779,47 @@ app.post('/api/orders', async (req, res) => {
             });
         }
 
+        // Validar y convertir los product_id a ObjectId
+        const productIds = products.map(p => p.product_id);
+        const existingProducts = await Product.find({ id: { $in: productIds } });
+
+        if (existingProducts.length !== productIds.length) {
+            return res.status(400).json({
+                success: false,
+                message: "Uno o más productos no existen en la base de datos.",
+            });
+        }
+
+        // Mapear los productos con sus ObjectIds
+        const productIdMap = existingProducts.reduce((map, product) => {
+            map[product.id] = product._id;
+            return map;
+        }, {});
+
+        const updatedProducts = products.map(p => ({
+            product_id: productIdMap[p.product_id],
+            quantity: p.quantity,
+            price: p.price,
+        }));
+
+        // Ajustar la fecha a la zona horaria de Colombia
+        const now = new Date();
+        const colombiaOffset = -5 * 60; // Colombia está en UTC-5
+        const localOffset = now.getTimezoneOffset();
+        const colombiaTime = new Date(now.getTime() + (colombiaOffset - localOffset) * 60 * 1000);
+
+        // Crear la nueva orden con la fecha ajustada
         const newOrder = new Order({
             user_id,
-            products,
+            products: updatedProducts,
             total,
             customer_info,
             payment_info,
             status: 'Pending',
+            date: colombiaTime // Establecer la fecha ajustada
         });
 
+        console.log("Orden creada:", newOrder);
         await newOrder.save();
         res.status(201).send(newOrder);
     } catch (error) {

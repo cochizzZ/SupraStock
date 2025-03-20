@@ -31,8 +31,7 @@ const Navbar = () => {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('auth-token');
-    localStorage.removeItem('username');
+    localStorage.clear();
     window.location.replace('/');
   };
 
