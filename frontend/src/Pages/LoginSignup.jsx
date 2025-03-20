@@ -35,11 +35,13 @@ const LoginSignup = () => {
     if (responseData.success && responseData.role === 'admin') {
       localStorage.setItem('auth-token', responseData.token);
       localStorage.setItem('username', responseData.username);
+      localStorage.setItem('userId', responseData.userId);
       window.open("http://localhost:5173/?token=" + responseData.token, "_blank");
       window.location.replace("/");
     } else if (responseData.success) {
       localStorage.setItem('auth-token', responseData.token);
       localStorage.setItem('username', responseData.username);
+      localStorage.setItem('userId', responseData.userId);
       window.location.replace("/");
     } else {
       alert(responseData.errors);
@@ -61,6 +63,7 @@ const LoginSignup = () => {
     if (responseData.success) {
       localStorage.setItem('auth-token', responseData.token);
       localStorage.setItem('username', responseData.username);
+      localStorage.setItem('userId', responseData.userId);
       window.location.replace("/");
     } else {
       alert(responseData.errors);

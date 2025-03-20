@@ -63,11 +63,11 @@ const OrderManagement = () => {
   const filteredOrders = orders.filter(
     (order) =>
       order.available === !showDeleted &&
-      order.user_id.toLowerCase().includes(searchUser.toLowerCase()) &&
+      (typeof order.user_id === "string" ? order.user_id.toLowerCase().includes(searchUser.toLowerCase()) : true) &&
       (filterStatus === "" || order.status === filterStatus) &&
       (filterDate === "" ||
         new Date(order.date).toLocaleDateString() ===
-          new Date(filterDate).toLocaleDateString())
+        new Date(filterDate).toLocaleDateString())
   );
 
   const handleViewOrder = (order) => {
@@ -181,11 +181,11 @@ const OrderManagement = () => {
                     </thead>
                     <tbody>
                       {selectedOrder.products.map((product) => (
-                        <tr key={product.product_id}>
+                        <tr key={product.product_id._id}>
                           <td>
-                            <img src={product.image_url} alt={product.name} style={{ width: '50px', height: '50px' }} />
+                            <img src={product.product_id.image} alt={product.product_id.name} style={{ width: '50px', height: '50px' }} />
                           </td>
-                          <td>{product.name}</td>
+                          <td>{product.product_id.name}</td>
                           <td>{product.quantity}</td>
                           <td>${formatPrice(product.price)}</td>
                         </tr>
@@ -199,7 +199,7 @@ const OrderManagement = () => {
                 <h3>Información de Contacto</h3>
                 <div className="label">ID de Usuario:</div>
                 <div className="value">
-                  {showFullUserId ? selectedOrder.user_id : ""}
+                  {showFullUserId ? selectedOrder.user_id._id : ""}
                   <button onClick={toggleUserIdVisibility} className="toggle-id-visibility">
                     {showFullUserId ? "Ocultar ID" : "Visualizar ID"}
                   </button>
