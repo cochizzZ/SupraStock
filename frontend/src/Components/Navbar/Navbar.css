@@ -50,6 +50,15 @@
     transform: rotate(180deg);
 }
 
+.dropdown-icon {
+    font-size: 14px;
+    transition: transform 0.3s ease;
+}
+
+.dropdown-toggle:hover .dropdown-icon {
+    transform: rotate(180deg);
+}
+
 .dropdown-menu {
     position: absolute;
     top: 100%;
@@ -96,10 +105,12 @@
     white-space: nowrap;
     width: 100%;
     padding-right: 130px;
+
 }
 
 .logout-button:hover {
     color: #333;
+    background: none;
 }
 
 .cart-img {
@@ -165,16 +176,17 @@
 }
 
 .nav-login-cart .login-button {
-    width: 120px;
-    height: 40px;
-    font-size: 16px;
+    width: 110px;
+    height: 38px;
+    font-size: 14px;
     font-weight: 500;
-    color: #333; 
-    background: rgba(255, 255, 255, 0.6); 
-    border: 2px solid #ccc; 
+    color: #333;
+    background: rgba(255, 255, 255, 0.6);
+    border: 2px solid #ccc;
     border-radius: 20px;
     cursor: pointer;
     transition: all 0.3s ease;
+    margin-left: 20px;
 }
 
 .nav-login-cart .dropdown-toggle {
