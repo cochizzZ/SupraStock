@@ -25,55 +25,79 @@ const LoginSignup = () => {
     console.log("Login Function Executed", formData);
     let responseData;
     await fetch('http://localhost:4000/login', {
-      method: 'POST',
-      headers: {
-        Accept: 'application/form-data',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(formData),
-    }).then((response) => response.json()).then((data) => responseData = data);
-    if (responseData.success && responseData.role === 'admin') {
-      localStorage.setItem('auth-token', responseData.token);
-      localStorage.setItem('username', responseData.username);
-      localStorage.setItem('userId', responseData.userId);
-      window.open("http://localhost:5173/?token=" + responseData.token, "_blank");
-      window.location.replace("/");
-    } else if (responseData.success) {
-      localStorage.setItem('auth-token', responseData.token);
-      localStorage.setItem('username', responseData.username);
-      localStorage.setItem('userId', responseData.userId);
-      window.location.replace("/");
-    } else {
-      alert(responseData.errors);
-    }
-  };
-
-  const signup = async () => {
-    console.log("SignUp Function Executed", formData);
-    let responseData;
-    await fetch('http://localhost:4000/signup', {
-      method: 'POST',
-      headers: {
-        Accept: 'application/form-data',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(formData),
+        method: 'POST',
+        headers: {
+            Accept: 'application/form-data',
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
     }).then((response) => response.json()).then((data) => responseData = data);
 
     if (responseData.success) {
-      localStorage.setItem('auth-token', responseData.token);
-      localStorage.setItem('username', responseData.username);
-      localStorage.setItem('userId', responseData.userId);
-      window.location.replace("/");
-    } else {
-      alert(responseData.errors);
-    }
-  };
+        localStorage.setItem('auth-token', responseData.token);
+        localStorage.setItem('username', responseData.username);
+        localStorage.setItem('userId', responseData.userId);
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    handleLogin(formData.email, formData.password);
-  };
+        // Restaurar los productos seleccionados en el carrito
+        const selectedProducts = JSON.parse(localStorage.getItem('selectedProducts')) || [];
+        if (selectedProducts.length > 0) {
+            for (const product of selectedProducts) {
+                await fetch("http://localhost:4000/addtocart", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "auth-token": responseData.token
+                    },
+                    body: JSON.stringify({ itemId: product.productId, quantity: product.quantity })
+                });
+            }
+            localStorage.removeItem('selectedProducts'); // Limpiar los productos seleccionados
+        }
+
+        window.location.replace("/");
+    } else {
+        alert(responseData.errors);
+    }
+};
+
+const signup = async () => {
+    console.log("SignUp Function Executed", formData);
+    let responseData;
+    await fetch('http://localhost:4000/signup', {
+        method: 'POST',
+        headers: {
+            Accept: 'application/form-data',
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+    }).then((response) => response.json()).then((data) => responseData = data);
+
+    if (responseData.success) {
+        localStorage.setItem('auth-token', responseData.token);
+        localStorage.setItem('username', responseData.username);
+        localStorage.setItem('userId', responseData.userId);
+
+        // Restaurar los productos seleccionados en el carrito
+        const selectedProducts = JSON.parse(localStorage.getItem('selectedProducts')) || [];
+        if (selectedProducts.length > 0) {
+            for (const product of selectedProducts) {
+                await fetch("http://localhost:4000/addtocart", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "auth-token": responseData.token
+                    },
+                    body: JSON.stringify({ itemId: product.productId, quantity: product.quantity })
+                });
+            }
+            localStorage.removeItem('selectedProducts'); // Limpiar los productos seleccionados
+        }
+
+        window.location.replace("/");
+    } else {
+        alert(responseData.errors);
+    }
+};
 
   return (
     <div className='loginsignup'>

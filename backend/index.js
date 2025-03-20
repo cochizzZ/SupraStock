@@ -367,13 +367,13 @@ const fetchUser = async (req, res, next) => {
 app.post('/addtocart', fetchUser, async (req, res) => {
     try {
         let userData = await Users.findOne({ _id: req.user.id });
-        console.log("Producto agregado al carrito", req.body.itemId);
+        console.log("Producto agregado al carrito", req.body.itemId, req.body.quantity);
 
         if (!userData) {
             return res.status(404).json({ success: false, message: "Usuario no encontrado" });
         }
         let cartData = { ...userData.cartData };
-        cartData[req.body.itemId] = (cartData[req.body.itemId] || 0) + 1;
+        cartData[req.body.itemId] = (cartData[req.body.itemId] || 0) + req.body.quantity;
 
         await Users.findOneAndUpdate(
             { _id: req.user.id },

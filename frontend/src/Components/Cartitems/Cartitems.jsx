@@ -15,20 +15,34 @@ const Cartitems = () => {
     };
 
     const handleProceedToCheckout = () => {
+        if (!userId) {
+            // Guardar los productos seleccionados en el almacenamiento local
+            const selectedProducts = all_product.filter(product => cartItems[product.id] > 0).map(product => ({
+                productId: product.id,
+                quantity: cartItems[product.id]
+            }));
+            localStorage.setItem('selectedProducts', JSON.stringify(selectedProducts));
+    
+            // Redirigir al usuario a la página de registro/login
+            navigate('/login');
+            return;
+        }
+    
+        // Si el usuario está logueado, proceder al formulario de orden
         const selectedProducts = all_product.filter(product => cartItems[product.id] > 0).map(product => ({
             productId: product.id,
             quantity: cartItems[product.id]
         }));
-
+    
         const orderData = {
             userId,
             products: selectedProducts,
             totalAmount: getTotalCartAmount()
         };
-
+    
         // Almacenar la información de la orden en el almacenamiento local
         localStorage.setItem('orderData', JSON.stringify(orderData));
-
+    
         // Redirigir a la página de creación de la orden
         navigate('/order');
     };
