@@ -235,7 +235,6 @@ const OrderSchema = new mongoose.Schema({
 
     // Información del cliente
     customer_info: {
-        name: { type: String, required: true },
         address: { type: String, required: true },
         city: { type: String, required: true },
         postal_code: { type: String, required: true },
@@ -532,7 +531,7 @@ app.get('/api/orders', async (req, res) => {
             })
             .populate({
                 path: 'user_id',
-                select: 'name email', // Opcional: incluir datos del usuario
+                select: 'name email', // Incluye el nombre y el email del usuario
             });
 
         res.json(orders);
@@ -765,7 +764,6 @@ exports.updateOrder = async (req, res) => {
 };
 
 module.exports = router;
-// Endpoint para crear una orden
 // Endpoint para crear una orden
 app.post('/api/orders', async (req, res) => {
     try {

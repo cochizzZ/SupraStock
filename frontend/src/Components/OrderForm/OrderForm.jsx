@@ -5,8 +5,8 @@ import { ShopContext } from '../../Context/ShopContext';
 
 const OrderForm = () => {
     const { userId, cartItems, all_product, getTotalCartAmount } = useContext(ShopContext);
+    const [userName, setUserName] = useState(''); // Nuevo estado para el nombre del usuario
     const [formData, setFormData] = useState({
-        fullName: '',
         email: '',
         phone: '',
         address: '',
@@ -14,6 +14,23 @@ const OrderForm = () => {
         postalCode: '',
         paymentMethod: '',
     });
+
+    // Obtener el nombre del usuario desde el backend
+    React.useEffect(() => {
+        const fetchUserName = async () => {
+            try {
+                const response = await axios.get(`http://localhost:4000/api/users/${userId}`);
+                setUserName(response.data.name); // Establecer el nombre del usuario
+                setFormData({ ...formData, email: response.data.email }); // Prellenar el email
+            } catch (error) {
+                console.error('Error fetching user data:', error);
+            }
+        };
+
+        if (userId) {
+            fetchUserName();
+        }
+    }, [userId]);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -24,21 +41,12 @@ const OrderForm = () => {
         e.preventDefault();
         if (window.confirm('¿Estás seguro de que deseas confirmar la compra?')) {
             console.log('Order submitted:', formData);
-            alert('Orden confirmada. ¡Gracias por tu compra!');
-
-            // Verificar que userId no sea undefined
-            if (!userId) {
-                console.error('Error: userId is undefined');
-                return;
-            }
-
-            console.log('userId:', userId); // Verificar el valor de userId
 
             // Obtener los productos seleccionados del carrito
             const selectedProducts = all_product.filter(product => cartItems[product.id] > 0).map(product => ({
                 product_id: product.id,
                 quantity: cartItems[product.id],
-                price: product.new_price
+                price: product.new_price,
             }));
 
             // Crear la orden con los datos del pago incluidos
@@ -47,7 +55,6 @@ const OrderForm = () => {
                 products: selectedProducts,
                 total: getTotalCartAmount(),
                 customer_info: {
-                    name: formData.fullName,
                     address: formData.address,
                     city: formData.city,
                     postal_code: formData.postalCode,
@@ -58,7 +65,7 @@ const OrderForm = () => {
                     method: formData.paymentMethod,
                     status: 'Pending',
                     transaction_id: '1234567890', // Simulación de un ID de transacción
-                }
+                },
             };
 
             console.log('Order data:', orderData);
@@ -72,7 +79,7 @@ const OrderForm = () => {
             } catch (error) {
                 console.error('Error creating order:', error);
                 if (error.response) {
-                    console.error('Error response:', error.response.data); // Agregar este log para ver el error detallado
+                    console.error('Error response:', error.response.data);
                 }
             }
         }
@@ -83,8 +90,8 @@ const OrderForm = () => {
             <h1>Formulario de Orden de Compra</h1>
             <form onSubmit={handleSubmit}>
                 <label>
-                    Nombres y Apellidos:
-                    <input type="text" name="fullName" value={formData.fullName} onChange={handleChange} required />
+                    Nombre del Usuario:
+                    <input type="text" value={userName} disabled /> {/* Mostrar el nombre del usuario */}
                 </label>
                 <label>
                     Email:
