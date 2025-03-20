@@ -179,43 +179,18 @@ app.get('/allproducts', async (req, res) => {
 //creación de schema para el modelo de usuario
 
 const Users = mongoose.model('Users', new mongoose.Schema({
-    name: {
-        type: String,
-        required: true,
-    },
-    email: {
-        type: String,
-        unique: true,
-        required: true,
-    },
-    password: {
-        type: String,
-        required: true,
-    },
-    photo: {
-        type: String,
-    },
-    address: {
-        type: String,
-    },
-    phone: {
-        type: String,
-    },
-    wishlist: {
-        type: Array,
-        default: [],
-    },
-    cartData: {
-        type: Object,
-    },
-    date: {
-        type: Date,
-        default: Date.now,
-    },
-    role: {
-        type: String,
-        default: 'user',
-    },
+    name: {type: String,required: true,},
+    email: {type: String,unique: true,required: true,},
+    password: {type: String,required: true,},
+    photo: {type: String,},
+    address: {type: String,},
+    city: { type: String, required: true },
+    postal_code: { type: String, required: true },
+    phone: {type: String,},
+    wishlist: {type: Array,default: [],},
+    cartData: {type: Object,},
+    date: {type: Date,default: Date.now,},
+    role: {type: String,default: 'user',},
 }));
 
 //creación de schema para el modelo de ordenes
@@ -232,15 +207,6 @@ const OrderSchema = new mongoose.Schema({
     status: { type: String, enum: ["Pending", "Processing", "Shipped", "Completed", "Cancelled"], default: "Pending" },
     date: { type: Date, default: Date.now },
     available: { type: Boolean, default: true },
-
-    // Información del cliente
-    customer_info: {
-        address: { type: String, required: true },
-        city: { type: String, required: true },
-        postal_code: { type: String, required: true },
-        email: { type: String, required: true },
-        phone: { type: String, required: true },
-    },
 
     // Información del pago
     payment_info: {
@@ -476,8 +442,12 @@ app.get('/user', fetchUser, async (req, res) => {
 // Endpoint para actualizar el perfil del usuario
 app.post('/updateProfile', fetchUser, async (req, res) => {
     try {
-        const { name, photo, address, phone, email } = req.body;
-        const user = await Users.findByIdAndUpdate(req.user.id, { name, photo, address, phone, email }, { new: true });
+        const { name, email, phone, address, city, postal_code } = req.body;
+        const user = await Users.findByIdAndUpdate(
+            req.user.id,
+            { name, email, phone, address, city, postal_code },
+            { new: true }
+        );
         res.json({ success: true, user });
     } catch (error) {
         console.error("Error updating user profile:", error);
