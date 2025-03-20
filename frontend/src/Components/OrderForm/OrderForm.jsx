@@ -109,9 +109,9 @@ const OrderForm = () => {
                     <input type="text" name="address" value={formData.address} onChange={handleChange} /> {/* Permitir editar la dirección */}
                 </label>
                 <label>
-                    Ciudad:
+                    Area Metropolitana:
                     <select name="city" value={formData.city} onChange={handleChange}>
-                        <option value="">Seleccione una ciudad</option>
+                        <option value="">Seleccione un Municipio</option>
                         <option value="Medellín">Medellín</option>
                         <option value="Envigado">Envigado</option>
                         <option value="Itagüí">Itagüí</option>
