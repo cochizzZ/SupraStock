@@ -203,6 +203,9 @@ const OrderSchema = new mongoose.Schema({
             price: { type: Number, required: true },
         },
     ],
+    address: { type: String, required: true },
+    city: { type: String, required: true },
+    postal_code: { type: String, required: true },
     total: { type: Number, required: true },
     status: { type: String, enum: ["Pending", "Processing", "Shipped", "Completed", "Cancelled"], default: "Pending" },
     date: { type: Date, default: Date.now },
@@ -737,13 +740,13 @@ module.exports = router;
 // Endpoint para crear una orden
 app.post('/api/orders', async (req, res) => {
     try {
-        const { user_id, products, total, customer_info, payment_info } = req.body;
+        const { user_id, products, total, address, city, postal_code, payment_info } = req.body;
         console.log("Orden recibida:", req.body);
 
-        if (!user_id || !products || !total || !customer_info || !payment_info) {
+        if (!user_id || !products || !total || !address || !city || !postal_code || !payment_info) {
             return res.status(400).json({
                 success: false,
-                message: "Los campos user_id, products, total, customer_info y payment_info son obligatorios.",
+                message: "Los campos user_id, products, total, address, city, postal_code y payment_info son obligatorios.",
             });
         }
 
@@ -781,7 +784,9 @@ app.post('/api/orders', async (req, res) => {
             user_id,
             products: updatedProducts,
             total,
-            customer_info,
+            address,
+            city,
+            postal_code,
             payment_info,
             status: 'Pending',
             date: colombiaTime // Establecer la fecha ajustada

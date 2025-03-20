@@ -1,34 +1,40 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import axios from 'axios';
 import './OrderForm.css';
 import { ShopContext } from '../../Context/ShopContext';
 
 const OrderForm = () => {
     const { userId, cartItems, all_product, getTotalCartAmount } = useContext(ShopContext);
-    const [userName, setUserName] = useState(''); // Nuevo estado para el nombre del usuario
-    const [formData, setFormData] = useState({
+    const [userData, setUserData] = useState({
+        name: '',
         email: '',
         phone: '',
         address: '',
         city: '',
-        postalCode: '',
+        postal_code: '',
+    });
+    const [formData, setFormData] = useState({
         paymentMethod: '',
+        address: '',
+        city: '',
+        postal_code: '',
     });
 
-    // Obtener el nombre del usuario desde el backend
-    React.useEffect(() => {
-        const fetchUserName = async () => {
+    // Obtener la información del usuario desde el backend
+    useEffect(() => {
+        const fetchUserData = async () => {
             try {
                 const response = await axios.get(`http://localhost:4000/api/users/${userId}`);
-                setUserName(response.data.name); // Establecer el nombre del usuario
-                setFormData({ ...formData, email: response.data.email }); // Prellenar el email
+                const { name, email, phone, address, city, postal_code } = response.data;
+                setUserData({ name, email, phone, address, city, postal_code });
+                setFormData({ ...formData, address, city, postal_code });
             } catch (error) {
                 console.error('Error fetching user data:', error);
             }
         };
 
         if (userId) {
-            fetchUserName();
+            fetchUserData();
         }
     }, [userId]);
 
@@ -54,13 +60,9 @@ const OrderForm = () => {
                 user_id: userId,
                 products: selectedProducts,
                 total: getTotalCartAmount(),
-                customer_info: {
-                    address: formData.address,
-                    city: formData.city,
-                    postal_code: formData.postalCode,
-                    email: formData.email,
-                    phone: formData.phone,
-                },
+                address: formData.address,
+                city: formData.city,
+                postal_code: formData.postal_code,
                 payment_info: {
                     method: formData.paymentMethod,
                     status: 'Pending',
@@ -89,25 +91,26 @@ const OrderForm = () => {
         <div className="order-form">
             <h1>Formulario de Orden de Compra</h1>
             <form onSubmit={handleSubmit}>
+                {/* Mostrar información del usuario */}
                 <label>
                     Nombre del Usuario:
-                    <input type="text" value={userName} disabled /> {/* Mostrar el nombre del usuario */}
+                    <input type="text" value={userData.name} disabled /> {/* Mostrar el nombre del usuario */}
                 </label>
                 <label>
                     Email:
-                    <input type="email" name="email" value={formData.email} onChange={handleChange} required />
+                    <input type="email" value={userData.email} disabled /> {/* Mostrar el email del usuario */}
                 </label>
                 <label>
                     Número de Celular:
-                    <input type="tel" name="phone" value={formData.phone} onChange={handleChange} required />
+                    <input type="tel" name="phone" value={userData.phone} disabled /> {/* Mostrar el teléfono */}
                 </label>
                 <label>
                     Dirección:
-                    <input type="text" name="address" value={formData.address} onChange={handleChange} required />
+                    <input type="text" name="address" value={formData.address} onChange={handleChange} /> {/* Permitir editar la dirección */}
                 </label>
                 <label>
                     Ciudad:
-                    <select name="city" value={formData.city} onChange={handleChange} required>
+                    <select name="city" value={formData.city} onChange={handleChange}>
                         <option value="">Seleccione una ciudad</option>
                         <option value="Medellín">Medellín</option>
                         <option value="Envigado">Envigado</option>
@@ -120,8 +123,10 @@ const OrderForm = () => {
                 </label>
                 <label>
                     Código Postal:
-                    <input type="text" name="postalCode" value={formData.postalCode} onChange={handleChange} required />
+                    <input type="text" name="postal_code" value={formData.postal_code} onChange={handleChange} /> {/* Permitir editar el código postal */}
                 </label>
+
+                {/* Selección del método de pago */}
                 <label>
                     Método de Pago:
                     <select name="paymentMethod" value={formData.paymentMethod} onChange={handleChange} required>
