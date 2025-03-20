@@ -118,13 +118,13 @@ const OrderManagement = () => {
             <div className="order-info">
               <div className="label">Orden #{index + 1}</div>
               <div className="label">Nombre:</div>
-              <div className="value">{order.customer_info?.name || "N/A"}</div>
+              <div className="value">{order.user_id?.name || "N/A"}</div>
 
               <div className="label">Correo:</div>
-              <div className="value">{order.customer_info?.email || "N/A"}</div>
+              <div className="value">{order.user_id?.email || "N/A"}</div>
 
               <div className="label">Teléfono:</div>
-              <div className="value">{order.customer_info?.phone || "N/A"}</div>
+              <div className="value">{order.user_id?.phone || "N/A"}</div>
 
               <div className="label">Fecha:</div>
               <div className="value">{new Date(order.date).toLocaleString()}</div>
@@ -205,21 +205,21 @@ const OrderManagement = () => {
                   </button>
                 </div>
                 <div className="label">Nombre:</div>
-                <div className="value">{selectedOrder.customer_info?.name || "N/A"}</div>
+                <div className="value">{selectedOrder.user_id?.name || "N/A"}</div>
                 <div className="label">Correo:</div>
-                <div className="value">{selectedOrder.customer_info?.email || "N/A"}</div>
+                <div className="value">{selectedOrder.user_id?.email || "N/A"}</div>
                 <div className="label">Teléfono:</div>
-                <div className="value">{selectedOrder.customer_info?.phone || "N/A"}</div>
+                <div className="value">{selectedOrder.user_id?.phone || "N/A"}</div>
               </div>
 
               <div className="section">
                 <h3>Información de Envío</h3>
                 <div className="label">Ciudad:</div>
-                <div className="value">{selectedOrder.customer_info?.city || "N/A"}</div>
+                <div className="value">{selectedOrder.city || "N/A"}</div>
                 <div className="label">Dirección:</div>
-                <div className="value">{selectedOrder.customer_info?.address || "N/A"}</div>
+                <div className="value">{selectedOrder.address || "N/A"}</div>
                 <div className="label">Código Postal:</div>
-                <div className="value">{selectedOrder.customer_info?.postal_code || "N/A"}</div>
+                <div className="value">{selectedOrder.postal_code || "N/A"}</div>
               </div>
             </div>
             <button className="close-modal" onClick={closeModal}>Cerrar</button>

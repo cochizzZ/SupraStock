@@ -504,7 +504,7 @@ app.get('/api/orders', async (req, res) => {
             })
             .populate({
                 path: 'user_id',
-                select: 'name email', // Incluye el nombre y el email del usuario
+                select: 'name email phone', // Incluye el nombre y el email del usuario
             });
 
         res.json(orders);
