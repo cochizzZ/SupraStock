@@ -60,15 +60,17 @@ const OrderManagement = () => {
     setShowDeleted((prev) => !prev);
   };
 
-  const filteredOrders = orders.filter(
-    (order) =>
-      order.available === !showDeleted &&
-      (typeof order.user_id === "string" ? order.user_id.toLowerCase().includes(searchUser.toLowerCase()) : true) &&
-      (filterStatus === "" || order.status === filterStatus) &&
-      (filterDate === "" ||
-        new Date(order.date).toLocaleDateString() ===
-        new Date(filterDate).toLocaleDateString())
-  );
+  const filteredOrders = orders
+    .filter(
+      (order) =>
+        order.available === !showDeleted &&
+        (typeof order.user_id === "string" ? order.user_id.toLowerCase().includes(searchUser.toLowerCase()) : true) &&
+        (filterStatus === "" || order.status === filterStatus) &&
+        (filterDate === "" ||
+          new Date(order.date).toLocaleDateString() ===
+          new Date(filterDate).toLocaleDateString())
+    )
+    .sort((a, b) => new Date(b.date) - new Date(a.date)); // Ordenar por fecha descendente
 
   const handleViewOrder = (order) => {
     setSelectedOrder(order);
@@ -116,7 +118,8 @@ const OrderManagement = () => {
         {filteredOrders.map((order, index) => (
           <div key={order._id} className="order-card">
             <div className="order-info">
-              <div className="label">Orden #{index + 1}</div>
+              {/* El número de la orden se calcula en base a su posición en la lista */}
+              <div className="label">Orden #{filteredOrders.length - index}</div>
               <div className="label">Nombre:</div>
               <div className="value">{order.user_id?.name || "N/A"}</div>
 
