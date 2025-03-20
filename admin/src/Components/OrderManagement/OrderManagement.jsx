@@ -6,7 +6,6 @@ const OrderManagement = () => {
   const [orders, setOrders] = useState([]);
   const [searchUser, setSearchUser] = useState("");
   const [filterStatus, setFilterStatus] = useState("");
-  const [filterDate, setFilterDate] = useState("");
   const [showDeleted, setShowDeleted] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [showFullOrderId, setShowFullOrderId] = useState(false);
@@ -61,16 +60,13 @@ const OrderManagement = () => {
   };
 
   const filteredOrders = orders
-    .filter(
-      (order) =>
-        order.available === !showDeleted &&
-        (typeof order.user_id === "string" ? order.user_id.toLowerCase().includes(searchUser.toLowerCase()) : true) &&
-        (filterStatus === "" || order.status === filterStatus) &&
-        (filterDate === "" ||
-          new Date(order.date).toLocaleDateString() ===
-          new Date(filterDate).toLocaleDateString())
-    )
-    .sort((a, b) => new Date(b.date) - new Date(a.date)); // Ordenar por fecha descendente
+  .filter(
+    (order) =>
+      order.available === !showDeleted &&
+      (searchUser === "" || order.user_id?.name?.toLowerCase().includes(searchUser.toLowerCase())) && // Filtrar por nombre del usuario
+      (filterStatus === "" || order.status === filterStatus) // Filtrar por estado
+  )
+  .sort((a, b) => new Date(b.date) - new Date(a.date)); // Ordenar por fecha descendente
 
   const handleViewOrder = (order) => {
     setSelectedOrder(order);
@@ -101,11 +97,7 @@ const OrderManagement = () => {
           value={searchUser}
           onChange={(e) => setSearchUser(e.target.value)}
         />
-        <input
-          type="date"
-          value={filterDate}
-          onChange={(e) => setFilterDate(e.target.value)}
-        />
+
         <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)}>
           <option value="">Todos los Estados</option>
           <option value="Pending">Pendiente</option>

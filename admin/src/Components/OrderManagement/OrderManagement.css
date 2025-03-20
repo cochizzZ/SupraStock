@@ -46,12 +46,15 @@
   box-shadow: 0 2px 4px rgba(76, 175, 80, 0.3);
 }
 
+/* Contenedor de la lista de órdenes */
 .order-management-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 20px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); /* Mostrar 3 tarjetas por fila */
+  gap: 20px; /* Espaciado entre las tarjetas */
+  justify-content: center;
 }
 
+/* Tarjetas individuales */
 .order-card {
   background: white;
   padding: 15px;
@@ -59,7 +62,7 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   border: 1px solid #ddd;
   box-sizing: border-box;
-  }
+}
 
 .order-info {
   margin-bottom: 10px;
