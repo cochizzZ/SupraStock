@@ -7,6 +7,27 @@ import { ShopContext } from '../../Context/ShopContext';
 const ProductDisplay = (props) => {
     const {product} = props;
     const {addToCart} = useContext(ShopContext);
+
+    // MMapear categorías del inglés al español
+    const categoryMap = {
+        men: 'Hombre',
+        women: 'Mujer',
+        kid: 'Niños'
+    };
+
+    // Asignar etiquetas según la categoría
+    const tagsMap = {
+        men: ['Deportivo', 'Casual'],
+        women: ['Elegante', 'Moderno'],
+        kid: ['Divertido', 'Colorido']
+    };
+
+    // Obtener la categoría traducida
+    const categoryDisplay = categoryMap[product.category] || product.category;
+
+    // Obtener las etiquetas para la categoría
+    const tagsDisplay = tagsMap[product.category] || [];
+
   return (
     <div className='productdisplay'>
       <div className="productdisplay-left">
@@ -42,8 +63,8 @@ const ProductDisplay = (props) => {
             </div>
         </div>
         <button onClick={()=>{addToCart(product.id)}}>AGREGAR AL CARRITO</button>
-        <p className='productdisplay-right-category'><span>Categoria: </span>Mujer, conjunto</p> 
-        <p className='productdisplay-right-category'><span>Tags: </span>Moderno, novedoso</p>
+        <p className='productdisplay-right-category'><span>Categoria: </span>{categoryDisplay}</p> 
+        <p className='productdisplay-right-category'><span>Tags: </span>{tagsDisplay.join(', ')}</p>
       </div>
     </div>
   )
