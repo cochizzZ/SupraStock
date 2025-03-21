@@ -1,5 +1,5 @@
 import React from "react";
-import { jsPDF } from "jspdf"; // Importar jsPDF
+import { jsPDF } from "jspdf";
 import "./OrderManagement.css";
 
 const OrderDetailsModal = ({
@@ -18,55 +18,94 @@ const OrderDetailsModal = ({
     const doc = new jsPDF();
 
     // Título del documento
-    doc.setFontSize(18);
-    doc.text("Detalles de la Orden", 10, 10);
+    doc.setFontSize(22);
+    doc.setFont("helvetica", "bold");
+    doc.text("Detalles de la Orden", 105, 20, { align: "center" });
+
+    // Dibujar una línea debajo del título
+    doc.setDrawColor(0);
+    doc.setLineWidth(0.5);
+    doc.line(10, 25, 200, 25);
 
     // Información de la venta
-    doc.setFontSize(14);
-    doc.text("Información de la Venta", 10, 20);
-    doc.text(`ID de Orden: ${selectedOrder._id}`, 10, 30);
-    doc.text(`Estado: ${translateStatus(selectedOrder.status)}`, 10, 40);
-    doc.text(`Fecha: ${new Date(selectedOrder.date).toLocaleString()}`, 10, 50);
-    doc.text(`Total: $${formatPrice(selectedOrder.total)}`, 10, 60);
+    doc.setFontSize(16);
+    doc.setFont("helvetica", "bold");
+    doc.text("Información de la Venta", 10, 35);
+
+    doc.setFontSize(12);
+    doc.setFont("helvetica", "normal");
+    doc.text(`ID de Orden: ${selectedOrder._id}`, 10, 45);
+    doc.text(`Estado: ${translateStatus(selectedOrder.status)}`, 10, 55);
+    doc.text(`Fecha: ${new Date(selectedOrder.date).toLocaleString()}`, 10, 65);
+    doc.text(`Total: $${formatPrice(selectedOrder.total)}`, 10, 75);
+
+    // Dibujar un rectángulo alrededor de la información de la venta
+    doc.setDrawColor(0);
+    doc.setLineWidth(0.5);
+    doc.rect(8, 30, 194, 50);
 
     // Productos
-    doc.text("Productos:", 10, 70);
-    let y = 80;
+    doc.setFontSize(16);
+    doc.setFont("helvetica", "bold");
+    doc.text("Productos", 10, 90);
+
+    let y = 100;
     selectedOrder.products.forEach((product, index) => {
-      doc.text(
-        `${index + 1}. ${product.product_id.name} - Cantidad: ${
-          product.quantity
-        } - Precio: $${formatPrice(product.price)}`,
-        10,
-        y
-      );
-      y += 10;
+      doc.setFontSize(12);
+      doc.setFont("helvetica", "bold");
+      doc.text(`${index + 1}. ${product.product_id.name}`, 10, y);
+
+      doc.setFont("helvetica", "normal");
+      doc.text(`Cantidad: ${product.quantity}`, 10, y + 10);
+      doc.text(`Precio: $${formatPrice(product.price)}`, 10, y + 20);
+
+      // Dibujar una línea separadora entre productos
+      doc.setDrawColor(200);
+      doc.setLineWidth(0.3);
+      doc.line(10, y + 25, 200, y + 25);
+
+      y += 35; // Incrementar la posición vertical
     });
 
     // Información de contacto
-    y += 10;
+    doc.setFontSize(16);
+    doc.setFont("helvetica", "bold");
     doc.text("Información de Contacto", 10, y);
+
     y += 10;
+    doc.setFontSize(12);
+    doc.setFont("helvetica", "normal");
     doc.text(`Nombre: ${selectedOrder.user_id?.name || "N/A"}`, 10, y);
-    y += 10;
-    doc.text(`Correo: ${selectedOrder.user_id?.email || "N/A"}`, 10, y);
-    y += 10;
-    doc.text(`Teléfono: ${selectedOrder.user_id?.phone || "N/A"}`, 10, y);
+    doc.text(`Correo: ${selectedOrder.user_id?.email || "N/A"}`, 10, y + 10);
+    doc.text(`Teléfono: ${selectedOrder.user_id?.phone || "N/A"}`, 10, y + 20);
+
+    // Dibujar un rectángulo alrededor de la información de contacto
+    doc.setDrawColor(0);
+    doc.setLineWidth(0.5);
+    doc.rect(8, y - 5, 194, 35);
+
+    y += 40;
 
     // Información de envío
-    y += 20;
+    doc.setFontSize(16);
+    doc.setFont("helvetica", "bold");
     doc.text("Información de Envío", 10, y);
-    y += 10;
-    doc.text(`Ciudad: ${selectedOrder.city || "N/A"}`, 10, y);
-    y += 10;
-    doc.text(`Dirección: ${selectedOrder.address || "N/A"}`, 10, y);
-    y += 10;
-    doc.text(`Código Postal: ${selectedOrder.postal_code || "N/A"}`, 10, y);
 
-    // Convertir el PDF a Blob
+    y += 10;
+    doc.setFontSize(12);
+    doc.setFont("helvetica", "normal");
+    doc.text(`Ciudad: ${selectedOrder.city || "N/A"}`, 10, y);
+    doc.text(`Dirección: ${selectedOrder.address || "N/A"}`, 10, y + 10);
+    doc.text(`Código Postal: ${selectedOrder.postal_code || "N/A"}`, 10, y + 20);
+
+    // Dibujar un rectángulo alrededor de la información de envío
+    doc.setDrawColor(0);
+    doc.setLineWidth(0.5);
+    doc.rect(8, y - 5, 194, 35);
+
+    // Guardar el PDF
     const pdfBlob = doc.output("blob");
 
-    // Usar el File System Access API para permitir al usuario guardar el archivo
     try {
       const fileHandle = await window.showSaveFilePicker({
         suggestedName: `Orden_${selectedOrder._id}.pdf`,
