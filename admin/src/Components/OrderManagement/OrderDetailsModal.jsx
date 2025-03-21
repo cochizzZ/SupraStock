@@ -1,7 +1,8 @@
 import React from "react";
 import { jsPDF } from "jspdf";
-import * as XLSX from "xlsx"; // Importar la biblioteca xlsx
 import "./OrderManagement.css";
+import ExcelJS from "exceljs"; // Importar exceljs
+import { saveAs } from "file-saver"; // Para guardar el archivo
 
 const OrderDetailsModal = ({
   selectedOrder,
@@ -127,50 +128,116 @@ const OrderDetailsModal = ({
     }
   };
 
-  const generateExcel = () => {
-    // Datos para el Excel
-    const data = [
-      ["ID de Orden", selectedOrder._id],
-      ["Estado", translateStatus(selectedOrder.status)],
-      ["Fecha", new Date(selectedOrder.date).toLocaleString()],
-      ["Total", `$${formatPrice(selectedOrder.total)}`],
-      [],
-      ["Productos"],
-      ["#", "Nombre", "Cantidad", "Precio"],
-      ...selectedOrder.products.map((product, index) => [
+  const generateExcel = async () => {
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet("Detalles de la Orden");
+
+    // Estilo para los encabezados
+    const headerStyle = {
+      font: { bold: true, color: { argb: "FFFFFFFF" } },
+      fill: { type: "pattern", pattern: "solid", fgColor: { argb: "FF4CAF50" } }, // Verde
+      alignment: { horizontal: "center", vertical: "middle" },
+      border: {
+        top: { style: "thin" },
+        left: { style: "thin" },
+        bottom: { style: "thin" },
+        right: { style: "thin" },
+      },
+    };
+
+    // Estilo para las celdas normales
+    const cellStyle = {
+      border: {
+        top: { style: "thin" },
+        left: { style: "thin" },
+        bottom: { style: "thin" },
+        right: { style: "thin" },
+      },
+    };
+
+    // Información de la orden
+    worksheet.addRow(["ID de Orden", selectedOrder._id]);
+    worksheet.addRow(["Estado", translateStatus(selectedOrder.status)]);
+    worksheet.addRow(["Fecha", new Date(selectedOrder.date).toLocaleString()]);
+    worksheet.addRow(["Total", `$${formatPrice(selectedOrder.total)}`]);
+    worksheet.addRow([]); // Espacio vacío
+
+    // Encabezado de productos
+    worksheet.addRow(["Productos"]);
+    const productHeader = worksheet.addRow(["#", "Nombre", "Cantidad", "Precio"]);
+    productHeader.eachCell((cell) => {
+      cell.style = headerStyle;
+    });
+
+    // Agregar productos
+    selectedOrder.products.forEach((product, index) => {
+      const row = worksheet.addRow([
         index + 1,
         product.product_id.name,
         product.quantity,
         `$${formatPrice(product.price)}`,
-      ]),
-      [],
-      ["Información de Contacto"],
+      ]);
+      row.eachCell((cell) => {
+        cell.style = cellStyle;
+      });
+    });
+
+    worksheet.addRow([]); // Espacio vacío
+
+    // Información de contacto
+    worksheet.addRow(["Información de Contacto"]);
+    const contactHeader = worksheet.addRow(["Campo", "Valor"]);
+    contactHeader.eachCell((cell) => {
+      cell.style = headerStyle;
+    });
+
+    const contactData = [
       ["Nombre", selectedOrder.user_id?.name || "N/A"],
       ["Correo", selectedOrder.user_id?.email || "N/A"],
       ["Teléfono", selectedOrder.user_id?.phone || "N/A"],
-      [],
-      ["Información de Envío"],
+    ];
+
+    contactData.forEach((contact) => {
+      const row = worksheet.addRow(contact);
+      row.eachCell((cell) => {
+        cell.style = cellStyle;
+      });
+    });
+
+    worksheet.addRow([]); // Espacio vacío
+
+    // Información de envío
+    worksheet.addRow(["Información de Envío"]);
+    const shippingHeader = worksheet.addRow(["Campo", "Valor"]);
+    shippingHeader.eachCell((cell) => {
+      cell.style = headerStyle;
+    });
+
+    const shippingData = [
       ["Ciudad", selectedOrder.city || "N/A"],
       ["Dirección", selectedOrder.address || "N/A"],
       ["Código Postal", selectedOrder.postal_code || "N/A"],
     ];
 
-    // Crear hoja de trabajo
-    const worksheet = XLSX.utils.aoa_to_sheet(data);
+    shippingData.forEach((shipping) => {
+      const row = worksheet.addRow(shipping);
+      row.eachCell((cell) => {
+        cell.style = cellStyle;
+      });
+    });
 
     // Ajustar el ancho de las columnas
-    const columnWidths = [
-      { wch: 20 }, // Columna 1
-      { wch: 50 }, // Columna 2
+    worksheet.columns = [
+      { width: 10 }, // Columna 1
+      { width: 30 }, // Columna 2
+      { width: 15 }, // Columna 3
+      { width: 20 }, // Columna 4
     ];
-    worksheet["!cols"] = columnWidths;
 
-    // Crear libro de trabajo
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Detalles de la Orden");
-
-    // Descargar el archivo Excel
-    XLSX.writeFile(workbook, `Orden_${selectedOrder._id}.xlsx`);
+    // Guardar el archivo
+    const buffer = await workbook.xlsx.writeBuffer();
+    const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+    saveAs(blob, `Orden_${selectedOrder._id}.xlsx`);
   };
 
   return (
