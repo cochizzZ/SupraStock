@@ -128,32 +128,48 @@ const OrderDetailsModal = ({
   };
 
   const generateExcel = () => {
+    // Datos para el Excel
     const data = [
-      {
-        "ID de Orden": selectedOrder._id,
-        Estado: translateStatus(selectedOrder.status),
-        Fecha: new Date(selectedOrder.date).toLocaleString(),
-        Total: `$${formatPrice(selectedOrder.total)}`,
-      },
-      ...selectedOrder.products.map((product, index) => ({
-        Producto: `${index + 1}. ${product.product_id.name}`,
-        Cantidad: product.quantity,
-        Precio: `$${formatPrice(product.price)}`,
-      })),
-      {
-        Nombre: selectedOrder.user_id?.name || "N/A",
-        Correo: selectedOrder.user_id?.email || "N/A",
-        Teléfono: selectedOrder.user_id?.phone || "N/A",
-        Ciudad: selectedOrder.city || "N/A",
-        Dirección: selectedOrder.address || "N/A",
-        "Código Postal": selectedOrder.postal_code || "N/A",
-      },
+      ["ID de Orden", selectedOrder._id],
+      ["Estado", translateStatus(selectedOrder.status)],
+      ["Fecha", new Date(selectedOrder.date).toLocaleString()],
+      ["Total", `$${formatPrice(selectedOrder.total)}`],
+      [],
+      ["Productos"],
+      ["#", "Nombre", "Cantidad", "Precio"],
+      ...selectedOrder.products.map((product, index) => [
+        index + 1,
+        product.product_id.name,
+        product.quantity,
+        `$${formatPrice(product.price)}`,
+      ]),
+      [],
+      ["Información de Contacto"],
+      ["Nombre", selectedOrder.user_id?.name || "N/A"],
+      ["Correo", selectedOrder.user_id?.email || "N/A"],
+      ["Teléfono", selectedOrder.user_id?.phone || "N/A"],
+      [],
+      ["Información de Envío"],
+      ["Ciudad", selectedOrder.city || "N/A"],
+      ["Dirección", selectedOrder.address || "N/A"],
+      ["Código Postal", selectedOrder.postal_code || "N/A"],
     ];
 
-    const worksheet = XLSX.utils.json_to_sheet(data);
+    // Crear hoja de trabajo
+    const worksheet = XLSX.utils.aoa_to_sheet(data);
+
+    // Ajustar el ancho de las columnas
+    const columnWidths = [
+      { wch: 20 }, // Columna 1
+      { wch: 50 }, // Columna 2
+    ];
+    worksheet["!cols"] = columnWidths;
+
+    // Crear libro de trabajo
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Detalles de la Orden");
 
+    // Descargar el archivo Excel
     XLSX.writeFile(workbook, `Orden_${selectedOrder._id}.xlsx`);
   };
 
