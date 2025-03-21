@@ -14,7 +14,7 @@ const OrderDetailsModal = ({
 }) => {
   if (!selectedOrder) return null;
 
-  const generatePDF = () => {
+  const generatePDF = async () => {
     const doc = new jsPDF();
 
     // Título del documento
@@ -63,8 +63,28 @@ const OrderDetailsModal = ({
     y += 10;
     doc.text(`Código Postal: ${selectedOrder.postal_code || "N/A"}`, 10, y);
 
-    // Guardar el PDF
-    doc.save(`Orden_${selectedOrder._id}.pdf`);
+    // Convertir el PDF a Blob
+    const pdfBlob = doc.output("blob");
+
+    // Usar el File System Access API para permitir al usuario guardar el archivo
+    try {
+      const fileHandle = await window.showSaveFilePicker({
+        suggestedName: `Orden_${selectedOrder._id}.pdf`,
+        types: [
+          {
+            description: "Archivos PDF",
+            accept: { "application/pdf": [".pdf"] },
+          },
+        ],
+      });
+
+      const writableStream = await fileHandle.createWritable();
+      await writableStream.write(pdfBlob);
+      await writableStream.close();
+      console.log("Archivo guardado correctamente.");
+    } catch (error) {
+      console.error("Error al guardar el archivo:", error);
+    }
   };
 
   return (
