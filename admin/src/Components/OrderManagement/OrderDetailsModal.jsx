@@ -158,12 +158,14 @@ const OrderDetailsModal = ({
             <div className="value">{selectedOrder.postal_code || "N/A"}</div>
           </div>
         </div>
-        <button className="generate-pdf" onClick={generatePDF}>
-          Generar PDF
-        </button>
-        <button className="close-modal" onClick={closeModal}>
-          Cerrar
-        </button>
+        <div className="modal-buttons">
+          <button className="generate-pdf" onClick={generatePDF}>
+            Generar PDF
+          </button>
+          <button className="close-modal" onClick={closeModal}>
+            Cerrar
+          </button>
+        </div>
       </div>
     </div>
   );

@@ -178,6 +178,31 @@
   font-size: 14px;
 }
 
+/* Estilo para el botón de generar PDF */
+.generate-pdf {
+  background-color: #ff4d4d; /* Rojo */
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+  margin-right: 10px; /* Espaciado entre los botones */
+  transition: background-color 0.3s ease;
+}
+
+.generate-pdf:hover {
+  background-color: #e60000; /* Rojo más oscuro al pasar el mouse */
+}
+
+/* Estilo para alinear los botones */
+.modal-buttons {
+  display: flex;
+  justify-content: flex-end; /* Alinear los botones al lado derecho */
+  gap: 10px; /* Espaciado entre los botones */
+  margin-top: 20px; /* Espaciado superior */
+}
+
 @media (max-width: 1200px) {
   .order-card {
     width: calc(33.33% - 20px);
