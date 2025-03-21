@@ -1,11 +1,12 @@
 .offers {
-    width: 65%;
+    width: 60%;
     display: flex;
     margin: auto;
-    padding: 0px 140px;
+    padding: 0px 160px;
     margin-bottom: 155px;
     background: linear-gradient(180deg, #fde1ff, #e1ffea22 60%);
     margin-top: 155px; 
+    max-height: 400px;
 }
 
 .offers-left {
@@ -37,16 +38,15 @@
 }
 
 .offers-right img {
-    max-width: 100%; /* Evita que la imagen se desborde */
+    max-width: 450px; /* Evita que la imagen se desborde */
     height: auto;
 }
-
 /* Ajustes para pantallas medianas */
 @media (max-width: 1280px) {
     .offers {
         padding: 0px 80px;
         margin-bottom: 120px;
-        padding-top: 90px;
+        height: 80%;
     }
     .offers-left h1 {
         font-size: 40px;
@@ -72,7 +72,6 @@
     .offers {
         padding: 0px 60px;
         margin-bottom: 80px;
-        height: 40vh;
     }
     .offers-left h1 {
         font-size: 30px;
@@ -137,16 +136,5 @@
         height: 25px;
         font-size: 10px;
         margin-top: 12px;
-    }
-}
-
-@media (min-width: 1600px) {
-    .offers {
-        width: 60%;
-        padding: 0px 160px;
-        height: 45vh;
-    }
-    .offers-right img {
-        max-width: 450px; /* Evita que crezca demasiado */
     }
 }
