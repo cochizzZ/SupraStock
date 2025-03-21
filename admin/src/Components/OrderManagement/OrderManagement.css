@@ -140,13 +140,18 @@
 }
 
 .close-modal {
-  background-color: #007bff;
+  background-color: #6c757d; /* Gris */
   color: white;
   border: none;
-  padding: 10px;
+  padding: 10px 15px;
   border-radius: 5px;
   cursor: pointer;
-  margin-top: 20px;
+  font-size: 14px;
+  transition: background-color 0.3s ease;
+}
+
+.close-modal:hover {
+  background-color: #5a6268; /* Gris más oscuro al pasar el mouse */
 }
 
 .order-details {
@@ -195,7 +200,24 @@
   background-color: #e60000; /* Rojo más oscuro al pasar el mouse */
 }
 
-/* Estilo para alinear los botones */
+/* Estilo para el botón de generar Excel */
+.generate-excel {
+  background-color: #28a745; /* Verde */
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+  margin-right: 10px; /* Espaciado entre los botones */
+  transition: background-color 0.3s ease;
+}
+
+.generate-excel:hover {
+  background-color: #218838; /* Verde más oscuro al pasar el mouse */
+}
+
+/* Alinear los botones en una fila */
 .modal-buttons {
   display: flex;
   justify-content: flex-end; /* Alinear los botones al lado derecho */
