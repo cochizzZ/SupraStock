@@ -12,6 +12,7 @@ const fs = require("fs");
 const bcrypt = require("bcryptjs");
 const bodyParser = require('body-parser');
 const userRoutes = require('./routes/users');
+const { clear } = require("console");
 
 app.use(cors());
 app.use(express.json());
@@ -821,3 +822,25 @@ app.listen(port, (error) => {
         console.log("Error : " + error)
     }
 })
+
+
+app.delete('/clearcart', async (req, res) => {
+    try {
+        console.log("Limpiar carrito:", req.body);
+        let userData = await Users.findOne({ _id
+            : req.body.user_id });
+        let cartData = { ...userData.cartData };
+        for (let itemId in cartData) {
+            cartData[itemId] = 0;
+        }
+        await Users.findOneAndUpdate(
+            { _id: req.body.user_id },
+            { cartData: cartData }
+        );
+        res.json({ success: true, message: "Carrito limpiado" });
+    } catch (error) {
+        console.error("Error al limpiar el carrito:", error);
+        res.status(500).json({ success: false, message: "Error interno del servidor" });
+    }
+}
+);

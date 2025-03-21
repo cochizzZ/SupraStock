@@ -78,6 +78,9 @@ const OrderForm = () => {
 
                 // Limpiar el almacenamiento local después de crear la orden
                 localStorage.removeItem('orderData');
+                const clearCart = await axios.delete(`http://localhost:4000/clearcart/`, { data: { user_id: userId } });
+                console.log('Cart cleared:', clearCart.data);
+                window.location.replace('/');
             } catch (error) {
                 console.error('Error creating order:', error);
                 if (error.response) {
