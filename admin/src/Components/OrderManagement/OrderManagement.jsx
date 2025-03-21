@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import "./OrderManagement.css";
 import OrderDetailsModal from "./OrderDetailsModal";
+import Swal from "sweetalert2";
 
 const OrderManagement = () => {
   const [orders, setOrders] = useState([]);
@@ -42,8 +43,21 @@ const OrderManagement = () => {
     return new Intl.NumberFormat("es-CO").format(price);
   };
 
-  const handleDeleteOrder = async (orderId) => {
-    console.log("Deleting order with ID:", orderId); // Verificar el orderId
+const handleDeleteOrder = async (orderId) => {
+  // Mostrar el cuadro de diálogo de confirmación
+  const result = await Swal.fire({
+    title: "¿Estás seguro?",
+    text: "No podrás revertir esta acción",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonColor: "#3085d6",
+    cancelButtonColor: "#d33",
+    confirmButtonText: "Sí, eliminar",
+    cancelButtonText: "Cancelar",
+  });
+
+  // Si el usuario confirma, proceder con la eliminación
+  if (result.isConfirmed) {
     try {
       await axios.put(`http://localhost:4000/api/orders/${orderId}`, {
         available: false,
@@ -53,10 +67,27 @@ const OrderManagement = () => {
           order._id === orderId ? { ...order, available: false } : order
         )
       );
+
+      // Mostrar mensaje de éxito
+      Swal.fire({
+        title: "Eliminado",
+        text: "La orden ha sido eliminada correctamente.",
+        icon: "success",
+        confirmButtonColor: "#3085d6",
+      });
     } catch (error) {
       console.error("Error al eliminar la orden:", error);
+
+      // Mostrar mensaje de error
+      Swal.fire({
+        title: "Error",
+        text: "No se pudo eliminar la orden.",
+        icon: "error",
+        confirmButtonColor: "#d33",
+      });
     }
-  };
+  }
+};
 
   const toggleShowDeleted = () => {
     setShowDeleted((prev) => !prev);
