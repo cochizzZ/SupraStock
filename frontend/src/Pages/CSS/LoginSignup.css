@@ -12,7 +12,6 @@
 
 .loginsignup-container{
     width: 580px;
-    height: 600px;
     background: white;
     margin: auto;
     padding: 60px 60px;
@@ -43,7 +42,7 @@
 }
 
 .loginsignup-container button{
-    width: 530px !important;
+    width: 530px;
     height: 72px;
     color: white;
     background: #ff4141;
@@ -109,7 +108,7 @@
 }
 @media(max-width:800px){
     .loginsignup-container{
-        padding: 20px 30px;
+        padding-right: 80px;
     }
     .loginsignup-container h1{
         font-size: 24px;
