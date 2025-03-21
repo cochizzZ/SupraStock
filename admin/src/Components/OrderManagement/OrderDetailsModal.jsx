@@ -1,5 +1,6 @@
 import React from "react";
 import { jsPDF } from "jspdf";
+import * as XLSX from "xlsx"; // Importar la biblioteca xlsx
 import "./OrderManagement.css";
 
 const OrderDetailsModal = ({
@@ -126,6 +127,36 @@ const OrderDetailsModal = ({
     }
   };
 
+  const generateExcel = () => {
+    const data = [
+      {
+        "ID de Orden": selectedOrder._id,
+        Estado: translateStatus(selectedOrder.status),
+        Fecha: new Date(selectedOrder.date).toLocaleString(),
+        Total: `$${formatPrice(selectedOrder.total)}`,
+      },
+      ...selectedOrder.products.map((product, index) => ({
+        Producto: `${index + 1}. ${product.product_id.name}`,
+        Cantidad: product.quantity,
+        Precio: `$${formatPrice(product.price)}`,
+      })),
+      {
+        Nombre: selectedOrder.user_id?.name || "N/A",
+        Correo: selectedOrder.user_id?.email || "N/A",
+        Teléfono: selectedOrder.user_id?.phone || "N/A",
+        Ciudad: selectedOrder.city || "N/A",
+        Dirección: selectedOrder.address || "N/A",
+        "Código Postal": selectedOrder.postal_code || "N/A",
+      },
+    ];
+
+    const worksheet = XLSX.utils.json_to_sheet(data);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Detalles de la Orden");
+
+    XLSX.writeFile(workbook, `Orden_${selectedOrder._id}.xlsx`);
+  };
+
   return (
     <div className="modal">
       <div className="modal-content">
@@ -220,6 +251,9 @@ const OrderDetailsModal = ({
         <div className="modal-buttons">
           <button className="generate-pdf" onClick={generatePDF}>
             Generar PDF
+          </button>
+          <button className="generate-excel" onClick={generateExcel}>
+            Generar Excel
           </button>
           <button className="close-modal" onClick={closeModal}>
             Cerrar
