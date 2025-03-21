@@ -26,7 +26,6 @@
 .container-items-info{
   display: flex;
   align-items: center;
-  flex-wrap: wrap;
   justify-content: space-between;
 }
 
@@ -43,7 +42,7 @@
 
 .item-price-new {
   color: #374151;
-  font-size: 18px;
+  font-size: 13px;
   font-weight: 600;
 }
 
@@ -100,7 +99,7 @@
     height: 210px;
   }
   .item-price-old {
-    font-size: 16px;
+    font-size: 12px;
   }
   .item .cart img{
     width: 15px;
