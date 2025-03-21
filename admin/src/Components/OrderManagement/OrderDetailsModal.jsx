@@ -234,10 +234,28 @@ const OrderDetailsModal = ({
       { width: 20 }, // Columna 4
     ];
 
-    // Guardar el archivo
+    // Convertir el archivo Excel a un buffer
     const buffer = await workbook.xlsx.writeBuffer();
-    const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
-    saveAs(blob, `Orden_${selectedOrder._id}.xlsx`);
+
+    // Usar la File System Access API para guardar el archivo
+    try {
+      const fileHandle = await window.showSaveFilePicker({
+        suggestedName: `Orden_${selectedOrder._id}.xlsx`,
+        types: [
+          {
+            description: "Archivos Excel",
+            accept: { "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": [".xlsx"] },
+          },
+        ],
+      });
+
+      const writableStream = await fileHandle.createWritable();
+      await writableStream.write(buffer);
+      await writableStream.close();
+      console.log("Archivo Excel guardado correctamente.");
+    } catch (error) {
+      console.error("Error al guardar el archivo Excel:", error);
+    }
   };
 
   return (
