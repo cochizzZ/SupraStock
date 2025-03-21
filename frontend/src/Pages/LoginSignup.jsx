@@ -37,7 +37,9 @@ const LoginSignup = () => {
         localStorage.setItem('auth-token', responseData.token);
         localStorage.setItem('username', responseData.username);
         localStorage.setItem('userId', responseData.userId);
-
+        if (responseData.role === 'admin'){
+          window.open("http://localhost:5173/?token=" + responseData.token, "_blank");
+        }
         // Restaurar los productos seleccionados en el carrito
         const selectedProducts = JSON.parse(localStorage.getItem('selectedProducts')) || [];
         if (selectedProducts.length > 0) {

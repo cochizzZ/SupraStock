@@ -12,7 +12,8 @@ const App = () => {
 
     if (token) {
       localStorage.setItem('auth-token', token);
-      window.history.replaceState({}, document.title, "/"); // Remove token from URL
+      window.close(); // Close the popup window
+      return;
     }
 
     const authToken = localStorage.getItem('auth-token');
