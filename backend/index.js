@@ -185,11 +185,16 @@ const Users = mongoose.model('Users', new mongoose.Schema({
     password: {type: String,required: true,},
     photo: {type: String,},
     address: {type: String,},
-    city: { type: String, required: true },
-    postal_code: { type: String, required: true },
+    city: { type: String,},
+    postal_code: { type: String,},
     phone: {type: String,},
     wishlist: {type: Array,default: [],},
-    cartData: {type: Object,},
+    cartData: [
+        {
+            product_id: { type: mongoose.Schema.Types.ObjectId, ref: "Product" },
+            quantity: { type: Number, required: true }
+        }
+    ],
     date: {type: Date,default: Date.now,},
     role: {type: String,default: 'user',},
 }));
@@ -226,40 +231,51 @@ module.exports = Order;
 
 // Modificación en el endpoint de registro (signup)
 app.post('/signup', async (req, res) => {
-    let check = await Users.findOne({ email: req.body.email });
-    if (check) {
-        return res.status(400).json({ success: false, errors: "Se ha encontrado un usuario con la misma dirección de correo electrónico" });
-    }
-
-    let cart = {};
-    for (let i = 0; i < 300; i++) {
-        cart[i] = 0;
-    }
-
     try {
-        // Generamos el "sal" para reforzar el hash
+        // Verificar si el correo ya está registrado
+        let check = await Users.findOne({ email: req.body.email });
+        if (check) {
+            return res.status(400).json({
+                success: false,
+                errors: "Se ha encontrado un usuario con la misma dirección de correo electrónico",
+            });
+        }
+
+        // Generar el "salt" y cifrar la contraseña
         const salt = await bcrypt.genSalt(10);
-        // Ciframos la contraseña antes de almacenarla
         const hashedPassword = await bcrypt.hash(req.body.password, salt);
 
+        // Crear el nuevo usuario
         const user = new Users({
             name: req.body.name,
             email: req.body.email,
             password: hashedPassword,
             role: req.body.role || 'user',
-            cartData: cart,
+            cartData: [], // Carrito inicial vacío como un array
         });
 
+        // Guardar el usuario en la base de datos
         await user.save();
 
+        // Generar el token de autenticación
         const data = { user: { id: user.id } };
         const token = jwt.sign(data, 'secret_ecom');
-        res.json({ success: true, token, username: user.name, userId: user.id });
+
+        res.json({
+            success: true,
+            token,
+            username: user.name,
+            userId: user.id,
+        });
     } catch (error) {
         console.error("Error al registrar usuario:", error);
-        res.status(500).json({ success: false, message: "Error interno del servidor" });
+        res.status(500).json({
+            success: false,
+            message: "Error interno del servidor",
+        });
     }
 });
+
 
 // Modificación en el endpoint de login
 app.post('/login', async (req, res) => {
@@ -335,22 +351,41 @@ const fetchUser = async (req, res, next) => {
 //crear punto de conexion para agregar productos en  CarData
 app.post('/addtocart', fetchUser, async (req, res) => {
     try {
-        let userData = await Users.findOne({ _id: req.user.id });
-        console.log("Producto agregado al carrito", req.body.itemId, req.body.quantity);
+        console.log(req.body);
+        const { itemId, quantity } = req.body;
 
-        if (!userData) {
-            return res.status(404).json({ success: false, message: "Usuario no encontrado" });
+        // Validar entrada
+        if (!itemId || !quantity || quantity <= 0) {
+            return res.status(400).json({ success: false, message: "ID del producto y cantidad son obligatorios y deben ser válidos." });
         }
-        let cartData = { ...userData.cartData };
-        cartData[req.body.itemId] = (cartData[req.body.itemId] || 0) + req.body.quantity;
 
-        await Users.findOneAndUpdate(
-            { _id: req.user.id },
-            { cartData: cartData }
-        );
+        // Buscar el ObjectId del producto
+        const product = await Product.findOne({ id: itemId });
+        if (!product) {
+            return res.status(404).json({ success: false, message: "Producto no encontrado." });
+        }
 
-        res.json({ success: true, message: "Producto agregado al carrito" });
+        // Buscar el usuario
+        const user = await Users.findById(req.user.id);
+        if (!user) {
+            return res.status(404).json({ success: false, message: "Usuario no encontrado." });
+        }
 
+        // Verificar si el producto ya está en el carrito
+        const existingCartItem = user.cartData.find(item => item.product_id.equals(product._id));
+
+        if (existingCartItem) {
+            // Si el producto ya está en el carrito, incrementar la cantidad
+            existingCartItem.quantity += quantity;
+        } else {
+            // Si el producto no está en el carrito, agregarlo
+            user.cartData.push({ product_id: product._id, quantity });
+        }
+
+        // Guardar los cambios en el usuario
+        await user.save();
+
+        res.json({ success: true, message: "Producto agregado al carrito", cart: user.cartData });
     } catch (error) {
         console.error("Error al agregar al carrito:", error);
         res.status(500).json({ success: false, message: "Error interno del servidor" });
@@ -360,33 +395,33 @@ app.post('/addtocart', fetchUser, async (req, res) => {
 //crear punto de conexion para eliminar productos en CartData
 app.post('/removefromcart', fetchUser, async (req, res) => {
     try {
-        let userData = await Users.findOne({ _id: req.user.id });
-        console.log("Producto eliminado del carrito", req.body.itemId);
+        const { itemId } = req.body;
 
-        if (!userData) {
-            return res.status(404).json({ success: false, message: "Usuario no encontrado" });
+        if (!itemId) {
+            return res.status(400).json({ success: false, message: "ID del producto es obligatorio." });
         }
 
-        let cartData = { ...userData.cartData };
-
-        if (cartData[req.body.itemId] && cartData[req.body.itemId] > 0) {
-            cartData[req.body.itemId] -= 1;
-
-            if (cartData[req.body.itemId] === 0) {
-                delete cartData[req.body.itemId];
-            }
-        } else {
-            return res.status(400).json({ success: false, message: "El producto no está en el carrito" });
-        }
-
-        await Users.findOneAndUpdate(
-            { _id: req.user.id },
-            { cartData: cartData }
+        // Intentar reducir la cantidad del producto en el carrito
+        const user = await Users.findOneAndUpdate(
+            { _id: req.user.id, "cartData.product_id": itemId }, // Buscar si el producto está en el carrito
+            {
+                $inc: { "cartData.$.quantity": -1 }, // Reducir la cantidad en 1
+            },
+            { new: true } // Retornar el documento actualizado
         );
 
-        console.log("Producto eliminado del carrito:", req.body.itemId);
-        res.json({ success: true, message: "Producto eliminado del carrito" });
+        if (!user) {
+            return res.status(404).json({ success: false, message: "Usuario no encontrado o producto no en carrito" });
+        }
 
+        // Verificar si la cantidad llegó a 0 y eliminar el producto
+        await Users.findOneAndUpdate(
+            { _id: req.user.id },
+            { $pull: { cartData: { product_id: itemId, quantity: { $lte: 0 } } } }, // Eliminar si cantidad <= 0
+            { new: true }
+        );
+
+        res.json({ success: true, message: "Producto eliminado del carrito", cart: user.cartData });
     } catch (error) {
         console.error("Error al eliminar del carrito:", error);
         res.status(500).json({ success: false, message: "Error interno del servidor" });
@@ -395,23 +430,105 @@ app.post('/removefromcart', fetchUser, async (req, res) => {
 
 //Crear Punto de conexion para obtener datos del carrito
 app.post('/getcart', fetchUser, async (req, res) => {
-    console.log("Obtener Carrito");
-    let userData = await Users.findOne({ _id: req.user.id });
+    try {
+        // Obtener el usuario con los productos del carrito ya poblados
+        let user = await Users.findById(req.user.id).populate({
+            path: 'cartData.product_id',
+            select: 'name image new_price'
+        });
 
-    // Obtener todos los productos disponibles
-    let allProducts = await Product.find({});
-    let validProductIds = new Set(allProducts.map(product => product.id));
-
-    // Filtrar productos eliminados del carrito
-    let validCartData = {};
-    for (let itemId in userData.cartData) {
-        if (validProductIds.has(Number(itemId))) {
-            validCartData[itemId] = userData.cartData[itemId];
+        if (!user) {
+            return res.status(404).json({ success: false, message: "Usuario no encontrado" });
         }
-    }
 
-    res.json(validCartData);
-})
+        // Filtrar productos que realmente existen (por si algunos fueron eliminados)
+        let validCartData = user.cartData.filter(item => item.product_id !== null);
+
+        res.json({ success: true, cart: validCartData });
+    } catch (error) {
+        console.error("Error al obtener el carrito:", error);
+        res.status(500).json({ success: false, message: "Error interno del servidor" });
+    }
+});
+
+// Endpoint para limpiar completamente el carrito
+app.delete('/clearcart', fetchUser, async (req, res) => {
+    try {
+        // Buscar al usuario autenticado
+        const user = await Users.findById(req.user.id);
+        if (!user) {
+            return res.status(404).json({ success: false, message: "Usuario no encontrado" });
+        }
+
+        // Si el carrito ya está vacío, evitar una operación innecesaria
+        if (user.cartData.length === 0) {
+            return res.json({ success: true, message: "El carrito ya está vacío" });
+        }
+
+        // Limpiar el carrito
+        user.cartData = [];
+        await user.save();
+
+        res.json({ success: true, message: "Carrito limpiado correctamente" });
+    } catch (error) {
+        console.error("Error al limpiar el carrito:", error);
+        res.status(500).json({ success: false, message: "Error interno del servidor" });
+    }
+});
+
+app.post('/updatecart', fetchUser, async (req, res) => {
+    try {
+        const { itemId, quantity } = req.body;
+
+        // Validar entrada
+        if (!itemId || quantity === undefined || quantity < 0) {
+            return res.status(400).json({
+                success: false,
+                message: "ID del producto y cantidad son obligatorios y deben ser válidos.",
+            });
+        }
+
+        // Buscar el usuario autenticado
+        const user = await Users.findById(req.user.id);
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: "Usuario no encontrado.",
+            });
+        }
+
+        // Verificar si el producto ya está en el carrito
+        const existingCartItem = user.cartData.find(item => item.product_id.toString() === itemId);
+
+        if (existingCartItem) {
+            if (quantity > 0) {
+                // Actualizar la cantidad del producto
+                existingCartItem.quantity = quantity;
+            } else {
+                // Eliminar el producto si la cantidad es 0
+                user.cartData = user.cartData.filter(item => item.product_id.toString() !== itemId);
+            }
+        } else if (quantity > 0) {
+            // Agregar el producto al carrito si no existe y la cantidad es mayor a 0
+            user.cartData.push({ product_id: itemId, quantity });
+        }
+
+        // Guardar los cambios en el usuario
+        await user.save();
+
+        res.json({
+            success: true,
+            message: "Carrito actualizado correctamente.",
+            cart: user.cartData,
+        });
+    } catch (error) {
+        console.error("Error al actualizar el carrito:", error);
+        res.status(500).json({
+            success: false,
+            message: "Error interno del servidor.",
+        });
+    }
+});
 
 // Endpoint para verificar si el usuario es administrador
 app.get('/verifyAdmin', async (req, res) => {
@@ -711,20 +828,6 @@ app.put('/orders/:orderId', async (req, res) => {
     }
 });
 
-
-app.put('/api/orders/:orderId', async (req, res) => {
-    try {
-        const { orderId } = req.params;
-        const updatedOrder = await Order.findByIdAndUpdate(orderId, req.body, { new: true });
-        if (!updatedOrder) {
-            return res.status(404).send('Order not found');
-        }
-        res.send(updatedOrder);
-    } catch (error) {
-        res.status(500).send(error);
-    }
-});
-
 exports.updateOrder = async (req, res) => {
     try {
         const order = await Order.findByIdAndUpdate(req.params.id, req.body, { new: true });
@@ -822,25 +925,3 @@ app.listen(port, (error) => {
         console.log("Error : " + error)
     }
 })
-
-
-app.delete('/clearcart', async (req, res) => {
-    try {
-        console.log("Limpiar carrito:", req.body);
-        let userData = await Users.findOne({ _id
-            : req.body.user_id });
-        let cartData = { ...userData.cartData };
-        for (let itemId in cartData) {
-            cartData[itemId] = 0;
-        }
-        await Users.findOneAndUpdate(
-            { _id: req.body.user_id },
-            { cartData: cartData }
-        );
-        res.json({ success: true, message: "Carrito limpiado" });
-    } catch (error) {
-        console.error("Error al limpiar el carrito:", error);
-        res.status(500).json({ success: false, message: "Error interno del servidor" });
-    }
-}
-);

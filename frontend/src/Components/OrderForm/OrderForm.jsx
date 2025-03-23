@@ -1,5 +1,6 @@
 import React, { useContext, useState, useEffect } from 'react';
 import axios from 'axios';
+import Swal from 'sweetalert2'; // Importar SweetAlert2
 import './OrderForm.css';
 import { ShopContext } from '../../Context/ShopContext';
 
@@ -19,6 +20,7 @@ const OrderForm = () => {
         city: '',
         postal_code: '',
     });
+    const [isProcessing, setIsProcessing] = useState(false); // Estado para controlar el botón
 
     // Obtener la información del usuario desde el backend
     useEffect(() => {
@@ -45,15 +47,34 @@ const OrderForm = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (window.confirm('¿Estás seguro de que deseas confirmar la compra?')) {
-            console.log('Order submitted:', formData);
 
+        // Confirmación de compra
+        const confirm = await Swal.fire({
+            title: "Confirmar compra",
+            text: "¿Estás seguro de que deseas confirmar la compra?",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Sí, confirmar",
+        });
+
+        if (!confirm.isConfirmed) return;
+
+        console.log("Order submitted:", formData);
+
+        // Deshabilitar botón mientras se procesa
+        setIsProcessing(true);
+
+        try {
             // Obtener los productos seleccionados del carrito
-            const selectedProducts = all_product.filter(product => cartItems[product.id] > 0).map(product => ({
-                product_id: product.id,
-                quantity: cartItems[product.id],
-                price: product.new_price,
-            }));
+            const selectedProducts = all_product
+                .filter((product) => cartItems[product.id] > 0)
+                .map((product) => ({
+                    product_id: product.id,
+                    quantity: cartItems[product.id],
+                    price: product.new_price,
+                }));
 
             // Crear la orden con los datos del pago incluidos
             const orderData = {
@@ -65,28 +86,51 @@ const OrderForm = () => {
                 postal_code: formData.postal_code,
                 payment_info: {
                     method: formData.paymentMethod,
-                    status: 'Pending',
-                    transaction_id: '1234567890', // Simulación de un ID de transacción
+                    status: "Pending",
+                    transaction_id: "1234567890", // Simulación de un ID de transacción
                 },
             };
 
-            console.log('Order data:', orderData);
+            console.log("Order data:", orderData);
 
-            try {
-                const orderResponse = await axios.post('http://localhost:4000/api/orders', orderData);
-                console.log('Order created successfully:', orderResponse.data);
+            // Crear la orden en el backend
+            const orderResponse = await axios.post("http://localhost:4000/api/orders", orderData);
+            console.log("Order created successfully:", orderResponse.data);
 
-                // Limpiar el almacenamiento local después de crear la orden
-                localStorage.removeItem('orderData');
-                const clearCart = await axios.delete(`http://localhost:4000/clearcart/`, { data: { user_id: userId } });
-                console.log('Cart cleared:', clearCart.data);
-                window.location.replace('/');
-            } catch (error) {
-                console.error('Error creating order:', error);
-                if (error.response) {
-                    console.error('Error response:', error.response.data);
-                }
+            // Limpiar el carrito después de crear la orden
+            const clearCartResponse = await axios.delete("http://localhost:4000/clearcart", {
+                headers: { "auth-token": localStorage.getItem("auth-token") },
+            });
+
+            console.log("Cart cleared:", clearCartResponse.data);
+
+            // Mostrar mensaje de éxito
+            await Swal.fire({
+                title: "¡Compra realizada!",
+                text: "Tu compra ha sido confirmada con éxito.",
+                icon: "success",
+                confirmButtonColor: "#3085d6",
+                confirmButtonText: "OK",
+            });
+
+            // Redirigir al usuario a la página principal
+            window.location.replace("/");
+        } catch (error) {
+            console.error("Error creating order or clearing cart:", error);
+            if (error.response) {
+                console.error("Error response:", error.response.data);
             }
+
+            // Notificar al usuario en caso de error
+            Swal.fire({
+                title: "Error",
+                text: "Hubo un problema al procesar tu compra. Inténtalo de nuevo.",
+                icon: "error",
+                confirmButtonColor: "#d33",
+                confirmButtonText: "Cerrar",
+            });
+        } finally {
+            setIsProcessing(false); // Habilitar botón nuevamente
         }
     };
 
@@ -97,19 +141,19 @@ const OrderForm = () => {
                 {/* Mostrar información del usuario */}
                 <label>
                     Nombre del Usuario:
-                    <input type="text" value={userData.name} disabled /> {/* Mostrar el nombre del usuario */}
+                    <input type="text" value={userData.name} disabled />
                 </label>
                 <label>
                     Email:
-                    <input type="email" value={userData.email} disabled /> {/* Mostrar el email del usuario */}
+                    <input type="email" value={userData.email} disabled />
                 </label>
                 <label>
                     Número de Celular:
-                    <input type="tel" name="phone" value={userData.phone} disabled /> {/* Mostrar el teléfono */}
+                    <input type="tel" name="phone" value={userData.phone} disabled />
                 </label>
                 <label>
                     Dirección:
-                    <input type="text" name="address" value={formData.address} onChange={handleChange} /> {/* Permitir editar la dirección */}
+                    <input type="text" name="address" value={formData.address} onChange={handleChange} />
                 </label>
                 <label>
                     Area Metropolitana:
@@ -126,7 +170,7 @@ const OrderForm = () => {
                 </label>
                 <label>
                     Código Postal:
-                    <input type="text" name="postal_code" value={formData.postal_code} onChange={handleChange} /> {/* Permitir editar el código postal */}
+                    <input type="text" name="postal_code" value={formData.postal_code} onChange={handleChange} />
                 </label>
 
                 {/* Selección del método de pago */}
@@ -139,7 +183,9 @@ const OrderForm = () => {
                         <option value="PayPal">PayPal</option>
                     </select>
                 </label>
-                <button type="submit">Confirmar Orden</button>
+                <button type="submit" disabled={isProcessing}>
+                    {isProcessing ? "Procesando..." : "Confirmar Orden"}
+                </button>
             </form>
         </div>
     );

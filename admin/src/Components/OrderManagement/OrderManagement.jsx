@@ -59,7 +59,7 @@ const handleDeleteOrder = async (orderId) => {
   // Si el usuario confirma, proceder con la eliminación
   if (result.isConfirmed) {
     try {
-      await axios.put(`http://localhost:4000/api/orders/${orderId}`, {
+      await axios.put(`http://localhost:4000/orders/${orderId}`, {
         available: false,
       });
       setOrders((prevOrders) =>
