@@ -74,6 +74,7 @@ const ListProduct = () => {
         <p>Precio oferta</p>
         <p>Categoria</p>
         <p>Stock</p>
+        <p>Tallas</p> {/* Nuevo campo agregado */}
         <p>Editar</p>
         <p>Eliminar</p>
       </div>
@@ -89,6 +90,11 @@ const ListProduct = () => {
                 <p>${product.new_price}</p>
                 <p>{product.category}</p>
                 <p>{product.stock}</p>
+                <p>
+                  {product.sizes && Object.entries(product.sizes).map(([size, quantity]) => (
+                    <span key={size}>{size}: {quantity} unidades</span>
+                  ))}
+                </p> {/* Mostrar las tallas y cantidades */}
                 <button className="edit-button" onClick={() => handleEdit(product)}>
                   <img className="edit-image" src={lapicito} alt="Editar" />
                 </button>

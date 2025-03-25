@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import "./AddProduct.css";
 import upload_area from "../../assets/upload_area.svg";
+import Swal from "sweetalert2";
 
 const AddProduct = () => {
   const [image, setImage] = useState(null);
@@ -11,8 +12,12 @@ const AddProduct = () => {
     new_price: "",
     old_price: "",
     description: "",
-    stock: "", // Nuevo campo agregado
+    stock: "", // Campo general de stock
+    sizes: {}, // Objeto para almacenar tallas y cantidades
   });
+
+  const [sizeInput, setSizeInput] = useState(""); // Estado para el campo de entrada de tallas
+  const [sizeStockInput, setSizeStockInput] = useState(""); // Estado para el campo de entrada de cantidad de stock por talla
 
   const imageHandler = (e) => {
     setImage(e.target.files[0]);
@@ -22,12 +27,50 @@ const AddProduct = () => {
     setProductDetails({ ...productDetails, [e.target.name]: e.target.value });
   };
 
+  const addSizeHandler = () => {
+    const totalSizeStock = Object.values(productDetails.sizes).reduce((acc, curr) => acc + parseInt(curr), 0);
+    const newSizeStock = parseInt(sizeStockInput);
+
+    if (sizeInput && sizeStockInput && !productDetails.sizes[sizeInput]) {
+      if (totalSizeStock + newSizeStock > parseInt(productDetails.stock)) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'La cantidad total de tallas no puede ser mayor que la cantidad de stock general.',
+        });
+        return;
+      }
+
+      setProductDetails({
+        ...productDetails,
+        sizes: { ...productDetails.sizes, [sizeInput]: sizeStockInput },
+      });
+      setSizeInput("");
+      setSizeStockInput("");
+    }
+  };
+
+  const removeSizeHandler = (sizeToRemove) => {
+    const updatedSizes = { ...productDetails.sizes };
+    delete updatedSizes[sizeToRemove];
+    setProductDetails({ ...productDetails, sizes: updatedSizes });
+  };
+
+  const updateSizeHandler = (size, newQuantity) => {
+    const updatedSizes = { ...productDetails.sizes, [size]: newQuantity };
+    setProductDetails({ ...productDetails, sizes: updatedSizes });
+  };
+
   const Add_Product = async () => {
     console.log("Producto antes de enviar:", productDetails);
 
     // Verificar que todos los campos obligatorios estén llenos
     if (!productDetails.name || !productDetails.category || !productDetails.new_price || !productDetails.stock) {
-      alert("Por favor, complete todos los campos obligatorios.");
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Por favor, complete todos los campos obligatorios.',
+      });
       return;
     }
 
@@ -51,7 +94,11 @@ const AddProduct = () => {
       if (imageResponse?.success) {
         product.image = imageResponse.image_url;
       } else {
-        alert("Fallo al subir la imagen");
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'Fallo al subir la imagen',
+        });
         return;
       }
     }
@@ -69,7 +116,11 @@ const AddProduct = () => {
     console.log("Respuesta del servidor al agregar producto:", productResponse);
 
     if (productResponse.success) {
-      alert("Producto e imagen agregados correctamente");
+      Swal.fire({
+        icon: 'success',
+        title: 'Éxito',
+        text: 'Producto e imagen agregados correctamente',
+      });
       // Limpiar todos los campos del formulario
       setProductDetails({
         name: "",
@@ -79,10 +130,15 @@ const AddProduct = () => {
         old_price: "",
         description: "",
         stock: "",
+        sizes: {},
       });
       setImage(null);
     } else {
-      alert("Fallo al agregar el producto");
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Fallo al agregar el producto',
+      });
     }
 
     console.log("Producto final:", product);
@@ -138,7 +194,7 @@ const AddProduct = () => {
       </div>
 
       <div className="add-product-itemfield">
-        <p>Cantidad en stock</p> {/* Nuevo campo agregado */}
+        <p>Cantidad en stock</p> {/* Campo general de stock */}
         <input
           value={productDetails.stock}
           onChange={changeHandler}
@@ -174,6 +230,47 @@ const AddProduct = () => {
           />
         </label>
         <input onChange={imageHandler} type="file" name="image" id="file-input" hidden />
+      </div>
+
+      <div className="add-product-itemfield">
+        <p>Tallas disponibles</p>
+        <div className="sizes-input">
+          <select
+            value={sizeInput}
+            onChange={(e) => setSizeInput(e.target.value)}
+            className="size-select"
+          >
+            <option value="" disabled>Seleccionar talla</option>
+            <option value="XS">XS</option>
+            <option value="S">S</option>
+            <option value="M">M</option>
+            <option value="L">L</option>
+            <option value="XL">XL</option>
+            <option value="XXL">XXL</option>
+          </select>
+          <input
+            value={sizeStockInput}
+            onChange={(e) => setSizeStockInput(e.target.value)}
+            type="number"
+            placeholder="Cantidad"
+          />
+          <button onClick={addSizeHandler}>Agregar</button>
+        </div>
+        <div className="sizes-list">
+          {Object.keys(productDetails.sizes).map((size, index) => (
+            <div key={index} className="size-item">
+              {size} - 
+              <input
+                type="number"
+                value={productDetails.sizes[size]}
+                onChange={(e) => updateSizeHandler(size, e.target.value)}
+                className="size-quantity-input"
+              />
+              unidades
+              <button onClick={() => removeSizeHandler(size)}>Eliminar</button>
+            </div>
+          ))}
+        </div>
       </div>
 
       <button onClick={Add_Product} className="addproduct-btn">

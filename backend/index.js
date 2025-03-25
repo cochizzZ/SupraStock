@@ -99,6 +99,11 @@ const Product = mongoose.model("Product", new mongoose.Schema({
         type: Number,
         required: true,
         default: 0,
+    },
+    sizes: {
+        type: Map,
+        of: Number,
+        default: {},
     }
 }));
 
@@ -108,7 +113,7 @@ app.post('/addproduct', async (req, res) => {
         let products = await Product.find({});
         let id = products.length > 0 ? products[products.length - 1].id + 1 : 1;
 
-        const { name, image, category, new_price, old_price, description, stock } = req.body;
+        const { name, image, category, new_price, old_price, description, stock, sizes } = req.body;
 
         // Validar que los campos obligatorios no estén vacíos
         if (!name || !image || !category || !new_price || stock === undefined) {
@@ -126,7 +131,8 @@ app.post('/addproduct', async (req, res) => {
             new_price: new_price,
             old_price: old_price || 0,
             description: description,
-            stock: stock
+            stock: stock,
+            sizes: sizes || {}
         });
 
         await product.save();
@@ -635,7 +641,7 @@ app.get('/api/orders', async (req, res) => {
 // Endpoint para actualizar un producto
 app.post('/updateproduct', async (req, res) => {
     try {
-        const { id, name, description, new_price, old_price, category, image, stock } = req.body;
+        const { id, name, description, new_price, old_price, category, image, stock, sizes } = req.body;
 
         // Validar que los campos obligatorios no estén vacíos
         if (!id || !name || !description || !new_price || !category || stock === undefined) {
@@ -650,7 +656,7 @@ app.post('/updateproduct', async (req, res) => {
 
         const updatedProduct = await Product.findOneAndUpdate(
             { id: id },
-            { name, description, new_price, old_price, category, image, stock, available },
+            { name, description, new_price, old_price, category, image, stock, sizes, available },
             { new: true }
         );
 

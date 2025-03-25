@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import "./EditProduct.css";
 import upload_area from "../../assets/upload_area.svg";
+import Swal from "sweetalert2";
 
 const EditProduct = ({ product, onUpdate }) => {
   const [image, setImage] = useState(null);
@@ -13,7 +14,11 @@ const EditProduct = ({ product, onUpdate }) => {
     category: product.category,
     image: product.image,
     stock: product.stock, // Añadir el campo de stock
+    sizes: product.sizes || {}, // Añadir el campo de tallas
   });
+
+  const [sizeInput, setSizeInput] = useState(""); // Nuevo estado para el campo de entrada de tallas
+  const [sizeStockInput, setSizeStockInput] = useState(""); // Nuevo estado para el campo de entrada de cantidad de stock por talla
 
   const imageHandler = (e) => {
     setImage(e.target.files[0]);
@@ -23,12 +28,50 @@ const EditProduct = ({ product, onUpdate }) => {
     setProductDetails({ ...productDetails, [e.target.name]: e.target.value });
   };
 
+  const addSizeHandler = () => {
+    const totalSizeStock = Object.values(productDetails.sizes).reduce((acc, curr) => acc + parseInt(curr), 0);
+    const newSizeStock = parseInt(sizeStockInput);
+
+    if (sizeInput && sizeStockInput && !productDetails.sizes[sizeInput]) {
+      if (totalSizeStock + newSizeStock > parseInt(productDetails.stock)) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'La cantidad total de tallas no puede ser mayor que la cantidad de stock general.',
+        });
+        return;
+      }
+
+      setProductDetails({
+        ...productDetails,
+        sizes: { ...productDetails.sizes, [sizeInput]: sizeStockInput },
+      });
+      setSizeInput("");
+      setSizeStockInput("");
+    }
+  };
+
+  const removeSizeHandler = (sizeToRemove) => {
+    const updatedSizes = { ...productDetails.sizes };
+    delete updatedSizes[sizeToRemove];
+    setProductDetails({ ...productDetails, sizes: updatedSizes });
+  };
+
+  const updateSizeHandler = (size, newQuantity) => {
+    const updatedSizes = { ...productDetails.sizes, [size]: newQuantity };
+    setProductDetails({ ...productDetails, sizes: updatedSizes });
+  };
+
   const updateProduct = async () => {
     console.log("Producto antes de enviar:", productDetails);
 
     // Verificar que todos los campos obligatorios estén llenos
     if (!productDetails.name || !productDetails.category || !productDetails.new_price) {
-      alert("Por favor, complete todos los campos obligatorios.");
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Por favor, complete todos los campos obligatorios.',
+      });
       return;
     }
 
@@ -52,7 +95,11 @@ const EditProduct = ({ product, onUpdate }) => {
       if (imageResponse?.success) {
         updatedProduct.image = imageResponse.image_url;
       } else {
-        alert("Fallo al subir la imagen");
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'Fallo al subir la imagen',
+        });
         return;
       }
     }
@@ -70,10 +117,18 @@ const EditProduct = ({ product, onUpdate }) => {
     console.log("Respuesta del servidor al actualizar producto:", productResponse);
 
     if (productResponse.success) {
-      alert("Producto actualizado correctamente");
+      Swal.fire({
+        icon: 'success',
+        title: 'Éxito',
+        text: 'Producto actualizado correctamente',
+      });
       onUpdate(productResponse.product);
     } else {
-      alert("Fallo al actualizar el producto");
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Fallo al actualizar el producto',
+      });
     }
   };
 
@@ -163,6 +218,47 @@ const EditProduct = ({ product, onUpdate }) => {
           />
         </label>
         <input onChange={imageHandler} type="file" name="image" id="file-input" hidden />
+      </div>
+
+      <div className="edit-product-itemfield">
+        <p>Tallas disponibles</p>
+        <div className="sizes-input">
+          <select
+            value={sizeInput}
+            onChange={(e) => setSizeInput(e.target.value)}
+            className="size-select"
+          >
+            <option value="" disabled>Seleccionar talla</option>
+            <option value="XS">XS</option>
+            <option value="S">S</option>
+            <option value="M">M</option>
+            <option value="L">L</option>
+            <option value="XL">XL</option>
+            <option value="XXL">XXL</option>
+          </select>
+          <input
+            value={sizeStockInput}
+            onChange={(e) => setSizeStockInput(e.target.value)}
+            type="number"
+            placeholder="Cantidad"
+          />
+          <button onClick={addSizeHandler}>Agregar</button>
+        </div>
+        <div className="sizes-list">
+          {Object.keys(productDetails.sizes).map((size, index) => (
+            <div key={index} className="size-item">
+              {size} - 
+              <input
+                type="number"
+                value={productDetails.sizes[size]}
+                onChange={(e) => updateSizeHandler(size, e.target.value)}
+                className="size-quantity-input"
+              />
+              unidades
+              <button onClick={() => removeSizeHandler(size)}>Eliminar</button>
+            </div>
+          ))}
+        </div>
       </div>
 
       <button onClick={updateProduct} className="editproduct-btn">
