@@ -1,32 +1,51 @@
-import React, { useContext } from 'react'
+import React, { useState, useContext } from "react";
 import './ProductDisplay.css'
 import star_icon from "../Assets/star_icon.png";
 import star_dull_icon from "../Assets/star_dull_icon.png";
-import { ShopContext } from '../../Context/ShopContext';
+import { ShopContext } from "../../Context/ShopContext";
+import Swal from "sweetalert2";
 
-const ProductDisplay = (props) => {
-    const {product} = props;
-    const {addToCart} = useContext(ShopContext);
+const ProductDisplay = ({ product }) => {
+  const { addToCart } = useContext(ShopContext);
+  const [selectedSize, setSelectedSize] = useState("");
+  const [quantity, setQuantity] = useState(1);
 
-    // MMapear categorías del inglés al español
-    const categoryMap = {
-        men: 'Hombre',
-        women: 'Mujer',
-        kid: 'Niños'
-    };
+  if (!product) {
+    return <div>Producto no encontrado</div>;
+  }
 
-    // Asignar etiquetas según la categoría
-    const tagsMap = {
-        men: ['Deportivo', 'Casual'],
-        women: ['Elegante', 'Moderno'],
-        kid: ['Divertido', 'Colorido']
-    };
+  // Mapear categorías del inglés al español
+  const categoryMap = {
+    men: 'Hombre',
+    women: 'Mujer',
+    kid: 'Niños'
+  };
 
-    // Obtener la categoría traducida
-    const categoryDisplay = categoryMap[product.category] || product.category;
+  // Asignar etiquetas según la categoría
+  const tagsMap = {
+    men: ['Deportivo', 'Casual'],
+    women: ['Elegante', 'Moderno'],
+    kid: ['Divertido', 'Colorido']
+  };
 
-    // Obtener las etiquetas para la categoría
-    const tagsDisplay = tagsMap[product.category] || [];
+  // Obtener la categoría traducida
+  const categoryDisplay = categoryMap[product.category] || product.category;
+
+  // Obtener las etiquetas para la categoría
+  const tagsDisplay = tagsMap[product.category] || [];
+
+  const handleAddToCart = () => {
+    if (!selectedSize) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Por favor, seleccione una talla.',
+      });
+      return;
+    }
+
+    addToCart(product.id, selectedSize, quantity);
+  };
 
   return (
     <div className='productdisplay'>
@@ -55,14 +74,27 @@ const ProductDisplay = (props) => {
         <div className="productdisplay-right-size">
             <h1>Seleccionar talla</h1>
             <div className="productdisplay-right-sizes">
-                <div>S</div>
-                <div>M</div>
-                <div>L</div>
-                <div>XL</div>
-                <div>XXL</div>
+                <select
+                  value={selectedSize}
+                  onChange={(e) => setSelectedSize(e.target.value)}
+                >
+                  <option value="" disabled>Seleccionar talla</option>
+                  {Object.keys(product.sizes).map((size) => (
+                    <option key={size} value={size}>{size}</option>
+                  ))}
+                </select>
             </div>
         </div>
-        <button onClick={()=>{addToCart(product.id)}}>AGREGAR AL CARRITO</button>
+        <div className="product-quantity">
+          <p>Cantidad:</p>
+          <input
+            type="number"
+            value={quantity}
+            onChange={(e) => setQuantity(e.target.value)}
+            min="1"
+          />
+        </div>
+        <button onClick={handleAddToCart}>Agregar al carrito</button>
         <p className='productdisplay-right-category'><span>Categoria: </span>{categoryDisplay}</p> 
         <p className='productdisplay-right-category'><span>Tags: </span>{tagsDisplay.join(', ')}</p>
       </div>
@@ -70,4 +102,4 @@ const ProductDisplay = (props) => {
   )
 }
 
-export default ProductDisplay
+export default ProductDisplay;
