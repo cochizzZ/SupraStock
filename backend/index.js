@@ -668,7 +668,7 @@ app.get('/api/orders', async (req, res) => {
 // Endpoint para actualizar un producto
 app.post('/updateproduct', async (req, res) => {
     try {
-        const { id, name, description, new_price, old_price, category, image, stock } = req.body;
+        const { id, name, description, new_price, old_price, category, image, stock, sizes } = req.body;
 
         // Validar que los campos obligatorios no estén vacíos
         if (!id || !name || !description || !new_price || !category || stock === undefined) {
@@ -678,12 +678,21 @@ app.post('/updateproduct', async (req, res) => {
             });
         }
 
+        // Validar que la cantidad total de tallas no sea mayor que el stock general
+        const totalSizeStock = Object.values(sizes).reduce((acc, curr) => acc + parseInt(curr), 0);
+        if (totalSizeStock > stock) {
+            return res.status(400).json({
+                success: false,
+                message: "La cantidad total de tallas no puede ser mayor que la cantidad de stock general.",
+            });
+        }
+
         // Determinar el estado de disponibilidad basado en el stock
         const available = stock > 0;
 
         const updatedProduct = await Product.findOneAndUpdate(
             { id: id },
-            { name, description, new_price, old_price, category, image, stock, available },
+            { name, description, new_price, old_price, category, image, stock, available, sizes },
             { new: true }
         );
 
@@ -707,7 +716,6 @@ app.post('/updateproduct', async (req, res) => {
         });
     }
 });
-
 // Endpoint para obtener estadísticas
 app.get('/api/statistics', async (req, res) => {
     try {
