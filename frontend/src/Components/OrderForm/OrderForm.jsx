@@ -3,6 +3,7 @@ import axios from 'axios';
 import Swal from 'sweetalert2'; // Importar SweetAlert2
 import './OrderForm.css';
 import { ShopContext } from '../../Context/ShopContext';
+import Payment from '../payment/Payment'; // Ajusta la ruta según la ubicación del archivo
 
 const OrderForm = () => {
     const { userId, cartItems, all_product, getTotalCartAmount } = useContext(ShopContext);
@@ -134,6 +135,8 @@ const OrderForm = () => {
         }
     };
 
+    const totalAmount = getTotalCartAmount(); // Calcula el monto total del carrito
+
     return (
         <div className="order-form">
             <h1>Formulario de Orden de Compra</h1>
@@ -187,6 +190,7 @@ const OrderForm = () => {
                     {isProcessing ? "Procesando..." : "Confirmar Orden"}
                 </button>
             </form>
+            <Payment totalAmount={totalAmount} />
         </div>
     );
 };

@@ -1,7 +1,6 @@
 const port = 4000;
 const express = require("express");
 const router = express.Router(); // Asegurar que router está definido
-const User = require('./models/User'); // Importar el modelo de usuario si no lo tienes
 const app = express();
 const mongoose = require("mongoose");
 const jwt = require("jsonwebtoken");
@@ -11,14 +10,13 @@ const cors = require("cors");
 const fs = require("fs");
 const bcrypt = require("bcryptjs");
 const bodyParser = require('body-parser');
-const userRoutes = require('./routes/users');
+const stripe = require('stripe')('sk_test_51R6cNaBLRCJFKBKAttNOUBrZeJ83hiT7urfBaLEhNONIKDeqO9YeiAUmn0Pq5Ox23iseYtgbKX10s2IJuxTO0UFk00wjtRk5MZ');
 const { clear } = require("console");
 
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(bodyParser.json());
-app.use('/api/users', userRoutes);
 
 // Conexion con la base de datos de MongoDB
 mongoose.connect("mongodb+srv://JuanRM:JuanTDP10@stp.jlm2k.mongodb.net/suprastock", {
@@ -947,14 +945,25 @@ app.post('/api/orders', async (req, res) => {
     }
 });
 
-// Endpoint para crear un pago
-app.post('/api/payments', async (req, res) => {
+// Endpoint para crear un pago con Stripe
+app.post('/api/create-payment-intent', fetchUser, async (req, res) => {
     try {
-        const newPayment = new Payment(req.body);
-        await newPayment.save();
-        res.status(201).send(newPayment);
+        const { amount, currency } = req.body;
+
+        // Crear un PaymentIntent
+        const paymentIntent = await stripe.paymentIntents.create({
+            amount, // Monto en centavos (por ejemplo, $10.00 = 1000)
+            currency, // Moneda (por ejemplo, "usd")
+            metadata: { userId: req.user.id }, // Agregar metadatos opcionales
+        });
+
+        res.json({
+            success: true,
+            clientSecret: paymentIntent.client_secret, // Enviar el client_secret al frontend
+        });
     } catch (error) {
-        res.status(500).send({ message: 'Error al crear el pago', error });
+        console.error('Error al crear PaymentIntent:', error);
+        res.status(500).json({ success: false, message: 'Error al procesar el pago' });
     }
 });
 
