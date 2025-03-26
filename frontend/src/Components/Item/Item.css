@@ -22,10 +22,11 @@
   cursor: pointer;
 }
 
-.container-items-info{
+.container-items-info {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  position: relative;
 }
 
 .item p {
@@ -55,6 +56,59 @@
 .item:hover {
   transform: scale(1.05);
   transition: 0.6s;
+}
+
+.item-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  margin-top: 5px;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  background-color: #f9f9f9;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  z-index: 10;
+}
+
+.item-dropdown-field {
+  margin-bottom: 10px;
+}
+
+.item-dropdown-field label {
+  display: block;
+  font-size: 14px;
+  margin-bottom: 5px;
+}
+
+.item-dropdown-field select,
+.item-dropdown-field input {
+  width: 100%;
+  padding: 8px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.add-to-cart-button {
+  width: 100%;
+  padding: 10px;
+  background-color: #ff5a5a;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.add-to-cart-button:hover {
+  background-color: #e04e4e;
+}
+
+#quantity-input {
+  width: 90%;
 }
 
 @media(max-width: 1280px) {

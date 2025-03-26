@@ -1,19 +1,31 @@
-import React, { useContext, useCallback } from 'react';
+import React, { useContext, useCallback, useState } from 'react';
 import './Item.css';
 import { Link } from 'react-router-dom';
 import { ShopContext } from '../../Context/ShopContext';
 import addToCartIcon from '../Assets/add_to_cart_icon.png';
 
-const Item = ({ id, image, name, new_price, old_price }) => {
+const Item = ({ id, image, name, new_price, old_price, sizes }) => {
   const { addToCart } = useContext(ShopContext);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [selectedSize, setSelectedSize] = useState('');
+  const [quantity, setQuantity] = useState(1);
 
   const handleAddToCart = useCallback(() => {
     if (!id) {
       console.error("El ID del producto no está definido.");
       return;
     }
-    addToCart(id);
-  }, [id, addToCart]); // Dependencias para evitar recreación innecesaria
+    if (!selectedSize) {
+      alert("Por favor, selecciona una talla.");
+      return;
+    }
+    if (quantity < 1) {
+      alert("Por favor, selecciona una cantidad válida.");
+      return;
+    }
+    addToCart(id, selectedSize, quantity);
+    setIsDropdownOpen(false);
+  }, [id, selectedSize, quantity, addToCart]);
 
   return (
     <div className='item'>
@@ -22,13 +34,46 @@ const Item = ({ id, image, name, new_price, old_price }) => {
       </Link>
       <p>{name}</p>
       <div className="container-items-info">
-        <div className="item-prices"> 
+        <div className="item-prices">
           <div className="item-price-new">${new_price}</div>
           <div className="item-price-old">${old_price}</div>
         </div>
-        <button onClick={handleAddToCart} className="cart">
+        <button onClick={() => setIsDropdownOpen(!isDropdownOpen)} className="cart">
           <img src={addToCartIcon} alt="Agregar al carrito" />
         </button>
+        {isDropdownOpen && (
+          <div className="item-dropdown">
+            <div className="item-dropdown-field">
+              <label htmlFor="size-select">Talla:</label>
+              <select
+                id="size-select"
+                value={selectedSize}
+                onChange={(e) => setSelectedSize(e.target.value)}
+              >
+                <option value="" disabled>Seleccionar talla</option>
+                {Object.entries(sizes).map(([size, quantity]) => (
+                  <option key={size} value={size}>
+                    {size} ({quantity} disponibles)
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="item-dropdown-field">
+              <label htmlFor="quantity-input">Cantidad:</label>
+              <input
+                id="quantity-input"
+                type="number"
+                min="1"
+                max={sizes[selectedSize] || 1}
+                value={quantity}
+                onChange={(e) => setQuantity(Math.min(e.target.value, sizes[selectedSize] || 1))}
+              />
+            </div>
+            <button onClick={handleAddToCart} className="add-to-cart-button">
+              Confirmar
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
