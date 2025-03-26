@@ -1,5 +1,5 @@
 import React, { useState, useContext } from "react";
-import './ProductDisplay.css'
+import "./ProductDisplay.css";
 import star_icon from "../Assets/star_icon.png";
 import star_dull_icon from "../Assets/star_dull_icon.png";
 import { ShopContext } from "../../Context/ShopContext";
@@ -14,32 +14,27 @@ const ProductDisplay = ({ product }) => {
     return <div>Producto no encontrado</div>;
   }
 
-  // Mapear categorías del inglés al español
   const categoryMap = {
-    men: 'Hombre',
-    women: 'Mujer',
-    kid: 'Niños'
+    men: "Hombre",
+    women: "Mujer",
+    kid: "Niños",
   };
 
-  // Asignar etiquetas según la categoría
   const tagsMap = {
-    men: ['Deportivo', 'Casual'],
-    women: ['Elegante', 'Moderno'],
-    kid: ['Divertido', 'Colorido']
+    men: ["Deportivo", "Casual"],
+    women: ["Elegante", "Moderno"],
+    kid: ["Divertido", "Colorido"],
   };
 
-  // Obtener la categoría traducida
   const categoryDisplay = categoryMap[product.category] || product.category;
-
-  // Obtener las etiquetas para la categoría
   const tagsDisplay = tagsMap[product.category] || [];
 
   const handleAddToCart = () => {
     if (!selectedSize) {
       Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: 'Por favor, seleccione una talla.',
+        icon: "error",
+        title: "Error",
+        text: "Por favor, seleccione una talla.",
       });
       return;
     }
@@ -48,42 +43,54 @@ const ProductDisplay = ({ product }) => {
   };
 
   return (
-    <div className='productdisplay'>
+    <div className="productdisplay">
       <div className="productdisplay-left">
         <div className="productdisplay-img">
-            <img className='productdisplay-main-img' src={product.image} alt="" />
+          <img
+            className="productdisplay-main-img"
+            src={product.image}
+            alt={product.name}
+          />
         </div>
       </div>
       <div className="productdisplay-right">
         <h1>{product.name}</h1>
         <div className="productdisplay-right-stars">
-            <img src={star_icon} alt="" />
-            <img src={star_icon} alt="" />
-            <img src={star_icon} alt="" />
-            <img src={star_icon} alt="" />
-            <img src={star_dull_icon} alt="" />
-            <p>(122)</p>
+          <img src={star_icon} alt="star" />
+          <img src={star_icon} alt="star" />
+          <img src={star_icon} alt="star" />
+          <img src={star_icon} alt="star" />
+          <img src={star_dull_icon} alt="star dull" />
+          <p>(122)</p>
         </div>
         <div className="productdisplay-right-prices">
-            <div className="productdisplay-right-price-old">${product.old_price}</div>
-            <div className="productdisplay-right-price-new">${product.new_price}</div>
+          <div className="productdisplay-right-price-old">
+            ${product.old_price}
+          </div>
+          <div className="productdisplay-right-price-new">
+            ${product.new_price}
+          </div>
         </div>
         <div className="productdisplay-right-description">
-          <div >{product.description}</div>
+          <div>{product.description}</div>
         </div>
         <div className="productdisplay-right-size">
-            <h1>Seleccionar talla</h1>
-            <div className="productdisplay-right-sizes">
-                <select
-                  value={selectedSize}
-                  onChange={(e) => setSelectedSize(e.target.value)}
-                >
-                  <option value="" disabled>Seleccionar talla</option>
-                  {Object.keys(product.sizes).map((size) => (
-                    <option key={size} value={size}>{size}</option>
-                  ))}
-                </select>
-            </div>
+          <h1>Seleccionar talla:</h1>
+          <div className="productdisplay-right-sizes">
+            <select
+              value={selectedSize}
+              onChange={(e) => setSelectedSize(e.target.value)}
+            >
+              <option value="" disabled>
+                Seleccionar talla
+              </option>
+              {Object.keys(product.sizes).map((size) => (
+                <option key={size} value={size}>
+                  {size}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
         <div className="product-quantity">
           <p>Cantidad:</p>
@@ -95,11 +102,17 @@ const ProductDisplay = ({ product }) => {
           />
         </div>
         <button onClick={handleAddToCart}>Agregar al carrito</button>
-        <p className='productdisplay-right-category'><span>Categoria: </span>{categoryDisplay}</p> 
-        <p className='productdisplay-right-category'><span>Tags: </span>{tagsDisplay.join(', ')}</p>
+        <p className="productdisplay-right-category">
+          <span>Categoria: </span>
+          {categoryDisplay}
+        </p>
+        <p className="productdisplay-right-category">
+          <span>Tags: </span>
+          {tagsDisplay.join(", ")}
+        </p>
       </div>
     </div>
-  )
-}
+  );
+};
 
 export default ProductDisplay;
