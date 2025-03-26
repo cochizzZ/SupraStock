@@ -1,7 +1,6 @@
 const port = 4000;
 const express = require("express");
 const router = express.Router(); // Asegurar que router está definido
-const User = require('./models/User'); // Importar el modelo de usuario si no lo tienes
 const app = express();
 const mongoose = require("mongoose");
 const jwt = require("jsonwebtoken");
