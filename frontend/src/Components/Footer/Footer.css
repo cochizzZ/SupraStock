@@ -3,7 +3,8 @@
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    padding: 115px 0px
+    padding: 115px 0px;
+    margin-top: 80px; 
 }
 
 .footer-logo {
@@ -79,6 +80,7 @@
 @media (max-width: 800px) {
     .footer {
         gap: 20px;
+        margin-top: 50px; 
     }
     .footer-logo {
         gap: 10px;
