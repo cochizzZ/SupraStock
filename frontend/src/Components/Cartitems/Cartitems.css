@@ -10,7 +10,7 @@
 
 .cartitems-format-main {
     display: grid;
-    grid-template-columns: 0.5fr 2fr 1fr 1fr 1fr 1fr;
+    grid-template-columns: 0.5fr 0.5fr 3fr 1fr 1fr 1fr 1fr;
     align-items: center;
     gap: 75px;
     padding: 20px 0;
@@ -34,7 +34,7 @@
     cursor: pointer;
 }
 
-/* 📌 Nuevo estilo para la caja de cantidad */
+/*Nuevo estilo para la caja de cantidad */
 .cartitems-quantity-input {
     width: 64px;
     height: 50px;
@@ -47,7 +47,7 @@
     outline: none;
 }
 
-/* 📌 Ajustes generales */
+/* Ajustes generales */
 .cartitems-down {
     display: flex;
     margin: 100px 0px;
@@ -86,7 +86,6 @@
     }
 
     .cartitems-format-main {
-        grid-template-columns: 0.5fr 3fr 0.5fr 0.5fr 0.5fr 0.5fr;
         gap: 20px;
         padding: 15px 0px;
         font-size: 15px;
