@@ -210,7 +210,7 @@ const Users = mongoose.model('Users', new mongoose.Schema({
 
 //creación de schema para el modelo de ordenes
 const OrderSchema = new mongoose.Schema({
-    user_id: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+    user_id: { type: mongoose.Schema.Types.ObjectId, ref: "Users", required: true }, // Cambiado de "User" a "Users"
     products: [
         {
             product_id: { type: mongoose.Schema.Types.ObjectId, ref: "Product", required: true },
@@ -225,16 +225,14 @@ const OrderSchema = new mongoose.Schema({
     status: { type: String, enum: ["Pending", "Processing", "Shipped", "Completed", "Cancelled"], default: "Pending" },
     date: { type: Date, default: Date.now },
     available: { type: Boolean, default: true },
-
-    // Información del pago
     payment_info: {
-        method: { type: String, required: true }, // "PSE", "Tarjeta de crédito"
+        method: { type: String, required: true },
         status: { type: String, enum: ["Pending", "Paid", "Failed"], default: "Pending" },
-        transaction_id: { type: String } // Se asigna solo si el pago es exitoso
-    }
+        transaction_id: { type: String },
+    },
 });
 
-const Order = mongoose.model("Order", OrderSchema);
+const Order = mongoose.model("Order", OrderSchema);
 module.exports = Order;
 
 
