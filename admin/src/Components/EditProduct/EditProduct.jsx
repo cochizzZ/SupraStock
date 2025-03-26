@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import "./EditProduct.css";
-import upload_area from "../../assets/upload_area.svg";
 import Swal from "sweetalert2";
 
 const EditProduct = ({ product, onUpdate }) => {
@@ -13,12 +12,12 @@ const EditProduct = ({ product, onUpdate }) => {
     old_price: product.old_price,
     category: product.category,
     image: product.image,
-    stock: product.stock, // Añadir el campo de stock
-    sizes: product.sizes || {}, // Añadir el campo de tallas
+    stock: product.stock,
+    sizes: product.sizes || {},
   });
 
-  const [sizeInput, setSizeInput] = useState(""); // Nuevo estado para el campo de entrada de tallas
-  const [sizeStockInput, setSizeStockInput] = useState(""); // Nuevo estado para el campo de entrada de cantidad de stock por talla
+  const [sizeInput, setSizeInput] = useState("");
+  const [sizeStockInput, setSizeStockInput] = useState("");
 
   const imageHandler = (e) => {
     setImage(e.target.files[0]);
@@ -65,7 +64,6 @@ const EditProduct = ({ product, onUpdate }) => {
   const updateProduct = async () => {
     console.log("Producto antes de enviar:", productDetails);
 
-    // Verificar que todos los campos obligatorios estén llenos
     if (!productDetails.name || !productDetails.category || !productDetails.new_price) {
       Swal.fire({
         icon: 'error',
@@ -75,9 +73,8 @@ const EditProduct = ({ product, onUpdate }) => {
       return;
     }
 
-    let updatedProduct = { ...productDetails }; // Se crea una copia del objeto para evitar mutaciones inesperadas
+    let updatedProduct = { ...productDetails };
 
-    // Si hay una imagen, súbela primero
     if (image) {
       let formData = new FormData();
       formData.append("product", image);
@@ -104,7 +101,7 @@ const EditProduct = ({ product, onUpdate }) => {
       }
     }
 
-    // Luego, intenta actualizar el producto en la base de datos
+    console.log("Producto actualizado antes de enviar:", updatedProduct);
     const productResponse = await fetch('http://localhost:4000/updateproduct', {
       method: 'POST',
       headers: {
@@ -182,7 +179,7 @@ const EditProduct = ({ product, onUpdate }) => {
       </div>
 
       <div className="edit-product-itemfield">
-        <p>Cantidad en stock</p> {/* Nuevo campo agregado */}
+        <p>Cantidad en stock</p>
         <input
           value={productDetails.stock}
           onChange={changeHandler}

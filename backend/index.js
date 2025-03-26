@@ -58,7 +58,7 @@ app.post("/upload", upload.single('product'), (req, res) => {
 
 // Esquema para la creación de productos
 
-const Product = mongoose.model("Product", new mongoose.Schema({
+const ProductSchema = new mongoose.Schema({
     id: {
         type: Number,
         required: true,
@@ -103,9 +103,11 @@ const Product = mongoose.model("Product", new mongoose.Schema({
     sizes: {
         type: Map,
         of: Number,
-        default: {},
+        default: {}, // Inicializar como un objeto vacío
     }
-}));
+});
+
+const Product = mongoose.model("Product", ProductSchema);
 
 // Endpoint para agregar un producto
 app.post('/addproduct', async (req, res) => {
@@ -113,7 +115,7 @@ app.post('/addproduct', async (req, res) => {
         let products = await Product.find({});
         let id = products.length > 0 ? products[products.length - 1].id + 1 : 1;
 
-        const { name, image, category, new_price, old_price, description, stock, sizes } = req.body;
+        const { name, image, category, new_price, old_price, description, stock } = req.body;
 
         // Validar que los campos obligatorios no estén vacíos
         if (!name || !image || !category || !new_price || stock === undefined) {
@@ -131,8 +133,7 @@ app.post('/addproduct', async (req, res) => {
             new_price: new_price,
             old_price: old_price || 0,
             description: description,
-            stock: stock,
-            sizes: sizes || {}
+            stock: stock
         });
 
         await product.save();
@@ -175,35 +176,39 @@ app.post('/removeproduct', async (req, res) => {
     }
 });
 
-// Creación de API para obtener todos los productos
 
+// Endpoint para obtener todos los productos
 app.get('/allproducts', async (req, res) => {
-    let products = await Product.find({});
-    console.log("All products Fetched");
-    res.send(products);
-})
+    try {
+        const products = await Product.find({ available: true });
+        res.status(200).json(products);
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
 
 //creación de schema para el modelo de usuario
 
 const Users = mongoose.model('Users', new mongoose.Schema({
-    name: {type: String,required: true,},
-    email: {type: String,unique: true,required: true,},
-    password: {type: String,required: true,},
-    photo: {type: String,},
-    address: {type: String,},
-    city: { type: String,},
-    postal_code: { type: String,},
-    phone: {type: String,},
-    wishlist: {type: Array,default: [],},
+    name: { type: String, required: true },
+    email: { type: String, unique: true, required: true },
+    password: { type: String, required: true },
+    photo: { type: String },
+    address: { type: String },
+    city: { type: String },
+    postal_code: { type: String },
+    phone: { type: String },
+    wishlist: { type: Array, default: [] },
     cartData: [
         {
             product_id: { type: mongoose.Schema.Types.ObjectId, ref: "Product" },
+            size: { type: String, required: true },
             quantity: { type: Number, required: true }
         }
     ],
-    date: {type: Date,default: Date.now,},
-    role: {type: String,default: 'user',},
-}));
+    date: { type: Date, default: Date.now },
+    role: { type: String, default: 'user' },
+})); 
 
 //creación de schema para el modelo de ordenes
 const OrderSchema = new mongoose.Schema({
@@ -321,7 +326,7 @@ app.post('/login', async (req, res) => {
 
 //creación de un punto final para los datos de newcollection
 app.get('/newcollections', async (req, res) => {
-    let products = await Product.find({});
+    let products = await Product.find({ available: true });
     let newcollection = products.slice(0).slice(-8);
     console.log("newcollection: " + newcollection);
     console.log("NewCollection Fetched");
@@ -330,45 +335,73 @@ app.get('/newcollections', async (req, res) => {
 
 //creación de un punto final para la sección de mujeres populares
 app.get('/popularinwomen', async (req, res) => {
-    let products = await Product.find({ category: "women" });
-    let popular_in_women = products.slice(0, 4);
-    console.log("Popular in women fetched");
-    res.send(popular_in_women);
-})
+    try {
+        const popular_in_women = await Product.find({ category: "women", available: true }) // Filtrar por categoría y disponibilidad
+            .sort({ date: -1 }) // Ordenar por fecha de creación descendente
+            .limit(4); // Limitar a los 4 productos más recientes
+
+        console.log("Popular in women fetched");
+        res.status(200).json(popular_in_women);
+    } catch (error) {
+        console.error("Error fetching popular in women:", error);
+        res.status(500).json({ success: false, message: "Error interno del servidor" });
+    }
+});
 
 // crear middleware para obtener usuario
 
+// Crear middleware para obtener usuario
 const fetchUser = async (req, res, next) => {
     const token = req.header('auth-token');
     if (!token) {
-        res.status(401).send({ errors: "Autenticacion requerida:ingresa un token valido" })
-    }
-    else {
+        res.status(401).send({ errors: "Autenticacion requerida: ingresa un token valido" });
+    } else {
         try {
             const data = jwt.verify(token, 'secret_ecom');
             req.user = data.user;
             next();
         } catch (error) {
-            res.status(401).send({ errors: "Autenticacion requerida:ingresa un token valido" })
+            res.status(401).send({ errors: "Autenticacion requerida: ingresa un token valido" });
         }
     }
-}
+};
+
+// Endpoint para agregar un producto al carrito
+
 
 //crear punto de conexion para agregar productos en  CarData
+// Endpoint para agregar un producto al carrito
+// Endpoint para agregar un producto al carrito
+// Endpoint para agregar un producto al carrito
+// Endpoint para agregar un producto al carrito
+// Endpoint para agregar un producto al carrito
+// Endpoint para agregar un producto al carrito
+// Endpoint para agregar un producto al carrito
 app.post('/addtocart', fetchUser, async (req, res) => {
     try {
         console.log(req.body);
-        const { itemId, quantity } = req.body;
+        const { itemId, size, quantity } = req.body;
 
         // Validar entrada
-        if (!itemId || !quantity || quantity <= 0) {
-            return res.status(400).json({ success: false, message: "ID del producto y cantidad son obligatorios y deben ser válidos." });
+        if (!itemId || !size || !quantity || quantity <= 0) {
+            return res.status(400).json({ success: false, message: "ID del producto, talla y cantidad son obligatorios y deben ser válidos." });
         }
 
         // Buscar el ObjectId del producto
         const product = await Product.findOne({ id: itemId });
         if (!product) {
             return res.status(404).json({ success: false, message: "Producto no encontrado." });
+        }
+
+        // Verificar que el campo sizes esté definido
+        if (!product.sizes || !product.sizes.has(size)) {
+            return res.status(400).json({ success: false, message: `La talla ${size} no está disponible para este producto.` });
+        }
+
+        // Verificar la cantidad disponible en la talla especificada
+        const availableQuantity = product.sizes.get(size);
+        if (availableQuantity < quantity) {
+            return res.status(400).json({ success: false, message: `Solo hay ${availableQuantity} unidades disponibles en la talla ${size}.` });
         }
 
         // Buscar el usuario
@@ -378,14 +411,14 @@ app.post('/addtocart', fetchUser, async (req, res) => {
         }
 
         // Verificar si el producto ya está en el carrito
-        const existingCartItem = user.cartData.find(item => item.product_id.equals(product._id));
+        const existingCartItem = user.cartData.find(item => item.product_id && item.product_id.equals(product._id) && item.size === size);
 
         if (existingCartItem) {
             // Si el producto ya está en el carrito, incrementar la cantidad
             existingCartItem.quantity += quantity;
         } else {
             // Si el producto no está en el carrito, agregarlo
-            user.cartData.push({ product_id: product._id, quantity });
+            user.cartData.push({ product_id: product._id, size: size, quantity: quantity });
         }
 
         // Guardar los cambios en el usuario
@@ -397,7 +430,6 @@ app.post('/addtocart', fetchUser, async (req, res) => {
         res.status(500).json({ success: false, message: "Error interno del servidor" });
     }
 });
-
 //crear punto de conexion para eliminar productos en CartData
 app.post('/removefromcart', fetchUser, async (req, res) => {
     try {
@@ -482,15 +514,16 @@ app.delete('/clearcart', fetchUser, async (req, res) => {
     }
 });
 
+// Endpoint para actualizar el carrito
 app.post('/updatecart', fetchUser, async (req, res) => {
     try {
-        const { itemId, quantity } = req.body;
+        const { itemId, size, quantity } = req.body;
 
         // Validar entrada
-        if (!itemId || quantity === undefined || quantity < 0) {
+        if (!itemId || !size || quantity === undefined || quantity < 0) {
             return res.status(400).json({
                 success: false,
-                message: "ID del producto y cantidad son obligatorios y deben ser válidos.",
+                message: "ID del producto, talla y cantidad son obligatorios y deben ser válidos.",
             });
         }
 
@@ -504,7 +537,7 @@ app.post('/updatecart', fetchUser, async (req, res) => {
         }
 
         // Verificar si el producto ya está en el carrito
-        const existingCartItem = user.cartData.find(item => item.product_id.toString() === itemId);
+        const existingCartItem = user.cartData.find(item => item.product_id.toString() === itemId && item.size === size);
 
         if (existingCartItem) {
             if (quantity > 0) {
@@ -512,11 +545,11 @@ app.post('/updatecart', fetchUser, async (req, res) => {
                 existingCartItem.quantity = quantity;
             } else {
                 // Eliminar el producto si la cantidad es 0
-                user.cartData = user.cartData.filter(item => item.product_id.toString() !== itemId);
+                user.cartData = user.cartData.filter(item => !(item.product_id.toString() === itemId && item.size === size));
             }
         } else if (quantity > 0) {
             // Agregar el producto al carrito si no existe y la cantidad es mayor a 0
-            user.cartData.push({ product_id: itemId, quantity });
+            user.cartData.push({ product_id: itemId, size, quantity });
         }
 
         // Guardar los cambios en el usuario
@@ -651,12 +684,21 @@ app.post('/updateproduct', async (req, res) => {
             });
         }
 
+        // Validar que la cantidad total de tallas no sea mayor que el stock general
+        const totalSizeStock = Object.values(sizes).reduce((acc, curr) => acc + parseInt(curr), 0);
+        if (totalSizeStock > stock) {
+            return res.status(400).json({
+                success: false,
+                message: "La cantidad total de tallas no puede ser mayor que la cantidad de stock general.",
+            });
+        }
+
         // Determinar el estado de disponibilidad basado en el stock
         const available = stock > 0;
 
         const updatedProduct = await Product.findOneAndUpdate(
             { id: id },
-            { name, description, new_price, old_price, category, image, stock, sizes, available },
+            { name, description, new_price, old_price, category, image, stock, available, sizes },
             { new: true }
         );
 
@@ -680,7 +722,6 @@ app.post('/updateproduct', async (req, res) => {
         });
     }
 });
-
 // Endpoint para obtener estadísticas
 app.get('/api/statistics', async (req, res) => {
     try {

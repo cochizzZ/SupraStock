@@ -3,24 +3,46 @@ import './Cartitems.css';
 import { ShopContext } from '../../Context/ShopContext';
 import remove_icon from '../Assets/cart_cross_icon.png';
 import { useNavigate } from 'react-router-dom';
+import Swal from 'sweetalert2'; // Importar Swal
 
 const Cartitems = () => {
     const { getTotalCartAmount, all_product, cartItems, removeFromCart, updateCart, userId } = useContext(ShopContext);
     const navigate = useNavigate();
 
-    const updateCartQuantity = (itemId, newQuantity) => {
-        console.log(itemId, newQuantity);
+    const updateCartQuantity = (productId, newQuantity, size) => {
+        const product = all_product.find(p => p._id === productId);
+
+        if (!product) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Producto no encontrado.',
+            });
+            return;
+        }
+
+        const availableQuantity = product.sizes[size];
+
+        if (newQuantity > availableQuantity) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: `Solo hay ${availableQuantity} unidades disponibles en la talla ${size}.`,
+            });
+            return;
+        }
+
         if (newQuantity >= 1) {
-            updateCart(itemId, newQuantity);
+            updateCart(productId, newQuantity, size);
         }
     };
 
     const handleProceedToCheckout = () => {
         if (!userId) {
             // Guardar los productos seleccionados en el almacenamiento local
-            const selectedProducts = all_product.filter(product => cartItems[product.id] > 0).map(product => ({
-                productId: product.id,
-                quantity: cartItems[product.id]
+            const selectedProducts = all_product.filter(product => cartItems.some(item => item.product_id._id === product._id && item.quantity > 0)).map(product => ({
+                productId: product._id,
+                quantity: cartItems.find(item => item.product_id._id === product._id).quantity
             }));
             localStorage.setItem('selectedProducts', JSON.stringify(selectedProducts));
 
@@ -30,9 +52,9 @@ const Cartitems = () => {
         }
 
         // Si el usuario está logueado, proceder al formulario de orden
-        const selectedProducts = all_product.filter(product => cartItems[product.id] > 0).map(product => ({
-            productId: product.id,
-            quantity: cartItems[product.id]
+        const selectedProducts = all_product.filter(product => cartItems.some(item => item.product_id._id === product._id && item.quantity > 0)).map(product => ({
+            productId: product._id,
+            quantity: cartItems.find(item => item.product_id._id === product._id).quantity
         }));
 
         const orderData = {
@@ -54,32 +76,34 @@ const Cartitems = () => {
                 <p>Productos</p>
                 <p>Título</p>
                 <p>Precio</p>
+                <p>Talla</p>
                 <p>Cantidad</p>
                 <p>Total</p>
                 <p>Eliminar</p>
             </div>
             <hr />
-            {cartItems.map((item) => {
+            {Array.isArray(cartItems) && cartItems.map((item) => {
                 const product = item.product_id; // Acceder al producto dentro del objeto
                 if (item.quantity > 0) {
                     return (
-                        <div key={item._id}>
-                            <div className="cartitems-format cartitems-format-main" id={product._id}>
+                        <div key={`${item._id}-${item.size}`}>
+                            <div className="cartitems-format cartitems-format-main" id={`${product._id}-${item.size}`}>
                                 <img src={product.image} alt={product.name} className='carticon-product-icon' />
                                 <p>{product.name}</p>
                                 <p>${product.new_price}</p>
+                                <p>{item.size}</p> {/* Mostrar la talla del producto */}
                                 <input
                                     type="number"
                                     className="cartitems-quantity-input"
                                     min="1"
                                     value={item.quantity}
-                                    onChange={(event) => updateCartQuantity(product._id, Number(event.target.value))}
+                                    onChange={(event) => updateCartQuantity(product._id, Number(event.target.value), item.size)}
                                 />
                                 <p>${product.new_price * item.quantity}</p>
                                 <img
                                     className='cartitems-remove-icon'
                                     src={remove_icon}
-                                    onClick={() => removeFromCart(product._id)}
+                                    onClick={() => removeFromCart(product._id, item.size)}
                                     alt="Eliminar"
                                 />
                             </div>

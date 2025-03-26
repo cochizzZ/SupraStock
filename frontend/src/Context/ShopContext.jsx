@@ -77,25 +77,44 @@ const ShopContextProvider = ({ children }) => {
     };
 
     // Agregar un producto al carrito
-    const addToCart = async (productId, quantity) => {
+    const addToCart = async (productId, size, quantity) => {
         try {
+            // Obtener el producto correspondiente
+            const product = all_product.find((p) => p.id === productId);
+            if (!product) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Producto no encontrado.',
+                });
+                return;
+            }
+
+            // Verificar la cantidad disponible en la talla especificada
+            const availableQuantity = product.sizes[size];
+            if (availableQuantity < quantity) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: `Solo hay ${availableQuantity} unidades disponibles en la talla ${size}.`,
+                });
+                return;
+            }
+
             const response = await fetch("http://localhost:4000/addtocart", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                     "auth-token": localStorage.getItem("auth-token"),
                 },
-                body: JSON.stringify({ itemId: productId, quantity: 1 }),
+                body: JSON.stringify({ itemId: productId, size, quantity }),
             });
     
             const data = await response.json();
     
             if (data.success) {
                 // Actualizar estado del carrito
-                setCartItems((prev) => ({
-                    ...prev,
-                    [productId]: (prev[productId] || 0) + quantity,
-                }));
+                setCartItems((prev) => [...prev, { product_id: product, size, quantity }]);
     
                 // Mostrar alerta de éxito
                 Swal.fire({
@@ -107,15 +126,28 @@ const ShopContextProvider = ({ children }) => {
                 });
             } else {
                 console.error("Error al agregar al carrito:", data.message);
+                Swal.fire({
+                    title: "Error",
+                    text: data.message,
+                    icon: "error",
+                    confirmButtonColor: "#d33",
+                    confirmButtonText: "OK",
+                });
             }
         } catch (error) {
             console.error("Error al agregar al carrito:", error);
+            Swal.fire({
+                title: "Error",
+                text: "Error interno del servidor",
+                icon: "error",
+                confirmButtonColor: "#d33",
+                confirmButtonText: "OK",
+            });
         }
     };
-    
 
     // Eliminar un producto del carrito
-    const removeFromCart = async (productId) => {
+    const removeFromCart = async (productId, size) => {
         try {
             const response = await fetch("http://localhost:4000/removefromcart", {
                 method: "POST",
@@ -123,7 +155,7 @@ const ShopContextProvider = ({ children }) => {
                     "Content-Type": "application/json",
                     "auth-token": localStorage.getItem("auth-token"),
                 },
-                body: JSON.stringify({ itemId: productId }),
+                body: JSON.stringify({ itemId: productId, size }),
             });
     
             const data = await response.json();
@@ -131,11 +163,7 @@ const ShopContextProvider = ({ children }) => {
             if (data.success) {
                 // Reducir cantidad o eliminar si es 0
                 setCartItems((prev) =>
-                    prev.map((item) =>
-                        item.product_id === productId
-                            ? { ...item, quantity: item.quantity - 1 }
-                            : item
-                    ).filter(item => item.quantity > 0)
+                    prev.filter(item => !(item.product_id._id === productId && item.size === size))
                 );
     
                 Swal.fire({
@@ -152,21 +180,19 @@ const ShopContextProvider = ({ children }) => {
             console.error("Error al eliminar del carrito:", error);
         }
     };
-    
 
     // Actualizar la cantidad de un producto en el carrito
-    const updateCart = (itemId, newQuantity) => {
+    const updateCart = (itemId, newQuantity, size) => {
         setCartItems((prevCart) => {
-            const prevQuantity = prevCart[itemId] || 0;
-            const updatedCart = { ...prevCart };
-
-            if (newQuantity > 0) {
-                updatedCart[itemId] = newQuantity;
-            } else {
-                delete updatedCart[itemId];
-            }
+            const updatedCart = prevCart.map(item => {
+                if (item.product_id._id === itemId && item.size === size) {
+                    return { ...item, quantity: newQuantity };
+                }
+                return item;
+            });
 
             // Alertas dinámicas para agregar o eliminar productos
+            const prevQuantity = prevCart.find(item => item.product_id._id === itemId && item.size === size)?.quantity || 0;
             if (newQuantity > prevQuantity) {
                 Swal.fire({
                     title: "Cantidad actualizada!",
@@ -196,7 +222,7 @@ const ShopContextProvider = ({ children }) => {
                     "auth-token": localStorage.getItem("auth-token"),
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify({ itemId, quantity: newQuantity }),
+                body: JSON.stringify({ itemId, quantity: newQuantity, size }),
             })
                 .then((response) => response.json())
                 .then(() => console.log("Cart updated successfully"))
