@@ -433,31 +433,26 @@ app.post('/addtocart', fetchUser, async (req, res) => {
 //crear punto de conexion para eliminar productos en CartData
 app.post('/removefromcart', fetchUser, async (req, res) => {
     try {
-        const { itemId } = req.body;
+        const { itemId, size } = req.body;
 
-        if (!itemId) {
-            return res.status(400).json({ success: false, message: "ID del producto es obligatorio." });
+        if (!itemId || !size) {
+            return res.status(400).json({ success: false, message: "ID del producto y talla son obligatorios." });
         }
 
-        // Intentar reducir la cantidad del producto en el carrito
-        const user = await Users.findOneAndUpdate(
-            { _id: req.user.id, "cartData.product_id": itemId }, // Buscar si el producto está en el carrito
-            {
-                $inc: { "cartData.$.quantity": -1 }, // Reducir la cantidad en 1
-            },
-            { new: true } // Retornar el documento actualizado
-        );
+        // Buscar el usuario
+        const user = await Users.findById(req.user.id);
 
         if (!user) {
-            return res.status(404).json({ success: false, message: "Usuario no encontrado o producto no en carrito" });
+            return res.status(404).json({ success: false, message: "Usuario no encontrado." });
         }
 
-        // Verificar si la cantidad llegó a 0 y eliminar el producto
-        await Users.findOneAndUpdate(
-            { _id: req.user.id },
-            { $pull: { cartData: { product_id: itemId, quantity: { $lte: 0 } } } }, // Eliminar si cantidad <= 0
-            { new: true }
-        );
+        // Eliminar el producto específico del carrito
+        user.cartData = user.cartData.filter(item => {
+            return !(item.product_id.equals(itemId) && item.size === size);
+        });
+
+        // Guardar los cambios en el usuario
+        await user.save();
 
         res.json({ success: true, message: "Producto eliminado del carrito", cart: user.cartData });
     } catch (error) {

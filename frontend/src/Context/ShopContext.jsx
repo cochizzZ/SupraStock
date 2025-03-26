@@ -246,6 +246,23 @@ const ShopContextProvider = ({ children }) => {
         return cartItems.reduce((total, item) => total + (item.quantity > 0 ? item.quantity : 0), 0);
     };
 
+    // Limpiar Carrito
+
+    const clearCart = () => {
+        const response = fetch("http://localhost:4000/clearcart", {
+            method: "DELETE",
+            headers: {
+                "Content-Type": "application/json",
+                "auth-token": localStorage.getItem("auth-token"),
+            }
+        });
+        response.then((res) => res.json()).then((data) => {
+            console.log(data);
+            setCartItems(getDefaultCart());
+        }
+        );
+    };
+
     // Proveer las funciones al contexto
     const contextValue = {
         userId,
@@ -257,6 +274,7 @@ const ShopContextProvider = ({ children }) => {
         removeFromCart,
         updateCart,
         handleLogin,
+        clearCart,
     };
 
     return <ShopContext.Provider value={contextValue}>{children}</ShopContext.Provider>;

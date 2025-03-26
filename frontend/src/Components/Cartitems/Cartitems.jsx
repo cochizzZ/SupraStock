@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2'; // Importar Swal
 
 const Cartitems = () => {
-    const { getTotalCartAmount, all_product, cartItems, removeFromCart, updateCart, userId } = useContext(ShopContext);
+    const { getTotalCartAmount, all_product, cartItems, removeFromCart, updateCart, userId, clearCart } = useContext(ShopContext);
     const navigate = useNavigate();
 
     const updateCartQuantity = (productId, newQuantity, size) => {
@@ -72,6 +72,8 @@ const Cartitems = () => {
 
     return (
         <div className='cartitems'>
+            <div className='empty-cart'> <button onClick={clearCart}>Limpiar carrito</button> </div>
+            <h1>Carrito</h1>
             <div className="cartitems-format-main">
                 <p>Productos</p>
                 <p>Título</p>
@@ -95,7 +97,7 @@ const Cartitems = () => {
                                 <input
                                     type="number"
                                     className="cartitems-quantity-input"
-                                    min="1"
+                                    min="0"
                                     value={item.quantity}
                                     onChange={(event) => updateCartQuantity(product._id, Number(event.target.value), item.size)}
                                 />
@@ -135,7 +137,11 @@ const Cartitems = () => {
                     <button onClick={handleProceedToCheckout}>Proceder al pago</button>
                 </div>
             </div>
+            <div className="cartitems-empty">
+                {cartItems.length === 0 && <h1>El carrito está vacío</h1>}
+            </div>
         </div>
+        
     );
 };
 
