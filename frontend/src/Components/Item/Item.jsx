@@ -1,4 +1,4 @@
-import React, { useContext, useCallback, useState } from 'react';
+import React, { useContext, useCallback, useState, useEffect, useRef } from 'react';
 import './Item.css';
 import { Link } from 'react-router-dom';
 import { ShopContext } from '../../Context/ShopContext';
@@ -9,6 +9,7 @@ const Item = ({ id, image, name, new_price, old_price, sizes }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [selectedSize, setSelectedSize] = useState('');
   const [quantity, setQuantity] = useState(1);
+  const dropdownRef = useRef(null);
 
   const handleAddToCart = useCallback(() => {
     if (!id) {
@@ -27,6 +28,20 @@ const Item = ({ id, image, name, new_price, old_price, sizes }) => {
     setIsDropdownOpen(false);
   }, [id, selectedSize, quantity, addToCart]);
 
+  // Cerrar el dropdown al hacer clic fuera de él
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
   return (
     <div className='item'>
       <Link to={`/product/${id}`}>
@@ -42,7 +57,7 @@ const Item = ({ id, image, name, new_price, old_price, sizes }) => {
           <img src={addToCartIcon} alt="Agregar al carrito" />
         </button>
         {isDropdownOpen && (
-          <div className="item-dropdown">
+          <div className="item-dropdown" ref={dropdownRef}>
             <div className="item-dropdown-field">
               <label htmlFor="size-select">Talla:</label>
               <select
