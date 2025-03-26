@@ -222,7 +222,7 @@ const OrderSchema = new mongoose.Schema({
     city: { type: String, required: true },
     postal_code: { type: String, required: true },
     total: { type: Number, required: true },
-    status: { type: String, enum: ["Pending", "Processing", "Shipped", "Completed", "Cancelled"], default: "Pending" },
+    status: { type: String, enum: ["Pending", "Shipped", "Completed", "Cancelled"], default: "Pending" },
     date: { type: Date, default: Date.now },
     available: { type: Boolean, default: true },
     payment_info: {
@@ -863,6 +863,30 @@ app.put('/orders/:orderId', async (req, res) => {
         res.send(updatedOrder);
     } catch (error) {
         res.status(500).send(error);
+    }
+});
+
+// Endpoint para actualizar el estado de una orden
+app.put('/api/orders/:id', async (req, res) => {
+    try {
+        const { id } = req.params; // Obtener el ID de la orden desde los parámetros
+        const { status } = req.body; // Obtener el nuevo estado desde el cuerpo de la solicitud
+
+        // Buscar y actualizar la orden
+        const order = await Order.findByIdAndUpdate(
+            id,
+            { status },
+            { new: true } // Retornar la orden actualizada
+        );
+
+        if (!order) {
+            return res.status(404).json({ message: "Orden no encontrada" });
+        }
+
+        res.json(order); // Enviar la orden actualizada como respuesta
+    } catch (error) {
+        console.error("Error al actualizar la orden:", error);
+        res.status(500).json({ message: "Error interno del servidor" });
     }
 });
 

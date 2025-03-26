@@ -89,6 +89,22 @@ const handleDeleteOrder = async (orderId) => {
   }
 };
 
+const handleUpdateOrderStatus = async (orderId, newStatus) => {
+    try {
+        await axios.put(`http://localhost:4000/api/orders/${orderId}`, {
+            status: newStatus,
+        });
+        // Actualizar la lista de órdenes después del cambio
+        setOrders((prevOrders) =>
+            prevOrders.map((order) =>
+                order._id === orderId ? { ...order, status: newStatus } : order
+            )
+        );
+    } catch (error) {
+        console.error("Error al actualizar el estado de la orden:", error);
+    }
+};
+
   const toggleShowDeleted = () => {
     setShowDeleted((prev) => !prev);
   };
@@ -190,6 +206,7 @@ const handleDeleteOrder = async (orderId) => {
 
       <OrderDetailsModal
         selectedOrder={selectedOrder}
+        onUpdateOrderStatus={handleUpdateOrderStatus} // Pasar la función correctamente
         showFullOrderId={showFullOrderId}
         showFullUserId={showFullUserId}
         toggleOrderIdVisibility={toggleOrderIdVisibility}

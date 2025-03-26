@@ -1,7 +1,8 @@
 import React from "react";
 import { jsPDF } from "jspdf";
 import "./OrderManagement.css";
-import ExcelJS from "exceljs"; // Importar exceljs
+import ExcelJS from "exceljs";
+import Swal from "sweetalert2"; // Importar SweetAlert2 para notificaciones
 
 const OrderDetailsModal = ({
   selectedOrder,
@@ -12,8 +13,30 @@ const OrderDetailsModal = ({
   closeModal,
   translateStatus,
   formatPrice,
+  onUpdateOrderStatus, // Nueva función para actualizar el estado
 }) => {
   if (!selectedOrder) return null;
+
+  const handleSendOrder = async () => {
+    try {
+      // Simular la actualización del estado de la orden
+      await onUpdateOrderStatus(selectedOrder._id, "Shipped");
+      Swal.fire({
+        title: "Orden Enviada",
+        text: "El estado de la orden ha sido actualizado a 'Enviado'.",
+        icon: "success",
+        confirmButtonColor: "#3085d6",
+      });
+    } catch (error) {
+      console.error("Error al actualizar el estado de la orden:", error);
+      Swal.fire({
+        title: "Error",
+        text: "No se pudo actualizar el estado de la orden.",
+        icon: "error",
+        confirmButtonColor: "#d33",
+      });
+    }
+  };
 
   const generatePDF = async () => {
     const doc = new jsPDF();
@@ -260,9 +283,9 @@ const OrderDetailsModal = ({
   return (
     <div className="modal">
       <div className="modal-content">
-        <span className="close" onClick={closeModal}>
+        <button className="close-modal-x" onClick={closeModal}>
           &times;
-        </span>
+        </button>
         <h2>Detalles de la Orden</h2>
         <div className="order-details">
           <div className="section">
@@ -354,6 +377,9 @@ const OrderDetailsModal = ({
           </button>
           <button className="generate-excel" onClick={generateExcel}>
             Generar Excel
+          </button>
+          <button className="send-order" onClick={handleSendOrder}>
+            Enviar
           </button>
           <button className="close-modal" onClick={closeModal}>
             Cerrar
