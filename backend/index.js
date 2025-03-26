@@ -176,12 +176,11 @@ app.post('/removeproduct', async (req, res) => {
     }
 });
 
-// Creación de API para obtener todos los productos
 
 // Endpoint para obtener todos los productos
 app.get('/allproducts', async (req, res) => {
     try {
-        const products = await Product.find({});
+        const products = await Product.find({ available: true });
         res.status(200).json(products);
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
@@ -327,7 +326,7 @@ app.post('/login', async (req, res) => {
 
 //creación de un punto final para los datos de newcollection
 app.get('/newcollections', async (req, res) => {
-    let products = await Product.find({});
+    let products = await Product.find({ available: true });
     let newcollection = products.slice(0).slice(-8);
     console.log("newcollection: " + newcollection);
     console.log("NewCollection Fetched");
@@ -336,11 +335,18 @@ app.get('/newcollections', async (req, res) => {
 
 //creación de un punto final para la sección de mujeres populares
 app.get('/popularinwomen', async (req, res) => {
-    let products = await Product.find({ category: "women" });
-    let popular_in_women = products.slice(0, 4);
-    console.log("Popular in women fetched");
-    res.send(popular_in_women);
-})
+    try {
+        const popular_in_women = await Product.find({ category: "women", available: true }) // Filtrar por categoría y disponibilidad
+            .sort({ date: -1 }) // Ordenar por fecha de creación descendente
+            .limit(4); // Limitar a los 4 productos más recientes
+
+        console.log("Popular in women fetched");
+        res.status(200).json(popular_in_women);
+    } catch (error) {
+        console.error("Error fetching popular in women:", error);
+        res.status(500).json({ success: false, message: "Error interno del servidor" });
+    }
+});
 
 // crear middleware para obtener usuario
 
