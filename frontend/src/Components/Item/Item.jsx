@@ -3,6 +3,7 @@ import './Item.css';
 import { Link } from 'react-router-dom';
 import { ShopContext } from '../../Context/ShopContext';
 import addToCartIcon from '../Assets/add_to_cart_icon.png';
+import defaultImage from '../Assets/404.jpg'; // Ruta a la imagen por defecto
 
 const Item = ({ id, image, name, new_price, old_price, sizes }) => {
   const { addToCart } = useContext(ShopContext);
@@ -45,7 +46,15 @@ const Item = ({ id, image, name, new_price, old_price, sizes }) => {
   return (
     <div className='item'>
       <Link to={`/product/${id}`}>
-        <img onClick={() => window.scrollTo(0, 0)} src={image} alt={name} />
+        <img
+          onClick={() => window.scrollTo(0, 0)}
+          src={image}
+          alt={name}
+          onError={(e) => {
+            e.target.onerror = null; // Evitar bucles infinitos si la imagen por defecto también falla
+            e.target.src = defaultImage; // Reemplazar con la imagen por defecto
+          }}
+        />
       </Link>
       <p>{name}</p>
       <div className="container-items-info">

@@ -57,6 +57,7 @@
 .listproduct-allproducts {
     overflow-y: auto;
     margin-top: 20px;
+    width: 100%;
 }
 
 @media(max-width:800px) {
