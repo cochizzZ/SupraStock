@@ -12,7 +12,6 @@ const AddProduct = () => {
     new_price: "",
     old_price: "",
     description: "",
-    stock: "", // Campo general de stock
     sizes: {}, // Objeto para almacenar tallas y cantidades
   });
 
@@ -28,22 +27,12 @@ const AddProduct = () => {
   };
 
   const addSizeHandler = () => {
-    const totalSizeStock = Object.values(productDetails.sizes).reduce((acc, curr) => acc + parseInt(curr), 0);
     const newSizeStock = parseInt(sizeStockInput);
 
     if (sizeInput && sizeStockInput && !productDetails.sizes[sizeInput]) {
-      if (totalSizeStock + newSizeStock > parseInt(productDetails.stock)) {
-        Swal.fire({
-          icon: 'error',
-          title: 'Error',
-          text: 'La cantidad total de tallas no puede ser mayor que la cantidad de stock general.',
-        });
-        return;
-      }
-
       setProductDetails({
         ...productDetails,
-        sizes: { ...productDetails.sizes, [sizeInput]: sizeStockInput },
+        sizes: { ...productDetails.sizes, [sizeInput]: newSizeStock },
       });
       setSizeInput("");
       setSizeStockInput("");
@@ -57,24 +46,34 @@ const AddProduct = () => {
   };
 
   const updateSizeHandler = (size, newQuantity) => {
-    const updatedSizes = { ...productDetails.sizes, [size]: newQuantity };
+    const updatedSizes = { ...productDetails.sizes, [size]: parseInt(newQuantity) || 0 };
     setProductDetails({ ...productDetails, sizes: updatedSizes });
+  };
+
+  const calculateStock = () => {
+    return Object.values(productDetails.sizes).reduce((acc, curr) => acc + parseInt(curr), 0);
   };
 
   const Add_Product = async () => {
     console.log("Producto antes de enviar:", productDetails);
 
     // Verificar que todos los campos obligatorios estén llenos
-    if (!productDetails.name || !productDetails.category || !productDetails.new_price || !productDetails.stock) {
+    if (!productDetails.name || !productDetails.category || !productDetails.new_price) {
       Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: 'Por favor, complete todos los campos obligatorios.',
+        icon: "error",
+        title: "Error",
+        text: "Por favor, complete todos los campos obligatorios.",
       });
       return;
     }
 
-    let product = { ...productDetails }; // Se crea una copia del objeto para evitar mutaciones inesperadas
+    // Calcular el stock automáticamente
+    const calculatedStock = calculateStock();
+
+    const product = {
+      ...productDetails,
+      stock: calculatedStock, // Agregar el stock calculado
+    };
 
     // Si hay una imagen, súbela primero
     if (image) {
@@ -95,20 +94,20 @@ const AddProduct = () => {
         product.image = imageResponse.image_url;
       } else {
         Swal.fire({
-          icon: 'error',
-          title: 'Error',
-          text: 'Fallo al subir la imagen',
+          icon: "error",
+          title: "Error",
+          text: "Fallo al subir la imagen",
         });
         return;
       }
     }
 
     // Luego, intenta agregar el producto a la base de datos
-    const productResponse = await fetch('http://localhost:4000/addproduct', {
-      method: 'POST',
+    const productResponse = await fetch("http://localhost:4000/addproduct", {
+      method: "POST",
       headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
+        Accept: "application/json",
+        "Content-Type": "application/json",
       },
       body: JSON.stringify(product),
     }).then((resp) => resp.json());
@@ -117,9 +116,9 @@ const AddProduct = () => {
 
     if (productResponse.success) {
       Swal.fire({
-        icon: 'success',
-        title: 'Éxito',
-        text: 'Producto e imagen agregados correctamente',
+        icon: "success",
+        title: "Éxito",
+        text: "Producto e imagen agregados correctamente",
       });
       // Limpiar todos los campos del formulario
       setProductDetails({
@@ -129,15 +128,14 @@ const AddProduct = () => {
         new_price: "",
         old_price: "",
         description: "",
-        stock: "",
         sizes: {},
       });
       setImage(null);
     } else {
       Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: 'Fallo al agregar el producto',
+        icon: "error",
+        title: "Error",
+        text: "Fallo al agregar el producto",
       });
     }
 
@@ -194,17 +192,6 @@ const AddProduct = () => {
       </div>
 
       <div className="add-product-itemfield">
-        <p>Cantidad en stock</p> {/* Campo general de stock */}
-        <input
-          value={productDetails.stock}
-          onChange={changeHandler}
-          type="number"
-          name="stock"
-          placeholder="Ingrese la cantidad en stock"
-        />
-      </div>
-      
-      <div className="add-product-itemfield">
         <p>Categoría del producto</p>
         <select
           value={productDetails.category}
@@ -240,7 +227,9 @@ const AddProduct = () => {
             onChange={(e) => setSizeInput(e.target.value)}
             className="size-select"
           >
-            <option value="" disabled>Seleccionar talla</option>
+            <option value="" disabled>
+              Seleccionar talla
+            </option>
             <option value="XS">XS</option>
             <option value="S">S</option>
             <option value="M">M</option>
@@ -259,7 +248,7 @@ const AddProduct = () => {
         <div className="sizes-list">
           {Object.keys(productDetails.sizes).map((size, index) => (
             <div key={index} className="size-item">
-              {size} - 
+              {size} -{" "}
               <input
                 type="number"
                 value={productDetails.sizes[size]}
@@ -271,6 +260,10 @@ const AddProduct = () => {
             </div>
           ))}
         </div>
+      </div>
+
+      <div className="add-product-itemfield">
+        <p>Stock total: {calculateStock()}</p> {/* Mostrar el stock calculado */}
       </div>
 
       <button onClick={Add_Product} className="addproduct-btn">
