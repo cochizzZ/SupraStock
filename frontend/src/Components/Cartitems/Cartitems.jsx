@@ -4,6 +4,7 @@ import { ShopContext } from '../../Context/ShopContext';
 import remove_icon from '../Assets/cart_cross_icon.png';
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2'; // Importar Swal
+import defaultImage from '../Assets/404.jpg';
 
 const Cartitems = () => {
     const { getTotalCartAmount, all_product, cartItems, removeFromCart, updateCart, userId, clearCart } = useContext(ShopContext);
@@ -90,7 +91,10 @@ const Cartitems = () => {
                     return (
                         <div key={`${item._id}-${item.size}`}>
                             <div className="cartitems-format cartitems-format-main" id={`${product._id}-${item.size}`}>
-                                <img src={product.image} alt={product.name} className='carticon-product-icon' />
+                                <img src={product.image} alt={product.name} className='carticon-product-icon' onError={(e) => {
+                                        e.target.onerror = null;
+                                        e.target.src = defaultImage;
+                                    }}/>
                                 <p>{product.name}</p>
                                 <p>${product.new_price}</p>
                                 <p>{item.size}</p> {/* Mostrar la talla del producto */}
