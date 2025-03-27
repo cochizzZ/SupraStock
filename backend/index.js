@@ -214,6 +214,7 @@ const OrderSchema = new mongoose.Schema({
     products: [
         {
             product_id: { type: mongoose.Schema.Types.ObjectId, ref: "Product", required: true },
+            size: { type: String, required: true },
             quantity: { type: Number, required: true },
             price: { type: Number, required: true },
         },
@@ -909,6 +910,7 @@ app.post('/api/orders', async (req, res) => {
         const { user_id, products, total, address, city, postal_code, payment_info } = req.body;
         console.log("Orden recibida:", req.body);
 
+        // Validar que todos los campos obligatorios estén presentes
         if (!user_id || !products || !total || !address || !city || !postal_code || !payment_info) {
             return res.status(400).json({
                 success: false,
@@ -916,28 +918,13 @@ app.post('/api/orders', async (req, res) => {
             });
         }
 
-        // Validar y convertir los product_id a ObjectId
-        const productIds = products.map(p => p.product_id);
-        const existingProducts = await Product.find({ id: { $in: productIds } });
-
-        if (existingProducts.length !== productIds.length) {
+        // Validar que todos los productos tengan un _id válido
+        if (products.some(p => !mongoose.Types.ObjectId.isValid(p.product_id))) {
             return res.status(400).json({
                 success: false,
-                message: "Uno o más productos no existen en la base de datos.",
+                message: "Uno o más product_id no son válidos.",
             });
         }
-
-        // Mapear los productos con sus ObjectIds
-        const productIdMap = existingProducts.reduce((map, product) => {
-            map[product.id] = product._id;
-            return map;
-        }, {});
-
-        const updatedProducts = products.map(p => ({
-            product_id: productIdMap[p.product_id],
-            quantity: p.quantity,
-            price: p.price,
-        }));
 
         // Ajustar la fecha a la zona horaria de Colombia
         const now = new Date();
@@ -945,17 +932,17 @@ app.post('/api/orders', async (req, res) => {
         const localOffset = now.getTimezoneOffset();
         const colombiaTime = new Date(now.getTime() + (colombiaOffset - localOffset) * 60 * 1000);
 
-        // Crear la nueva orden con la fecha ajustada
+        // Crear la nueva orden con los datos proporcionados
         const newOrder = new Order({
             user_id,
-            products: updatedProducts,
+            products, // Usar directamente los productos proporcionados
             total,
             address,
             city,
             postal_code,
             payment_info,
             status: 'Pending',
-            date: colombiaTime // Establecer la fecha ajustada
+            date: colombiaTime, // Establecer la fecha ajustada
         });
 
         console.log("Orden creada:", newOrder);

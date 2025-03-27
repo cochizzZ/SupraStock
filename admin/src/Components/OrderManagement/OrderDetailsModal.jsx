@@ -79,16 +79,25 @@ const OrderDetailsModal = ({
       doc.setFont("helvetica", "bold");
       doc.text(`${index + 1}. ${product.product_id.name}`, 10, y);
 
+      // Agregar la imagen del producto
+      const imageHeight = 30; // Altura de la imagen
       doc.setFont("helvetica", "normal");
-      doc.text(`Cantidad: ${product.quantity}`, 10, y + 10);
-      doc.text(`Precio: $${formatPrice(product.price)}`, 10, y + 20);
+      doc.text("Imagen:", 10, y + 5);
+      doc.addImage(product.product_id.image, "JPEG", 10, y + 10, 30, imageHeight);
+
+      // Ajustar la posición vertical para el texto debajo de la imagen
+      const textStartY = y + imageHeight + 15; // Espaciado adicional debajo de la imagen
+      doc.text(`Talla: ${product.size}`, 10, textStartY);
+      doc.text(`Cantidad: ${product.quantity}`, 10, textStartY + 10);
+      doc.text(`Precio: $${formatPrice(product.price)}`, 10, textStartY + 20);
 
       // Dibujar una línea separadora entre productos
       doc.setDrawColor(200);
       doc.setLineWidth(0.3);
-      doc.line(10, y + 25, 200, y + 25);
+      doc.line(10, textStartY + 25, 200, textStartY + 25);
 
-      y += 35; // Incrementar la posición vertical
+      // Incrementar la posición vertical para el siguiente producto
+      y = textStartY + 35;
     });
 
     // Información de contacto
@@ -186,7 +195,7 @@ const OrderDetailsModal = ({
 
     // Encabezado de productos
     worksheet.addRow(["Productos"]);
-    const productHeader = worksheet.addRow(["#", "Nombre", "Cantidad", "Precio"]);
+    const productHeader = worksheet.addRow(["#", "Nombre", "Talla", "Cantidad", "Precio"]);
     productHeader.eachCell((cell) => {
       cell.style = headerStyle;
     });
@@ -196,6 +205,7 @@ const OrderDetailsModal = ({
       const row = worksheet.addRow([
         index + 1,
         product.product_id.name,
+        product.size, // Agregar la talla
         product.quantity,
         `$${formatPrice(product.price)}`,
       ]);
@@ -317,6 +327,7 @@ const OrderDetailsModal = ({
                   <tr>
                     <th>Imagen</th>
                     <th>Nombre</th>
+                    <th>Talla</th>
                     <th>Cantidad</th>
                     <th>Precio por Unidad</th>
                   </tr>
@@ -332,6 +343,7 @@ const OrderDetailsModal = ({
                         />
                       </td>
                       <td>{product.product_id.name}</td>
+                      <td>{product.size}</td>
                       <td>{product.quantity}</td>
                       <td>${formatPrice(product.price)}</td>
                     </tr>

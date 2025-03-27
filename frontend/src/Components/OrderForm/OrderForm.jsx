@@ -69,13 +69,12 @@ const OrderForm = () => {
 
         try {
             // Obtener los productos seleccionados del carrito
-            const selectedProducts = all_product
-                .filter((product) => cartItems[product.id] > 0)
-                .map((product) => ({
-                    product_id: product.id,
-                    quantity: cartItems[product.id],
-                    price: product.new_price,
-                }));
+            const selectedProducts = cartItems.map((item) => ({
+                product_id: item.product_id._id, // Accede al ID del producto
+                quantity: item.quantity, // Cantidad seleccionada
+                price: item.product_id.new_price, // Precio del producto
+                size: item.size, // Talla seleccionada
+            }));
 
             // Crear la orden con los datos del pago incluidos
             const orderData = {
