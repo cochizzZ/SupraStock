@@ -123,10 +123,11 @@
     
 }
 
-/* 📌 Ajustes para móviles */
+/* Ajustes para móviles */
 @media(max-width:500px) {
     .cartitems-format-main {
-        display: none;
+        padding: 10px 0px;
+        font-size: 11px;
     }
 
     .cartitems-format {
