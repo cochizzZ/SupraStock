@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./EditProduct.css";
 import Swal from "sweetalert2";
+import defaultImage from '../../assets/404.jpg';
 
 const EditProduct = ({ product, onUpdate }) => {
   const [image, setImage] = useState(null);
@@ -27,24 +28,27 @@ const EditProduct = ({ product, onUpdate }) => {
     setProductDetails({ ...productDetails, [e.target.name]: e.target.value });
   };
 
+  const calculateStock = (sizes) => {
+    return Object.values(sizes).reduce((acc, curr) => acc + parseInt(curr || 0), 0);
+  };
+
+  // Recalcular el stock automáticamente cuando cambien las tallas
+  useEffect(() => {
+    const updatedStock = calculateStock(productDetails.sizes);
+    setProductDetails((prevDetails) => ({
+      ...prevDetails,
+      stock: updatedStock,
+    }));
+  }, [productDetails.sizes]);
+
   const addSizeHandler = () => {
-    const totalSizeStock = Object.values(productDetails.sizes).reduce((acc, curr) => acc + parseInt(curr), 0);
     const newSizeStock = parseInt(sizeStockInput);
 
     if (sizeInput && sizeStockInput && !productDetails.sizes[sizeInput]) {
-      if (totalSizeStock + newSizeStock > parseInt(productDetails.stock)) {
-        Swal.fire({
-          icon: 'error',
-          title: 'Error',
-          text: 'La cantidad total de tallas no puede ser mayor que la cantidad de stock general.',
-        });
-        return;
-      }
-
-      setProductDetails({
-        ...productDetails,
-        sizes: { ...productDetails.sizes, [sizeInput]: sizeStockInput },
-      });
+      setProductDetails((prevDetails) => ({
+        ...prevDetails,
+        sizes: { ...prevDetails.sizes, [sizeInput]: newSizeStock },
+      }));
       setSizeInput("");
       setSizeStockInput("");
     }
@@ -53,12 +57,18 @@ const EditProduct = ({ product, onUpdate }) => {
   const removeSizeHandler = (sizeToRemove) => {
     const updatedSizes = { ...productDetails.sizes };
     delete updatedSizes[sizeToRemove];
-    setProductDetails({ ...productDetails, sizes: updatedSizes });
+    setProductDetails((prevDetails) => ({
+      ...prevDetails,
+      sizes: updatedSizes,
+    }));
   };
 
   const updateSizeHandler = (size, newQuantity) => {
-    const updatedSizes = { ...productDetails.sizes, [size]: newQuantity };
-    setProductDetails({ ...productDetails, sizes: updatedSizes });
+    const updatedSizes = { ...productDetails.sizes, [size]: parseInt(newQuantity) || 0 };
+    setProductDetails((prevDetails) => ({
+      ...prevDetails,
+      sizes: updatedSizes,
+    }));
   };
 
   const updateProduct = async () => {
@@ -182,7 +192,7 @@ const EditProduct = ({ product, onUpdate }) => {
         <p>Cantidad en stock</p>
         <input
           value={productDetails.stock}
-          onChange={changeHandler}
+          readOnly // Hacer que el campo sea de solo lectura
           type="number"
           name="stock"
           placeholder="Ingrese la cantidad en stock"
@@ -212,6 +222,10 @@ const EditProduct = ({ product, onUpdate }) => {
             src={image ? URL.createObjectURL(image) : productDetails.image}
             alt="Subir imagen"
             className="edit-product-thumbnail-img"
+            onError={(e) => {
+              e.target.onerror = null;
+              e.target.src = defaultImage; 
+            }}
           />
         </label>
         <input onChange={imageHandler} type="file" name="image" id="file-input" hidden />

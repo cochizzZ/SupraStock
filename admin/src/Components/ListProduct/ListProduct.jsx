@@ -3,6 +3,7 @@ import './ListProduct.css';
 import cross_icon from '../../assets/cross_icon.png';
 import lapicito from '../../assets/lapicito.svg';
 import EditProduct from '../EditProduct/EditProduct';
+import defaultImage from '../../assets/404.jpg';
 
 const ListProduct = () => {
   const [allproducts, setAllProducts] = useState([]);
@@ -84,7 +85,10 @@ const ListProduct = () => {
           return (
             <React.Fragment key={index}>
               <div className="listproduct-format-main listproduct-format" id={product.id}>
-                <img src={product.image} alt="" className="listproduct-product-icon" />
+                <img src={product.image} alt="" className="listproduct-product-icon" onError={(e) => {
+                                        e.target.onerror = null;
+                                        e.target.src = defaultImage;
+                                    }} />
                 <p>{product.name}</p>
                 <p>${product.old_price}</p>
                 <p>${product.new_price}</p>
