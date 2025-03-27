@@ -757,7 +757,7 @@ app.get('/api/users', async (req, res) => {
 // Endpoint para obtener detalles de un usuario
 app.put('/api/users/:id', async (req, res) => {
     try {
-        const { name, email, photo, address, phone } = req.body;
+        const { name, email, photo, address, phone, role } = req.body;
         const userId = req.params.id;
 
         // Verificar si el usuario existe
@@ -767,7 +767,7 @@ app.put('/api/users/:id', async (req, res) => {
         }
 
         // Actualizar el usuario
-        user = await Users.findByIdAndUpdate(userId, { name, email, photo, address, phone }, { new: true });
+        user = await Users.findByIdAndUpdate(userId, { name, email, photo, address, phone, role }, { new: true });
 
         res.json({ success: true, message: "Usuario actualizado", user });
     } catch (error) {
