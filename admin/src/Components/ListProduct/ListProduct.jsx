@@ -90,7 +90,7 @@ const ListProduct = () => {
                 <p>${product.new_price}</p>
                 <p>{product.category}</p>
                 <p>{product.stock}</p>
-                <p>
+                <p className="listproduct-sizes">
                   {product.sizes && Object.entries(product.sizes).map(([size, quantity]) => (
                     <span key={size}>{size}: {quantity} unidades</span>
                   ))}

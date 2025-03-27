@@ -108,3 +108,8 @@
     color: white;
     font-weight: bold;
 }
+
+.listproduct-sizes {
+    display: flex;
+    flex-direction: column;
+}
