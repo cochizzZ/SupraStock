@@ -84,9 +84,9 @@ const ProductDisplay = ({ product }) => {
               <option value="" disabled>
                 Seleccionar talla
               </option>
-              {Object.keys(product.sizes).map((size) => (
+              {Object.entries(product.sizes).map(([size, quantity]) => (
                 <option key={size} value={size}>
-                  {size}
+                  {size} ({quantity} disponibles)
                 </option>
               ))}
             </select>
