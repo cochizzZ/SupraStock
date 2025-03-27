@@ -4,6 +4,7 @@ import star_icon from "../Assets/star_icon.png";
 import star_dull_icon from "../Assets/star_dull_icon.png";
 import { ShopContext } from "../../Context/ShopContext";
 import Swal from "sweetalert2";
+import defaultImage from '../Assets/404.jpg';
 
 const ProductDisplay = ({ product }) => {
   const { addToCart } = useContext(ShopContext);
@@ -50,6 +51,10 @@ const ProductDisplay = ({ product }) => {
             className="productdisplay-main-img"
             src={product.image}
             alt={product.name}
+            onError={(e) => {
+              e.target.onerror = null;
+              e.target.src = defaultImage;
+            }}
           />
         </div>
       </div>

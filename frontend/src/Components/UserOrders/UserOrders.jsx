@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import './UserOrders.css';
+import defaultImage from '../Assets/404.jpg';
 
 const UserOrders = () => {
   const [orders, setOrders] = useState([]);
@@ -64,7 +65,10 @@ const UserOrders = () => {
                   <tr key={product.product_id}>
                     <td>
                       {productDetails && (
-                        <img src={productDetails.image} alt={productDetails.name} className="product-image" />
+                        <img src={productDetails.image} alt={productDetails.name} className="product-image" onError={(e) => {
+                          e.target.onerror = null;
+                          e.target.src = defaultImage;
+                        }} />
                       )}
                     </td>
                     <td>{productDetails ? productDetails.name : 'Cargando...'}</td>
