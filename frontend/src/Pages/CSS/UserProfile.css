@@ -25,13 +25,13 @@
   color: #333;
 }
 
-label {
+.user-info-section label, .address-section label{
   display: block;
   margin-bottom: 10px;
   font-weight: bold;
 }
 
-input, select {
+.user-info-section input, .user-info-section select, .address-section input, .address-section select {
   width: 100%;
   padding: 8px;
   margin-top: 5px;
@@ -39,7 +39,7 @@ input, select {
   border-radius: 4px;
 }
 
-button {
+.user-profile button {
   width: 80%;
   padding: 10px;
   background-color: #ff5a5a;
