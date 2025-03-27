@@ -113,13 +113,13 @@ app.post('/addproduct', async (req, res) => {
         let products = await Product.find({});
         let id = products.length > 0 ? products[products.length - 1].id + 1 : 1;
 
-        const { name, image, category, new_price, old_price, description, stock } = req.body;
+        const { name, image, category, new_price, old_price, description, stock, sizes } = req.body;
 
         // Validar que los campos obligatorios no estén vacíos
-        if (!name || !image || !category || !new_price || stock === undefined) {
+        if (!name || !image || !category || !new_price || stock === undefined || sizes === undefined) {
             return res.status(400).json({
                 success: false,
-                message: "Todos los campos (name, image, category, new_price, stock) son obligatorios.",
+                message: "Todos los campos (name, image, category, new_price, stock, sizes) son obligatorios.",
             });
         }
 
@@ -131,6 +131,7 @@ app.post('/addproduct', async (req, res) => {
             new_price: new_price,
             old_price: old_price || 0,
             description: description,
+            sizes: sizes,
             stock: stock
         });
 
