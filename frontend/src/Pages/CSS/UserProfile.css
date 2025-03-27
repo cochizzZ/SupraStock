@@ -40,7 +40,7 @@ input, select {
 }
 
 button {
-  width: 100%;
+  width: 80%;
   padding: 10px;
   background-color: #ff5a5a;
   color: white;
@@ -48,4 +48,5 @@ button {
   border-radius: 4px;
   font-size: 16px;
   cursor: pointer;
+  height: 35px;
 }
