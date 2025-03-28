@@ -40,6 +40,7 @@ const LoginSignup = () => {
         localStorage.setItem('username', responseData.username);
         localStorage.setItem('userId', responseData.userId);
         if (responseData.role === 'admin'){
+          localStorage.setItem('userRole', 'admin');
           window.open("http://localhost:5173/?token=" + responseData.token, "_blank");
         }
         // Restaurar los productos seleccionados en el carrito

@@ -1,14 +1,23 @@
 import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import './CommentsBox.css';
 
 const CommentsBox = ({ productId }) => {
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState({ author: '', text: '' });
   const [showComments, setShowComments] = useState(true);
+  let userRole = localStorage.getItem('userRole') || 'guest'; // Cambia 'guest' por el rol predeterminado que desees
 
   useEffect(() => {
-    const storedComments = JSON.parse(localStorage.getItem(`comments-${productId}`)) || [];
-    setComments(storedComments);
+    const fetchComments = async () => {
+      try {
+        const response = await axios.get(`http://localhost:4000/api/comments/${productId}`);
+        setComments(response.data);
+      } catch (error) {
+        console.error("Error al obtener comentarios:", error);
+      }
+    };
+    fetchComments();
   }, [productId]);
 
   const handleInputChange = (e) => {
@@ -16,21 +25,45 @@ const CommentsBox = ({ productId }) => {
     setNewComment({ ...newComment, [name]: value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (newComment.author && newComment.text) {
-      const updatedComments = [...comments, { id: comments.length + 1, ...newComment }];
-      setComments(updatedComments);
-      localStorage.setItem(`comments-${productId}`, JSON.stringify(updatedComments));
-      setNewComment({ author: '', text: '' });
+        try {
+            const response = await axios.post('http://localhost:4000/api/comments', { productId, ...newComment });
+            setComments([...comments, response.data.comment]);
+            setNewComment({ author: '', text: '' });
+        } catch (error) {
+            if (error.response && error.response.status === 404) {
+                console.error("Producto no encontrado:", error.response.data.message);
+                alert("El producto no existe. No se puede agregar el comentario.");
+            } else {
+                console.error("Error al agregar comentario:", error);
+            }
+        }
     }
-  };
+};
 
-  const handleDelete = (commentId) => {
-    const updatedComments = comments.filter(comment => comment.id !== commentId);
-    setComments(updatedComments);
-    localStorage.setItem(`comments-${productId}`, JSON.stringify(updatedComments));
-  };
+const handleDelete = async (commentId) => {
+  const confirmDelete = window.confirm("¿Estás seguro de que deseas eliminar este comentario?");
+  if (!confirmDelete) return;
+
+  try {
+      const token = localStorage.getItem('auth-token'); // Obtén el token del localStorage
+      const response = await axios.delete(`http://localhost:4000/api/comments/${commentId}`, {
+          headers: {
+              'auth-token': token, // Incluye el token en los encabezados
+          },
+      });
+
+      if (response.status === 200) {
+          setComments(comments.filter(comment => comment._id !== commentId));
+          alert("Comentario eliminado correctamente.");
+      }
+  } catch (error) {
+      console.error("Error al eliminar comentario:", error);
+      alert("No se pudo eliminar el comentario. Verifica tus permisos.");
+  }
+};
 
   return (
     <div className='commentsbox'>
@@ -52,10 +85,12 @@ const CommentsBox = ({ productId }) => {
         {showComments ? (
           <div className="commentsbox-comments">
             {comments.map(comment => (
-              <div key={comment.id} className="comment">
+              <div key={comment._id} className="comment">
                 <p><strong>{comment.author}</strong></p>
                 <p>{comment.text}</p>
-                <button onClick={() => handleDelete(comment.id)}>Eliminar</button>
+                {userRole === 'admin' && (
+                  <button onClick={() => handleDelete(comment._id)}>Eliminar</button>
+                )}
               </div>
             ))}
           </div>
