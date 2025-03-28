@@ -9,6 +9,12 @@ const CommentsBox = ({ productId }) => {
   let userRole = localStorage.getItem('userRole') || 'guest'; // Cambia 'guest' por el rol predeterminado que desees
 
   useEffect(() => {
+    // Obtener el nombre del usuario desde localStorage
+    const username = localStorage.getItem('username');
+    if (username) {
+      setNewComment((prev) => ({ ...prev, author: username }));
+    }
+
     const fetchComments = async () => {
       try {
         const response = await axios.get(`http://localhost:4000/api/comments/${productId}`);
@@ -27,15 +33,30 @@ const CommentsBox = ({ productId }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (newComment.author && newComment.text) {
+    if (!localStorage.getItem('auth-token')) {
+        alert("Debes iniciar sesión para dejar un comentario.");
+        return;
+    }
+    if (newComment.text) {
         try {
-            const response = await axios.post('http://localhost:4000/api/comments', { productId, ...newComment });
+            const token = localStorage.getItem('auth-token'); // Obtener el token del localStorage
+            const response = await axios.post(
+                'http://localhost:4000/api/comments',
+                { productId, text: newComment.text },
+                {
+                    headers: {
+                        'auth-token': token, // Incluir el token en los encabezados
+                    },
+                }
+            );
             setComments([...comments, response.data.comment]);
-            setNewComment({ author: '', text: '' });
+            setNewComment({ ...newComment, text: '' });
         } catch (error) {
             if (error.response && error.response.status === 404) {
                 console.error("Producto no encontrado:", error.response.data.message);
                 alert("El producto no existe. No se puede agregar el comentario.");
+            } else if (error.response && error.response.status === 401) {
+                alert("Debes iniciar sesión para dejar un comentario.");
             } else {
                 console.error("Error al agregar comentario:", error);
             }
@@ -99,19 +120,18 @@ const handleDelete = async (commentId) => {
             <input
               type="text"
               name="author"
-              placeholder="Your name"
+              placeholder="Tú nombre"
               value={newComment.author}
-              onChange={handleInputChange}
-              required
+              readOnly // Hacer el campo de solo lectura
             />
             <textarea
               name="text"
-              placeholder="Your comment"
+              placeholder="Tú comentario"
               value={newComment.text}
               onChange={handleInputChange}
               required
             ></textarea>
-            <button type="submit">Submit</button>
+            <button type="submit">Enviar</button>
           </form>
         )}
       </div>

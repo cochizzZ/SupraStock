@@ -1015,9 +1015,9 @@ app.get('/api/comments/:productId', async (req, res) => {
 });
 
 // Endpoint para agregar un comentario
-app.post('/api/comments', async (req, res) => {
+app.post('/api/comments', fetchUser, async (req, res) => {
     try {
-        const { productId, author, text } = req.body;
+        const { productId, text } = req.body;
 
         // Buscar el producto por su campo `id` (número)
         const product = await Product.findOne({ id: productId });
@@ -1025,9 +1025,20 @@ app.post('/api/comments', async (req, res) => {
             return res.status(404).json({ success: false, message: "Producto no encontrado" });
         }
 
+        // Obtener el usuario autenticado
+        const user = await Users.findById(req.user.id);
+        if (!user) {
+            return res.status(404).json({ success: false, message: "Usuario no encontrado" });
+        }
+
         // Crear y guardar el comentario con el ObjectId del producto
-        const newComment = new Comment({ productId: product._id, author, text });
+        const newComment = new Comment({
+            productId: product._id,
+            author: user.name, // Usar el nombre del usuario autenticado
+            text,
+        });
         await newComment.save();
+
         res.json({ success: true, comment: newComment });
     } catch (error) {
         console.error("Error al agregar comentario:", error);
