@@ -4,6 +4,7 @@ import cross_icon from '../../assets/cross_icon.png';
 import lapicito from '../../assets/lapicito.svg';
 import EditProduct from '../EditProduct/EditProduct';
 import defaultImage from '../../assets/404.jpg';
+import Swal from "sweetalert2";
 
 const ListProduct = () => {
   const [allproducts, setAllProducts] = useState([]);
@@ -22,16 +23,58 @@ const ListProduct = () => {
     fetchInfo();
   }, []);
 
-  const remove_product = async (id) => {
-    await fetch('http://localhost:4000/removeproduct', {
-      method: 'POST',
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ id: id }),
+  const remove_product = async (productId) => {
+    const result = await Swal.fire({
+        title: "¿Estás seguro?",
+        text: "No podrás revertir esta acción",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Sí, eliminar",
+        cancelButtonText: "Cancelar",
     });
-    await fetchInfo();
+
+    if (result.isConfirmed) {
+        try {
+            const response = await fetch(`http://localhost:4000/removeproduct`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ id: productId }),
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                Swal.fire({
+                    title: "¡Eliminado!",
+                    text: "El producto ha sido eliminado correctamente.",
+                    icon: "success",
+                    confirmButtonColor: "#3085d6",
+                });
+
+                // Actualizar la lista de productos después de eliminar
+                await fetchInfo();
+            } else {
+                Swal.fire({
+                    title: "Error",
+                    text: data.message || "No se pudo eliminar el producto.",
+                    icon: "error",
+                    confirmButtonColor: "#d33",
+                });
+            }
+        } catch (error) {
+            console.error("Error al eliminar el producto:", error);
+            Swal.fire({
+                title: "Error",
+                text: "Hubo un problema al eliminar el producto.",
+                icon: "error",
+                confirmButtonColor: "#d33",
+            });
+        }
+    }
   };
 
   const handleEdit = (product) => {
