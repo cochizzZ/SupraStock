@@ -12,7 +12,7 @@ const ListProduct = () => {
   const [activeTab, setActiveTab] = useState('available'); // 'available' or 'unavailable'
 
   const fetchInfo = async () => {
-    await fetch('http://localhost:4000/allproducts')
+    await fetch('http://localhost:4000/fullproducts')
       .then((res) => res.json())
       .then((data) => {
         setAllProducts(data);

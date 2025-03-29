@@ -185,6 +185,17 @@ app.get('/allproducts', async (req, res) => {
     }
 });
 
+// Endpoint para obtener todos los productos (incluyendo no disponibles)
+app.get('/fullproducts', async (req, res) => {
+    try {
+        const products = await Product.find({});
+        res.status(200).json(products);
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+
 //creación de schema para el modelo de usuario
 
 const Users = mongoose.model('Users', new mongoose.Schema({
