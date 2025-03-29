@@ -6,7 +6,7 @@
     margin-bottom: 155px;
     background: linear-gradient(180deg, #fde1ff, #e1ffea22 60%);
     margin-top: 155px; 
-    max-height: 400px;
+    max-height: 500px;
 }
 
 .offers-left {
@@ -38,7 +38,7 @@
 }
 
 .offers-right img {
-    max-width: 450px; /* Evita que la imagen se desborde */
+    max-width: 375px; /* Evita que la imagen se desborde */
     height: auto;
 }
 /* Ajustes para pantallas medianas */
