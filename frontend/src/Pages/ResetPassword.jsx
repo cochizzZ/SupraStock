@@ -30,7 +30,7 @@ const ResetPassword = () => {
     };
 
     return (
-        <div>
+        <div className="forgot-password-container">
             <h1>Establecer Nueva Contraseña</h1>
             <form onSubmit={handleSubmit}>
                 <label>

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import Swal from 'sweetalert2';
+import './CSS/ForgotPassword.css'; // Importar los estilos
 
 const ForgotPassword = () => {
     const [email, setEmail] = useState('');
@@ -28,7 +29,7 @@ const ForgotPassword = () => {
     };
 
     return (
-        <div>
+        <div className="forgot-password-container">
             <h1>Restablecer Contraseña</h1>
             <form onSubmit={handleSubmit}>
                 <label>
