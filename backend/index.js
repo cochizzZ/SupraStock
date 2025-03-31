@@ -380,15 +380,6 @@ const fetchUser = async (req, res, next) => {
 
 // Endpoint para agregar un producto al carrito
 
-
-//crear punto de conexion para agregar productos en  CarData
-// Endpoint para agregar un producto al carrito
-// Endpoint para agregar un producto al carrito
-// Endpoint para agregar un producto al carrito
-// Endpoint para agregar un producto al carrito
-// Endpoint para agregar un producto al carrito
-// Endpoint para agregar un producto al carrito
-// Endpoint para agregar un producto al carrito
 app.post('/addtocart', fetchUser, async (req, res) => {
     try {
         console.log(req.body);
