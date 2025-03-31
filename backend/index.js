@@ -1181,3 +1181,17 @@ app.post('/reset-password/:token', async (req, res) => {
         res.status(500).json({ success: false, message: "Error interno del servidor" });
     }
 });
+
+// Endpoint para obtener todas las órdenes
+app.get('/api/sales', async (req, res) => {
+    try {
+        const orders = await Order.find({});
+        res.json(orders);
+    } catch (error) {
+        console.error('Error fetching orders:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error interno del servidor',
+        });
+    }
+});
