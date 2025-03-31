@@ -11,12 +11,6 @@
     align-items: center;
 }
 
-.shopcategory-sort{
-    padding: 10px 20px;
-    border-radius: 40px;
-    border: 1px solid #888;
-}
-
 .shopcategory-indexSort p span{
     font-weight: 600;
 }
@@ -90,4 +84,16 @@
     .shopcategory-products{
         grid-template-columns: 1fr 1fr;
     }
+}
+
+#sort-select {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0px 20px;
+    width: 80%;
+    height: 40px;
+    padding: 10px 20px;
+    border-radius: 40px;
+    border: 1px solid #888;
 }
