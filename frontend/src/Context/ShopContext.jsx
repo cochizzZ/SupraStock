@@ -112,38 +112,61 @@ const ShopContextProvider = ({ children }) => {
                 return;
             }
     
-            const response = await fetch("http://localhost:4000/addtocart", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "auth-token": localStorage.getItem("auth-token"),
-                },
-                body: JSON.stringify({ itemId: productId, size, quantity: parsedQuantity }),
-            });
+            if (!localStorage.getItem("auth-token")) {
+                // Usuario no autenticado: guardar en localStorage
+                const storedCart = JSON.parse(localStorage.getItem("guestCart")) || [];
+                const existingItem = storedCart.find(item => item.productId === productId && item.size === size);
     
-            const data = await response.json();
+                if (existingItem) {
+                    existingItem.quantity += parsedQuantity;
+                } else {
+                    storedCart.push({ productId, size, quantity: parsedQuantity });
+                }
     
-            if (data.success) {
-                // Actualizar estado del carrito
-                setCartItems((prev) => [...prev, { product_id: product, size, quantity: parsedQuantity }]);
+                localStorage.setItem("guestCart", JSON.stringify(storedCart));
     
-                // Mostrar alerta de éxito
                 Swal.fire({
                     title: "Producto agregado!",
-                    text: "Se ha agregado el producto al carrito.",
+                    text: "Se ha agregado el producto al carrito temporal.",
                     icon: "success",
                     confirmButtonColor: "#3085d6",
                     confirmButtonText: "OK",
                 });
             } else {
-                console.error("Error al agregar al carrito:", data.message);
-                Swal.fire({
-                    title: "Error",
-                    text: data.message,
-                    icon: "error",
-                    confirmButtonColor: "#d33",
-                    confirmButtonText: "OK",
+                // Usuario autenticado: enviar al backend
+                const response = await fetch("http://localhost:4000/addtocart", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "auth-token": localStorage.getItem("auth-token"),
+                    },
+                    body: JSON.stringify({ itemId: productId, size, quantity: parsedQuantity }),
                 });
+    
+                const data = await response.json();
+    
+                if (data.success) {
+                // Actualizar estado del carrito
+                    setCartItems((prev) => [...prev, { product_id: product, size, quantity: parsedQuantity }]);
+    
+                // Mostrar alerta de éxito
+                    Swal.fire({
+                        title: "Producto agregado!",
+                        text: "Se ha agregado el producto al carrito.",
+                        icon: "success",
+                        confirmButtonColor: "#3085d6",
+                        confirmButtonText: "OK",
+                    });
+                } else {
+                    console.error("Error al agregar al carrito:", data.message);
+                    Swal.fire({
+                        title: "Error",
+                        text: data.message,
+                        icon: "error",
+                        confirmButtonColor: "#d33",
+                        confirmButtonText: "OK",
+                    });
+                }
             }
         } catch (error) {
             console.error("Error al agregar al carrito:", error);
@@ -253,8 +276,14 @@ const ShopContextProvider = ({ children }) => {
 
     // Obtener el total de productos en el carrito
     const getTotalCartItems = () => {
-        if (!Array.isArray(cartItems)) return 0; // Validar que cartItems sea un array
-        return cartItems.reduce((total, item) => total + (item.quantity > 0 ? item.quantity : 0), 0);
+        if (localStorage.getItem("auth-token")) {
+            // Usuario autenticado: calcular el total del carrito autenticado
+            return cartItems.reduce((total, item) => total + (item.quantity > 0 ? item.quantity : 0), 0);
+        } else {
+            // Usuario no autenticado: calcular el total del carrito temporal
+            const guestCart = JSON.parse(localStorage.getItem("guestCart")) || [];
+            return guestCart.reduce((total, item) => total + (item.quantity > 0 ? item.quantity : 0), 0);
+        }
     };
 
     // Limpiar Carrito

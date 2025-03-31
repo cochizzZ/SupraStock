@@ -39,40 +39,45 @@ const LoginSignup = () => {
         localStorage.setItem('auth-token', responseData.token);
         localStorage.setItem('username', responseData.username);
         localStorage.setItem('userId', responseData.userId);
-        if (responseData.role === 'admin'){
-          localStorage.setItem('userRole', 'admin');
-          window.open("http://localhost:5173/?token=" + responseData.token, "_blank");
+
+        if (responseData.role === 'admin') {
+            localStorage.setItem('userRole', 'admin');
+            window.open("http://localhost:5173/?token=" + responseData.token, "_blank");
         }
-        // Restaurar los productos seleccionados en el carrito
-        const selectedProducts = JSON.parse(localStorage.getItem('selectedProducts')) || [];
-        if (selectedProducts.length > 0) {
-            for (const product of selectedProducts) {
+
+        // Sincronizar productos del carrito temporal
+        const guestCart = JSON.parse(localStorage.getItem('guestCart')) || [];
+        if (guestCart.length > 0) {
+            for (const product of guestCart) {
                 await fetch("http://localhost:4000/addtocart", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
-                        "auth-token": responseData.token
+                        "auth-token": responseData.token,
                     },
-                    body: JSON.stringify({ itemId: product.productId, quantity: product.quantity })
+                    body: JSON.stringify({ itemId: product.productId, size: product.size, quantity: product.quantity }),
                 });
             }
-            localStorage.removeItem('selectedProducts'); // Limpiar los productos seleccionados
+            localStorage.removeItem('guestCart'); // Limpiar carrito temporal
         }
 
         window.location.replace("/");
     } else {
-        alert(responseData.errors);
+        Swal.fire({
+            title: "Error",
+            text: responseData.errors || "Hubo un problema con el inicio de sesión.",
+            icon: "error",
+            confirmButtonText: "OK",
+        });
     }
-  };
+};
 
   const handleSignup = async () => {
     try {
-        console.log("SignUp Function Executed", formData);
-
         const response = await axios.post("http://localhost:4000/signup", formData, {
             headers: { "Content-Type": "application/json" }
         });
-
+        console.log("Response from signup:", response); // Verificar la respuesta del servidor
         const responseData = response.data;
 
         if (responseData.success) {
@@ -81,30 +86,37 @@ const LoginSignup = () => {
             localStorage.setItem("username", responseData.username);
             localStorage.setItem("userId", responseData.userId);
 
-            console.log("Usuario registrado con éxito:", responseData);
-
-            // Restaurar los productos seleccionados en el carrito
-            const selectedProducts = JSON.parse(localStorage.getItem("selectedProducts")) || [];
-            if (selectedProducts.length > 0) {
-                for (const product of selectedProducts) {
-                    await axios.post("http://localhost:4000/addtocart", {
-                        itemId: product.productId,
-                        quantity: product.quantity,
-                    }, {
-                        headers: { "auth-token": responseData.token }
+            // Sincronizar productos del carrito temporal
+            const guestCart = JSON.parse(localStorage.getItem("guestCart")) || [];
+            if (guestCart.length > 0) {
+                for (const product of guestCart) {
+                    await fetch("http://localhost:4000/addtocart", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "auth-token": responseData.token,
+                        },
+                        body: JSON.stringify({ itemId: product.productId, size: product.size, quantity: product.quantity }),
                     });
                 }
-                localStorage.removeItem("selectedProducts"); // Limpiar productos seleccionados
+                localStorage.removeItem("guestCart"); // Limpiar carrito temporal
             }
 
-            // Redirigir al usuario
+            Swal.fire({
+                title: "Registro exitoso",
+                text: "Tu cuenta ha sido creada y los productos se han sincronizado.",
+                icon: "success",
+                confirmButtonColor: "#3085d6",
+                confirmButtonText: "OK",
+            });
+
             window.location.replace("/");
         } else {
             Swal.fire({
                 title: "Error",
                 text: responseData.errors || "Hubo un problema con el registro.",
                 icon: "error",
-                confirmButtonText: "OK"
+                confirmButtonText: "OK",
             });
         }
     } catch (error) {
@@ -113,10 +125,10 @@ const LoginSignup = () => {
             title: "Error",
             text: "No se pudo completar el registro. Inténtalo más tarde.",
             icon: "error",
-            confirmButtonText: "OK"
+            confirmButtonText: "OK",
         });
     }
-  };
+};
 
   return (
     <div className='loginsignup'>
