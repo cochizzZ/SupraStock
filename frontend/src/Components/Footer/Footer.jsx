@@ -6,7 +6,7 @@ import instagram_icon from '../Assets/instagram_icon.png';
 import whatsapp_icon from '../Assets/whatsapp_icon.png';
 
 const Footer = () => {
-  const email = "emmanuelriosierml@gmail.com";
+  const email = "domastore17@gmail.com";
   const subject = encodeURIComponent("Solicitud de ayuda");
   const body = encodeURIComponent("Hola, tengo una consulta sobre...");
 
