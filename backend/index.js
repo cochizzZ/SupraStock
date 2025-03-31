@@ -884,18 +884,45 @@ app.put('/api/orders/:id', async (req, res) => {
         const { id } = req.params; // Obtener el ID de la orden desde los parámetros
         const { status } = req.body; // Obtener el nuevo estado desde el cuerpo de la solicitud
 
-        // Buscar y actualizar la orden
-        const order = await Order.findByIdAndUpdate(
-            id,
-            { status },
-            { new: true } // Retornar la orden actualizada
-        );
+        // Buscar la orden por ID
+        const order = await Order.findById(id).populate('products.product_id'); // Poblar los productos para acceder a sus detalles
 
         if (!order) {
             return res.status(404).json({ message: "Orden no encontrada" });
         }
 
-        res.json(order); // Enviar la orden actualizada como respuesta
+        // Si el estado cambia a "Shipped", actualizar las cantidades de los productos
+        if (status === "Shipped") {
+            for (const productItem of order.products) {
+                const product = productItem.product_id; // Producto asociado
+                const size = productItem.size; // Talla del producto
+                const quantity = productItem.quantity; // Cantidad de la talla
+
+                // Verificar si el producto y la talla existen
+                if (product && product.sizes.has(size)) {
+                    // Reducir la cantidad de la talla
+                    const currentSizeStock = product.sizes.get(size);
+                    product.sizes.set(size, currentSizeStock - quantity);
+
+                    // Actualizar el stock general
+                    const totalStock = Array.from(product.sizes.values()).reduce((acc, curr) => acc + curr, 0);
+                    product.stock = totalStock;
+
+                    // Guardar los cambios en el producto
+                    await product.save();
+                } else {
+                    return res.status(400).json({
+                        message: `La talla ${size} no está disponible para el producto ${product.name}.`,
+                    });
+                }
+            }
+        }
+
+        // Actualizar el estado de la orden
+        order.status = status;
+        const updatedOrder = await order.save();
+
+        res.json(updatedOrder); // Enviar la orden actualizada como respuesta
     } catch (error) {
         console.error("Error al actualizar la orden:", error);
         res.status(500).json({ message: "Error interno del servidor" });
