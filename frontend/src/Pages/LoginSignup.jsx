@@ -131,6 +131,7 @@ const LoginSignup = () => {
         {state === "Registro"
           ? <p className="loginsignup-login">¿Ya tienes una cuenta? <span id="span-login" onClick={() => { setState("Iniciar Sesión") }}>Inicia sesión aquí</span></p>
           : <p className="loginsignup-login">¿Crear una cuenta? <span id="span-login" onClick={() => { setState("Registro") }}>Haz clic aquí</span></p>}
+        <p className="loginsignup-forgot-password" onClick={() => { window.location.replace("/forgot-password") }}>¿Olvidaste tu contraseña?</p>
       </div>
     </div>
   );

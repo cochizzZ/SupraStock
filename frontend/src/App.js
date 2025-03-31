@@ -17,6 +17,8 @@ import ShopContextProvider from './Context/ShopContext';
 import OrderForm from './Components/OrderForm/OrderForm';
 import LoginSignup from './Pages/LoginSignup';
 import AboutUs from './Pages/AboutUs';
+import ForgotPassword from './Pages/ForgotPassword';
+import ResetPassword from './Pages/ResetPassword';
 
 const App = () => {
     return (
@@ -39,6 +41,8 @@ const App = () => {
                     <Route path='/login' element={<LoginSignup />} />
                     <Route path="/" element={<Cartitems />} />
                     <Route path="/order" element={<OrderForm />} />
+                    <Route path="/forgot-password" element={<ForgotPassword />} />
+                    <Route path="/reset-password/:token" element={<ResetPassword />} />
                 </Routes>
                 <Footer />
             </Router>

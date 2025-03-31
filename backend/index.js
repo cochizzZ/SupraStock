@@ -11,6 +11,8 @@ const bcrypt = require("bcryptjs");
 const bodyParser = require('body-parser');
 const stripe = require('stripe')('sk_test_51R6cNaBLRCJFKBKAttNOUBrZeJ83hiT7urfBaLEhNONIKDeqO9YeiAUmn0Pq5Ox23iseYtgbKX10s2IJuxTO0UFk00wjtRk5MZ');
 const { clear } = require("console");
+const crypto = require('crypto');
+const nodemailer = require('nodemailer');
 
 app.use(cors());
 app.use(express.json());
@@ -217,6 +219,8 @@ const Users = mongoose.model('Users', new mongoose.Schema({
     ],
     date: { type: Date, default: Date.now },
     role: { type: String, default: 'user' },
+    resetPasswordToken: { type: String },
+    resetPasswordExpires: { type: Date },
 })); 
 
 //creación de schema para el modelo de ordenes
@@ -1100,6 +1104,80 @@ app.delete('/api/comments/:id', fetchUser, async (req, res) => {
         res.json({ success: true, message: "Comentario eliminado" });
     } catch (error) {
         console.error("Error al eliminar comentario:", error);
+        res.status(500).json({ success: false, message: "Error interno del servidor" });
+    }
+});
+
+// Endpoint para solicitar restablecimiento de contraseña
+app.post('/forgot-password', async (req, res) => {
+    const { email } = req.body;
+
+    try {
+        const user = await Users.findOne({ email });
+        if (!user) {
+            return res.status(404).json({ success: false, message: "Usuario no encontrado" });
+        }
+
+        // Generar un token único
+        const resetToken = crypto.randomBytes(32).toString('hex');
+        const resetTokenExpiry = Date.now() + 3600000; // 1 hora de validez
+
+        // Guardar el token y su expiración en el usuario
+        user.resetPasswordToken = resetToken;
+        user.resetPasswordExpires = resetTokenExpiry;
+        await user.save();
+
+        // Configurar el transporte de correo
+        const transporter = nodemailer.createTransport({
+            service: 'Gmail',
+            auth: {
+                user: 'nata.ospinap@gmail.com',
+                pass: 'aejx sqnh crfi wubd',
+            },
+        });
+
+        // Enviar el correo con el enlace de restablecimiento
+        const resetUrl = `http://localhost:3000/reset-password/${resetToken}`;
+        const mailOptions = {
+            to: user.email,
+            subject: 'Restablecimiento de contraseña',
+            text: `Haz clic en el siguiente enlace para restablecer tu contraseña: ${resetUrl} esta url es valida por 1 hora`,
+        };
+
+        await transporter.sendMail(mailOptions);
+
+        res.json({ success: true, message: "Correo de restablecimiento enviado" });
+    } catch (error) {
+        console.error("Error al solicitar restablecimiento de contraseña:", error);
+        res.status(500).json({ success: false, message: "Error interno del servidor" });
+    }
+});
+
+// Endpoint para restablecer la contraseña
+app.post('/reset-password/:token', async (req, res) => {
+    const { token } = req.params;
+    const { newPassword } = req.body;
+
+    try {
+        const user = await Users.findOne({
+            resetPasswordToken: token,
+            resetPasswordExpires: { $gt: Date.now() }, // Verificar que el token no haya expirado
+        });
+
+        if (!user) {
+            return res.status(400).json({ success: false, message: "Token inválido o expirado" });
+        }
+
+        // Actualizar la contraseña
+        const salt = await bcrypt.genSalt(10);
+        user.password = await bcrypt.hash(newPassword, salt);
+        user.resetPasswordToken = undefined; // Eliminar el token
+        user.resetPasswordExpires = undefined; // Eliminar la expiración
+        await user.save();
+
+        res.json({ success: true, message: "Contraseña actualizada correctamente" });
+    } catch (error) {
+        console.error("Error al restablecer contraseña:", error);
         res.status(500).json({ success: false, message: "Error interno del servidor" });
     }
 });

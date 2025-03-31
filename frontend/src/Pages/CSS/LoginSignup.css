@@ -124,3 +124,10 @@
         font-size: 16px;
     }
 }
+.loginsignup-forgot-password {
+    margin-top: 20px;
+    color: #5c5c5c;
+    font-size: 18px;
+    font-weight: 500;
+    cursor: pointer;
+}
