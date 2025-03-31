@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import Swal from "sweetalert2";
 import './CommentsBox.css';
 
 const CommentsBox = ({ productId }) => {
@@ -33,10 +34,29 @@ const CommentsBox = ({ productId }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Verificar si el usuario está autenticado
     if (!localStorage.getItem('auth-token')) {
-        alert("Debes iniciar sesión para dejar un comentario.");
+        // Mostrar alerta con SweetAlert2
+        Swal.fire({
+            title: "Debes iniciar sesión",
+            text: "Para dejar un comentario, primero debes iniciar sesión.",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Iniciar sesión",
+            cancelButtonText: "Cancelar",
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Redirigir al apartado de inicio de sesión
+                window.location.href = "/login";
+            }
+        });
         return;
     }
+
+    // Continuar con el envío del comentario si el usuario está autenticado
     if (newComment.text) {
         try {
             const token = localStorage.getItem('auth-token'); // Obtener el token del localStorage
@@ -54,11 +74,27 @@ const CommentsBox = ({ productId }) => {
         } catch (error) {
             if (error.response && error.response.status === 404) {
                 console.error("Producto no encontrado:", error.response.data.message);
-                alert("El producto no existe. No se puede agregar el comentario.");
+                Swal.fire({
+                    title: "Error",
+                    text: "El producto no existe. No se puede agregar el comentario.",
+                    icon: "error",
+                    confirmButtonColor: "#d33",
+                });
             } else if (error.response && error.response.status === 401) {
-                alert("Debes iniciar sesión para dejar un comentario.");
+                Swal.fire({
+                    title: "Error",
+                    text: "Debes iniciar sesión para dejar un comentario.",
+                    icon: "error",
+                    confirmButtonColor: "#d33",
+                });
             } else {
                 console.error("Error al agregar comentario:", error);
+                Swal.fire({
+                    title: "Error",
+                    text: "Hubo un problema al agregar el comentario.",
+                    icon: "error",
+                    confirmButtonColor: "#d33",
+                });
             }
         }
     }
