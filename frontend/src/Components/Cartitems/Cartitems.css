@@ -26,6 +26,8 @@
 
 .carticon-product-icon {
     height: 62px;
+    width: 62px;
+    object-fit: cover;
 }
 
 .cartitems-remove-icon {
