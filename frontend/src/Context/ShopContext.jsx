@@ -79,6 +79,17 @@ const ShopContextProvider = ({ children }) => {
     // Agregar un producto al carrito
     const addToCart = async (productId, size, quantity) => {
         try {
+            // Convertir quantity a número
+            const parsedQuantity = Number(quantity);
+            if (isNaN(parsedQuantity) || parsedQuantity <= 0) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'La cantidad debe ser un número válido mayor a 0.',
+                });
+                return;
+            }
+    
             // Obtener el producto correspondiente
             const product = all_product.find((p) => p.id === productId);
             if (!product) {
@@ -89,10 +100,10 @@ const ShopContextProvider = ({ children }) => {
                 });
                 return;
             }
-
+    
             // Verificar la cantidad disponible en la talla especificada
             const availableQuantity = product.sizes[size];
-            if (availableQuantity < quantity) {
+            if (availableQuantity < parsedQuantity) {
                 Swal.fire({
                     icon: 'error',
                     title: 'Error',
@@ -100,21 +111,21 @@ const ShopContextProvider = ({ children }) => {
                 });
                 return;
             }
-
+    
             const response = await fetch("http://localhost:4000/addtocart", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                     "auth-token": localStorage.getItem("auth-token"),
                 },
-                body: JSON.stringify({ itemId: productId, size, quantity }),
+                body: JSON.stringify({ itemId: productId, size, quantity: parsedQuantity }),
             });
     
             const data = await response.json();
     
             if (data.success) {
                 // Actualizar estado del carrito
-                setCartItems((prev) => [...prev, { product_id: product, size, quantity }]);
+                setCartItems((prev) => [...prev, { product_id: product, size, quantity: parsedQuantity }]);
     
                 // Mostrar alerta de éxito
                 Swal.fire({
