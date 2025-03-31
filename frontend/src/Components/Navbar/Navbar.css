@@ -187,6 +187,7 @@
     cursor: pointer;
     transition: all 0.3s ease;
     margin-left: 20px;
+    position: relative;
 }
 
 .nav-login-cart .dropdown-toggle {
@@ -330,6 +331,9 @@
 
     .nav-menu-visible {
         display: flex;
+        display: flex;
+        justify-content: space-evenly;
+        width: 90%;
     }
 
     .nav-dropdown.open {

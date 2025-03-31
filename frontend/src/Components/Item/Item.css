@@ -20,6 +20,8 @@
   background: none;
   border: none;
   cursor: pointer;
+  width: 100%;
+  padding-bottom: 10px;
 }
 
 .container-items-info {
@@ -27,6 +29,7 @@
   align-items: center;
   justify-content: space-between;
   position: relative;
+  width: 85%;
 }
 
 .item p {
