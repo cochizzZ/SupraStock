@@ -19,6 +19,7 @@ import LoginSignup from './Pages/LoginSignup';
 import AboutUs from './Pages/AboutUs';
 import ForgotPassword from './Pages/ForgotPassword';
 import ResetPassword from './Pages/ResetPassword';
+import VerifyEmail from './Pages/VerifyEmail';
 
 const App = () => {
     return (
@@ -43,6 +44,7 @@ const App = () => {
                     <Route path="/order" element={<OrderForm />} />
                     <Route path="/forgot-password" element={<ForgotPassword />} />
                     <Route path="/reset-password/:token" element={<ResetPassword />} />
+                    <Route path="/verify-email/:token" element={<VerifyEmail />} />
                 </Routes>
                 <Footer />
             </Router>

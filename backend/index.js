@@ -241,6 +241,8 @@ const Users = mongoose.model('Users', new mongoose.Schema({
     role: { type: String, default: 'user' },
     resetPasswordToken: { type: String },
     resetPasswordExpires: { type: Date },
+    isVerified: { type: Boolean, default: false }, // Nuevo campo
+    verificationToken: { type: String }, // Nuevo campo
 })); 
 
 //creación de schema para el modelo de ordenes
@@ -275,23 +277,24 @@ module.exports = Order;
 // Modificación en el endpoint de registro (signup)
 app.post('/signup', async (req, res) => {
     try {
-        const { password } = req.body;
+        const { name, email, password } = req.body;
+        console.log(req.body)
 
         // Validar la contraseña
         const passwordError = validatePassword(password);
         if (passwordError) {
             return res.status(400).json({
                 success: false,
-                message: "Registro fallido. La contraseña debe contener al menos 8 caracteres, una mayúscula, una minúscula y un carácter especial.",
+                message: passwordError,
             });
         }
 
         // Verificar si el correo ya está registrado
-        let check = await Users.findOne({ email: req.body.email });
-        if (check) {
+        let existingUser = await Users.findOne({ email });
+        if (existingUser) {
             return res.status(400).json({
                 success: false,
-                errors: "Se ha encontrado un usuario con la misma dirección de correo electrónico",
+                message: "El correo ya está registrado.",
             });
         }
 
@@ -299,27 +302,43 @@ app.post('/signup', async (req, res) => {
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
 
-        // Crear el nuevo usuario
+        // Generar un token único para la verificación
+        const verificationToken = crypto.randomBytes(32).toString('hex');
+
+        // Crear el nuevo usuario (sin activar)
         const user = new Users({
-            name: req.body.name,
-            email: req.body.email,
+            name,
+            email,
             password: hashedPassword,
-            role: req.body.role || 'user',
-            cartData: [], // Carrito inicial vacío como un array
+            role: 'user',
+            isVerified: false, // Nuevo campo para verificar si el usuario está autenticado
+            verificationToken,
         });
 
-        // Guardar el usuario en la base de datos
         await user.save();
 
-        // Generar el token de autenticación
-        const data = { user: { id: user.id } };
-        const token = jwt.sign(data, 'secret_ecom');
+        // Configurar el transporte de correo
+        const transporter = nodemailer.createTransport({
+            service: 'Gmail',
+            auth: {
+                user: 'nata.ospinap@gmail.com',
+                pass: 'aejx sqnh crfi wubd',
+            },
+        });
+
+        // Enviar el correo de verificación
+        const verificationUrl = `http://localhost:3000/verify-email/${verificationToken}`;
+        const mailOptions = {
+            to: email,
+            subject: 'Verificación de correo electrónico',
+            text: `Haz clic en el siguiente enlace para verificar tu correo electrónico: ${verificationUrl}`,
+        };
+
+        await transporter.sendMail(mailOptions);
 
         res.json({
             success: true,
-            token,
-            username: user.name,
-            userId: user.id,
+            message: "Cuenta creada. Por favor, verifica tu correo electrónico para activar tu cuenta.",
         });
     } catch (error) {
         console.error("Error al registrar usuario:", error);
@@ -1217,6 +1236,37 @@ app.get('/api/sales', async (req, res) => {
         res.status(500).json({
             success: false,
             message: 'Error interno del servidor',
+        });
+    }
+});
+
+app.get('/verify-email/:token', async (req, res) => {
+    try {
+        const { token } = req.params;
+
+        // Buscar al usuario por el token de verificación
+        const user = await Users.findOne({ verificationToken: token });
+        if (!user) {
+            return res.status(400).json({
+                success: false,
+                message: "Token de verificación inválido o expirado.",
+            });
+        }
+
+        // Activar la cuenta del usuario
+        user.isVerified = true;
+        user.verificationToken = undefined; // Eliminar el token de verificación
+        await user.save();
+
+        res.json({
+            success: true,
+            message: "Correo verificado correctamente. Ahora puedes iniciar sesión.",
+        });
+    } catch (error) {
+        console.error("Error al verificar el correo:", error);
+        res.status(500).json({
+            success: false,
+            message: "Error interno del servidor",
         });
     }
 });
