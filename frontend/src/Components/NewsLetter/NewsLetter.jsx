@@ -21,10 +21,10 @@ const NewsLetter = () => {
 
     emailjs
       .send(
-        "service_59zq1xr", // Reemplaza con tu Service ID
-        "template_p6zpkn6", // Reemplaza con tu Template ID
+        "service_6b4pczn", // Reemplaza con tu Service ID
+        "template_f5qqlbk", // Reemplaza con tu Template ID
         templateParams,
-        "KLMNrpDbx9FwwUPUF" // Reemplaza con tu Public Key
+        "pCiLGuVDOzMzIJ2Jl" // Reemplaza con tu Public Key
       )
       .then(
         (response) => {
