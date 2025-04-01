@@ -72,39 +72,49 @@ const LoginSignup = () => {
     }
 };
 
-  const handleSignup = async () => {
+const validatePassword = (password) => {
+    const minLength = 8;
+    const hasUpperCase = /[A-Z]/.test(password);
+    const hasLowerCase = /[a-z]/.test(password);
+    const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+
+    if (password.length < minLength) {
+        return "La contraseña debe tener al menos 8 caracteres.";
+    }
+    if (!hasUpperCase) {
+        return "La contraseña debe tener al menos una letra mayúscula.";
+    }
+    if (!hasLowerCase) {
+        return "La contraseña debe tener al menos una letra minúscula.";
+    }
+    if (!hasSpecialChar) {
+        return "La contraseña debe tener al menos un carácter especial.";
+    }
+    return null; // Si pasa todas las validaciones
+};
+
+const handleSignup = async () => {
+    const passwordError = validatePassword(formData.password);
+    if (passwordError) {
+        Swal.fire({
+            title: "Registro fallido",
+            text: "La contraseña debe contener al menos 8 caracteres, una mayúscula, una minúscula y un carácter especial.",
+            icon: "error",
+            confirmButtonText: "OK",
+        });
+        return;
+    }
+
     try {
         const response = await axios.post("http://localhost:4000/signup", formData, {
             headers: { "Content-Type": "application/json" }
         });
-        console.log("Response from signup:", response); // Verificar la respuesta del servidor
         const responseData = response.data;
 
         if (responseData.success) {
-            // Guardar datos en localStorage
-            localStorage.setItem("auth-token", responseData.token);
-            localStorage.setItem("username", responseData.username);
-            localStorage.setItem("userId", responseData.userId);
-
-            // Sincronizar productos del carrito temporal
-            const guestCart = JSON.parse(localStorage.getItem("guestCart")) || [];
-            if (guestCart.length > 0) {
-                for (const product of guestCart) {
-                    await fetch("http://localhost:4000/addtocart", {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json",
-                            "auth-token": responseData.token,
-                        },
-                        body: JSON.stringify({ itemId: product.productId, size: product.size, quantity: product.quantity }),
-                    });
-                }
-                localStorage.removeItem("guestCart"); // Limpiar carrito temporal
-            }
-
             Swal.fire({
                 title: "Registro exitoso",
-                text: "Tu cuenta ha sido creada y los productos se han sincronizado.",
+                text: "Tu cuenta ha sido creada correctamente.",
                 icon: "success",
                 confirmButtonColor: "#3085d6",
                 confirmButtonText: "OK",

@@ -7,24 +7,44 @@ const ResetPassword = () => {
     const { token } = useParams(); // Obtener el token desde la URL
     const [newPassword, setNewPassword] = useState('');
 
-    const handleSubmit = async (e) => {
+    const validatePassword = (password) => {
+        const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[\W_]).{8,}$/;
+        if (!regex.test(password)) {
+            console.log(password)
+            return "La contraseña debe contener al menos 8 caracteres, una mayúscula, una minúscula y un carácter especial.";
+        }
+        return null; // Si la contraseña es válida, no hay error
+    };
+
+    const handlePasswordChange = async (e) => {
         e.preventDefault();
+
+        const passwordError = validatePassword(newPassword);
+        if (passwordError) {
+            Swal.fire({
+                title: "Cambio de contraseña fallido",
+                text: passwordError, // Mostrar el mensaje devuelto por la función
+                icon: "error",
+                confirmButtonText: "OK",
+            });
+            return;
+        }
 
         try {
             const response = await axios.post(`http://localhost:4000/reset-password/${token}`, { newPassword });
             Swal.fire({
-                title: 'Éxito',
-                text: response.data.message,
-                icon: 'success',
-                confirmButtonText: 'OK',
+                title: "Éxito",
+                text: "Tu contraseña ha sido actualizada correctamente.",
+                icon: "success",
+                confirmButtonText: "OK",
             });
         } catch (error) {
-            console.error("Error al restablecer contraseña:", error);
+            console.error("Error al cambiar la contraseña:", error);
             Swal.fire({
-                title: 'Error',
-                text: error.response?.data?.message || 'Hubo un problema. Inténtalo más tarde.',
-                icon: 'error',
-                confirmButtonText: 'OK',
+                title: "Error",
+                text: error.response?.data?.message || "Hubo un problema. Inténtalo más tarde.",
+                icon: "error",
+                confirmButtonText: "OK",
             });
         }
     };
@@ -32,7 +52,7 @@ const ResetPassword = () => {
     return (
         <div className="forgot-password-container">
             <h1>Establecer Nueva Contraseña</h1>
-            <form onSubmit={handleSubmit}>
+            <form onSubmit={handlePasswordChange}>
                 <label>
                     Nueva Contraseña:
                     <input

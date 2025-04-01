@@ -1,6 +1,5 @@
 const port = 4000;
 const express = require("express");
-const router = express.Router(); // Asegurar que router está definido
 const app = express();
 const mongoose = require("mongoose");
 const jwt = require("jsonwebtoken");
@@ -13,6 +12,27 @@ const stripe = require('stripe')('sk_test_51R6cNaBLRCJFKBKAttNOUBrZeJ83hiT7urfBa
 const { clear } = require("console");
 const crypto = require('crypto');
 const nodemailer = require('nodemailer');
+
+const validatePassword = (password) => {
+    const minLength = 8;
+    const hasUpperCase = /[A-Z]/.test(password);
+    const hasLowerCase = /[a-z]/.test(password);
+    const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+
+    if (password.length < minLength) {
+        return "La contraseña debe tener al menos 8 caracteres.";
+    }
+    if (!hasUpperCase) {
+        return "La contraseña debe tener al menos una letra mayúscula.";
+    }
+    if (!hasLowerCase) {
+        return "La contraseña debe tener al menos una letra minúscula.";
+    }
+    if (!hasSpecialChar) {
+        return "La contraseña debe tener al menos un carácter especial.";
+    }
+    return null; // Si pasa todas las validaciones
+};
 
 app.use(cors());
 app.use(express.json());
@@ -255,6 +275,17 @@ module.exports = Order;
 // Modificación en el endpoint de registro (signup)
 app.post('/signup', async (req, res) => {
     try {
+        const { password } = req.body;
+
+        // Validar la contraseña
+        const passwordError = validatePassword(password);
+        if (passwordError) {
+            return res.status(400).json({
+                success: false,
+                message: "Registro fallido. La contraseña debe contener al menos 8 caracteres, una mayúscula, una minúscula y un carácter especial.",
+            });
+        }
+
         // Verificar si el correo ya está registrado
         let check = await Users.findOne({ email: req.body.email });
         if (check) {
@@ -266,7 +297,7 @@ app.post('/signup', async (req, res) => {
 
         // Generar el "salt" y cifrar la contraseña
         const salt = await bcrypt.genSalt(10);
-        const hashedPassword = await bcrypt.hash(req.body.password, salt);
+        const hashedPassword = await bcrypt.hash(password, salt);
 
         // Crear el nuevo usuario
         const user = new Users({
@@ -780,7 +811,7 @@ app.put('/api/users/:id', async (req, res) => {
     }
 });
 
-router.delete('/api/users/:id', async (req, res) => {
+app.delete('/api/users/:id', async (req, res) => {
     try {
         const { id } = req.params;
         console.log("ID recibido en el backend:", id); // 👀 Verifica si el ID llega correctamente
@@ -790,7 +821,7 @@ router.delete('/api/users/:id', async (req, res) => {
             return res.status(400).json({ message: "ID no válido" });
         }
 
-        const deletedUser = await User.findByIdAndDelete(id);
+        const deletedUser = await Users.findByIdAndDelete(id);
 
         if (!deletedUser) {
             return res.status(404).json({ message: "Usuario no encontrado" });
@@ -803,7 +834,6 @@ router.delete('/api/users/:id', async (req, res) => {
     }
 });
 
-module.exports = router;
 // Endpoint para obtener detalles de un usuario
 app.get('/api/users/:id', async (req, res) => {
     try {
@@ -935,7 +965,6 @@ exports.updateOrder = async (req, res) => {
     }
 };
 
-module.exports = router;
 // Endpoint para crear una orden
 app.post('/api/orders', async (req, res) => {
     try {
@@ -1149,6 +1178,12 @@ app.post('/reset-password/:token', async (req, res) => {
     const { newPassword } = req.body;
 
     try {
+        // Validar la contraseña
+        const passwordError = validatePassword(newPassword);
+        if (passwordError) {
+            return res.status(400).json({ success: false, message: passwordError });
+        }
+
         const user = await Users.findOne({
             resetPasswordToken: token,
             resetPasswordExpires: { $gt: Date.now() }, // Verificar que el token no haya expirado
