@@ -91,13 +91,13 @@
         height: 40px;
         font-size: 13px;
     }
-}
-@media(max-width:500px){
     .shopcategory-products{
         grid-template-columns: 1fr 1fr;
     }
-#sort-select {
-    height: 25px;
-    padding: 4px 14px;
 }
+@media(max-width:500px){
+    #sort-select {
+        height: 25px;
+        padding: 4px 14px;
+    }
 }

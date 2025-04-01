@@ -159,7 +159,7 @@
 @media (max-width: 500px) {
     .newsletter {
         height: auto;
-        width: 100%;
+        width: 375px;
         padding: 0;
         gap: 15px;
         align-items: center;

@@ -19,6 +19,7 @@
 
 .navbar-user {
     position: relative;
+    height: 55px;
 }
 
 .dropdown-toggle {
@@ -337,6 +338,7 @@
 
     .nav-dropdown.open {
         transform: rotate(90deg);
+        z-index: 5;
     }
 }
 
