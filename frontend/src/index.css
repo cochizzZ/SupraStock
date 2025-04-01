@@ -9,6 +9,9 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   font-family: 'poppins';
+  color: #333;
+  filter: brightness(98%);
+  opacity: 90%;
 }
 
 code {
