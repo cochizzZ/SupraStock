@@ -31,14 +31,11 @@
 .hero-hand-icon{
         display: flex;
         align-items: center;
-        justify-content: center;
-        padding: 10px 20px;
         border-radius: 8px;
         color: white;
         font-weight: bold;
         font-size: 18px;
-        width: 400px;
-        height: 100px;
+        width: 430px;
         transition: background-color 0.3s ease; /* Transición suave entre colores */
 }
 
@@ -83,6 +80,9 @@
     .hero-hand-icon img{
         width: 80px;
     }
+    .hero-hand-icon{
+        width: 310px;
+    }
     .hero-latest-btn{
         gap: 10px;
         width: 250px;
@@ -107,6 +107,9 @@
     .hero-hand-icon img{
         width: 65px;
     }
+    .hero-hand-icon{
+        width: 255px;
+    }
     .hero-latest-btn{
         width: 220px;
         height: 50px;
@@ -130,6 +133,9 @@
     }
     .hero-hand-icon img{
         width: 50px;
+    }
+    .hero-hand-icon{
+        width: 200px;
     }
     .hero-latest-btn{
         width: 175px;
@@ -160,6 +166,9 @@
     }
     .hero-hand-icon img{
         width: 55px;
+    }
+    .hero-hand-icon{
+        width: 245px;
     }
     .hero-latest-btn{
         width: 200px;
