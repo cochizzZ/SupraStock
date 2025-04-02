@@ -118,12 +118,21 @@ const ShopContextProvider = ({ children }) => {
                 const existingItem = storedCart.find(item => item.productId === productId && item.size === size);
     
                 if (existingItem) {
+                    if (existingItem.quantity + parsedQuantity > availableQuantity) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: `No puedes agregar más de ${availableQuantity} unidades en la talla ${size}.`,
+                        });
+                        return;
+                    }
                     existingItem.quantity += parsedQuantity;
                 } else {
                     storedCart.push({ productId, size, quantity: parsedQuantity });
                 }
     
                 localStorage.setItem("guestCart", JSON.stringify(storedCart));
+                setCartItems((prev) => [...prev, { product_id: product, size, quantity: parsedQuantity }]);
     
                 Swal.fire({
                     title: "Producto agregado!",
@@ -144,7 +153,6 @@ const ShopContextProvider = ({ children }) => {
                 });
     
                 const data = await response.json();
-    
                 if (data.success) {
                 // Actualizar estado del carrito
                     setCartItems((prev) => [...prev, { product_id: product, size, quantity: parsedQuantity }]);
@@ -217,6 +225,37 @@ const ShopContextProvider = ({ children }) => {
 
     // Actualizar la cantidad de un producto en el carrito
     const updateCart = (itemId, newQuantity, size) => {
+        console.log("Updating cart item:", itemId, newQuantity, size);
+        console.log(all_product)
+        let product;
+        if (localStorage.getItem("auth-token")) {
+            product = all_product.find((p) => p._id === itemId);
+        }
+        else {
+             product = all_product.find((p) => p.id === itemId);
+        }
+
+        if (!product) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Producto no encontrado.',
+            });
+            return;
+        }
+    
+        const availableQuantity = product.sizes[size];
+        console.log("Available Quantity:", availableQuantity);
+        console.log("New Quantity:", newQuantity);
+        if (newQuantity > availableQuantity) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: `Solo hay ${availableQuantity} unidades disponibles en la talla ${size}.`,
+            });
+            return;
+        }
+    
         setCartItems((prevCart) => {
             const updatedCart = prevCart.map(item => {
                 if (item.product_id._id === itemId && item.size === size) {
@@ -247,7 +286,7 @@ const ShopContextProvider = ({ children }) => {
 
             return updatedCart;
         });
-
+    
         if (localStorage.getItem("auth-token")) {
             fetch("http://localhost:4000/updatecart", {
                 method: "POST",
@@ -289,18 +328,26 @@ const ShopContextProvider = ({ children }) => {
     // Limpiar Carrito
 
     const clearCart = () => {
-        const response = fetch("http://localhost:4000/clearcart", {
-            method: "DELETE",
-            headers: {
-                "Content-Type": "application/json",
-                "auth-token": localStorage.getItem("auth-token"),
-            }
-        });
-        response.then((res) => res.json()).then((data) => {
-            console.log(data);
+        if (!localStorage.getItem("auth-token")) {
+            localStorage.removeItem("guestCart");
             setCartItems(getDefaultCart());
+            window.location.reload();
+            return;
+        } else {
+
+            const response = fetch("http://localhost:4000/clearcart", {
+                method: "DELETE",
+                headers: {
+                    "Content-Type": "application/json",
+                    "auth-token": localStorage.getItem("auth-token"),
+                }
+            });
+            response.then((res) => res.json()).then((data) => {
+                console.log(data);
+                setCartItems(getDefaultCart());
+            }
+            );
         }
-        );
     };
 
     // Proveer las funciones al contexto

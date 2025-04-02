@@ -1,4 +1,5 @@
-const port = 4000;
+require('dotenv').config();
+const port = process.env.PORT;
 const express = require("express");
 const app = express();
 const mongoose = require("mongoose");
@@ -12,6 +13,10 @@ const stripe = require('stripe')('sk_test_51R6cNaBLRCJFKBKAttNOUBrZeJ83hiT7urfBa
 const { clear } = require("console");
 const crypto = require('crypto');
 const nodemailer = require('nodemailer');
+const connectDB = require('./config/database');
+
+// Conexión a la base de datos
+connectDB();
 
 const validatePassword = (password) => {
     const minLength = 8;
@@ -38,16 +43,6 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(bodyParser.json());
-
-// Conexion con la base de datos de MongoDB
-mongoose.connect("mongodb+srv://JuanRM:JuanTDP10@stp.jlm2k.mongodb.net/suprastock", {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-}).then(() => {
-    console.log('Conectado a la base de datos');
-}).catch((error) => {
-    console.error('Error al conectar a la base de datos:', error);
-});
 
 // Creacion de API
 app.get("/", (req, res) => {
@@ -462,20 +457,18 @@ app.post('/addtocart', fetchUser, async (req, res) => {
             return res.status(404).json({ success: false, message: "Usuario no encontrado." });
         }
 
-        // Verificar si el producto ya está en el carrito
-        const existingCartItem = user.cartData.find(item => item.product_id && item.product_id.equals(product._id) && item.size === size);
-
+        const existingCartItem = user.cartData.find(item => item.product_id.equals(product._id) && item.size === size);
         if (existingCartItem) {
-            // Si el producto ya está en el carrito, incrementar la cantidad
+            if (existingCartItem.quantity + quantity > availableQuantity) {
+                return res.status(400).json({ success: false, message: `No puedes agregar más de ${availableQuantity} unidades en la talla ${size}.` });
+            }
             existingCartItem.quantity += quantity;
         } else {
-            // Si el producto no está en el carrito, agregarlo
-            user.cartData.push({ product_id: product._id, size: size, quantity: quantity });
+            user.cartData.push({ product_id: product._id, size, quantity });
         }
 
         // Guardar los cambios en el usuario
         await user.save();
-
         res.json({ success: true, message: "Producto agregado al carrito", cart: user.cartData });
     } catch (error) {
         console.error("Error al agregar al carrito:", error);
@@ -564,6 +557,7 @@ app.delete('/clearcart', fetchUser, async (req, res) => {
 // Endpoint para actualizar el carrito
 app.post('/updatecart', fetchUser, async (req, res) => {
     try {
+        console.log(req.body)
         const { itemId, size, quantity } = req.body;
 
         // Validar entrada
