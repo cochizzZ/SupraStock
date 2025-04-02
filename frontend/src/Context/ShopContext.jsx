@@ -124,6 +124,7 @@ const ShopContextProvider = ({ children }) => {
                 }
     
                 localStorage.setItem("guestCart", JSON.stringify(storedCart));
+                setCartItems((prev) => [...prev, { product_id: product, size, quantity: parsedQuantity }]);
     
                 Swal.fire({
                     title: "Producto agregado!",
@@ -289,18 +290,26 @@ const ShopContextProvider = ({ children }) => {
     // Limpiar Carrito
 
     const clearCart = () => {
-        const response = fetch("http://localhost:4000/clearcart", {
-            method: "DELETE",
-            headers: {
-                "Content-Type": "application/json",
-                "auth-token": localStorage.getItem("auth-token"),
-            }
-        });
-        response.then((res) => res.json()).then((data) => {
-            console.log(data);
+        if (!localStorage.getItem("auth-token")) {
+            localStorage.removeItem("guestCart");
             setCartItems(getDefaultCart());
+            window.location.reload();
+            return;
+        } else {
+
+            const response = fetch("http://localhost:4000/clearcart", {
+                method: "DELETE",
+                headers: {
+                    "Content-Type": "application/json",
+                    "auth-token": localStorage.getItem("auth-token"),
+                }
+            });
+            response.then((res) => res.json()).then((data) => {
+                console.log(data);
+                setCartItems(getDefaultCart());
+            }
+            );
         }
-        );
     };
 
     // Proveer las funciones al contexto

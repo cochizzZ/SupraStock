@@ -31,6 +31,7 @@ const Cartitems = () => {
 
         setGuestCart(updatedCart);
         localStorage.setItem("guestCart", JSON.stringify(updatedCart));
+        updateCart(productId, 0, size);
     };
 
     // Eliminar un producto del carrito temporal
@@ -38,6 +39,7 @@ const Cartitems = () => {
         const updatedCart = guestCart.filter(item => !(item.productId === productId && item.size === size));
         setGuestCart(updatedCart);
         localStorage.setItem("guestCart", JSON.stringify(updatedCart));
+        updateCart(productId, 0, size);
     };
 
     // Calcular el total del carrito (autenticado o no autenticado)
