@@ -22,13 +22,33 @@ const Cartitems = () => {
 
     // Actualizar la cantidad de un producto en el carrito temporal
     const updateGuestCartQuantity = (productId, newQuantity, size) => {
+        const product = all_product.find(p => p.id === productId);
+        if (!product) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Producto no encontrado.',
+            });
+            return;
+        }
+    
+        const availableQuantity = product.sizes[size];
+        if (newQuantity > availableQuantity) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Stock limitado',
+                text: `Solo hay ${availableQuantity} unidades disponibles en la talla ${size}.`,
+            });
+            newQuantity = availableQuantity; // Limitar la cantidad al stock disponible
+        }
+    
         const updatedCart = guestCart.map(item => {
             if (item.productId === productId && item.size === size) {
                 return { ...item, quantity: newQuantity };
             }
             return item;
         }).filter(item => item.quantity > 0); // Eliminar productos con cantidad 0
-
+    
         setGuestCart(updatedCart);
         localStorage.setItem("guestCart", JSON.stringify(updatedCart));
         updateCart(productId, 0, size);
@@ -187,7 +207,7 @@ const Cartitems = () => {
                         <hr />
                         <div className="cartitems-total-item">
                             <p>Precio de envio</p>
-                            <p>Free</p>
+                            <p>Por definir</p>
                         </div>
                         <hr />
                         <div className="cartitems-total-item">
