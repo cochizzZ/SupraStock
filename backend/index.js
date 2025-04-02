@@ -1,4 +1,5 @@
-const port = 4000;
+require('dotenv').config();
+const port = process.env.PORT;
 const express = require("express");
 const app = express();
 const mongoose = require("mongoose");
@@ -12,6 +13,10 @@ const stripe = require('stripe')('sk_test_51R6cNaBLRCJFKBKAttNOUBrZeJ83hiT7urfBa
 const { clear } = require("console");
 const crypto = require('crypto');
 const nodemailer = require('nodemailer');
+const connectDB = require('./config/database');
+
+// Conexión a la base de datos
+connectDB();
 
 const validatePassword = (password) => {
     const minLength = 8;
@@ -38,16 +43,6 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(bodyParser.json());
-
-// Conexion con la base de datos de MongoDB
-mongoose.connect("mongodb+srv://JuanRM:JuanTDP10@stp.jlm2k.mongodb.net/suprastock", {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-}).then(() => {
-    console.log('Conectado a la base de datos');
-}).catch((error) => {
-    console.error('Error al conectar a la base de datos:', error);
-});
 
 // Creacion de API
 app.get("/", (req, res) => {
