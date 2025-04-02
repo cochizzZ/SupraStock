@@ -462,20 +462,18 @@ app.post('/addtocart', fetchUser, async (req, res) => {
             return res.status(404).json({ success: false, message: "Usuario no encontrado." });
         }
 
-        // Verificar si el producto ya está en el carrito
-        const existingCartItem = user.cartData.find(item => item.product_id && item.product_id.equals(product._id) && item.size === size);
-
+        const existingCartItem = user.cartData.find(item => item.product_id.equals(product._id) && item.size === size);
         if (existingCartItem) {
-            // Si el producto ya está en el carrito, incrementar la cantidad
+            if (existingCartItem.quantity + quantity > availableQuantity) {
+                return res.status(400).json({ success: false, message: `No puedes agregar más de ${availableQuantity} unidades en la talla ${size}.` });
+            }
             existingCartItem.quantity += quantity;
         } else {
-            // Si el producto no está en el carrito, agregarlo
-            user.cartData.push({ product_id: product._id, size: size, quantity: quantity });
+            user.cartData.push({ product_id: product._id, size, quantity });
         }
 
         // Guardar los cambios en el usuario
         await user.save();
-
         res.json({ success: true, message: "Producto agregado al carrito", cart: user.cartData });
     } catch (error) {
         console.error("Error al agregar al carrito:", error);
@@ -564,6 +562,7 @@ app.delete('/clearcart', fetchUser, async (req, res) => {
 // Endpoint para actualizar el carrito
 app.post('/updatecart', fetchUser, async (req, res) => {
     try {
+        console.log(req.body)
         const { itemId, size, quantity } = req.body;
 
         // Validar entrada
