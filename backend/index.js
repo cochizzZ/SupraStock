@@ -14,30 +14,14 @@ const { clear } = require("console");
 const crypto = require('crypto');
 const nodemailer = require('nodemailer');
 const connectDB = require('./config/database');
+const Product = require('./models/Product');
+const Users = require('./models/Users');
+const Order = require('./models/Orders');
+const Comment = require('./models/Comments');
+const validatePassword = require('./utils/validatePassword');
 
 // Conexión a la base de datos
 connectDB();
-
-const validatePassword = (password) => {
-    const minLength = 8;
-    const hasUpperCase = /[A-Z]/.test(password);
-    const hasLowerCase = /[a-z]/.test(password);
-    const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
-
-    if (password.length < minLength) {
-        return "La contraseña debe tener al menos 8 caracteres.";
-    }
-    if (!hasUpperCase) {
-        return "La contraseña debe tener al menos una letra mayúscula.";
-    }
-    if (!hasLowerCase) {
-        return "La contraseña debe tener al menos una letra minúscula.";
-    }
-    if (!hasSpecialChar) {
-        return "La contraseña debe tener al menos un carácter especial.";
-    }
-    return null; // Si pasa todas las validaciones
-};
 
 app.use(cors());
 app.use(express.json());
@@ -69,59 +53,6 @@ app.post("/upload", upload.single('product'), (req, res) => {
         image_url: `http://localhost:${port}/images/${req.file.filename}`
     })
 })
-
-// Esquema para la creación de productos
-
-const ProductSchema = new mongoose.Schema({
-    id: {
-        type: Number,
-        required: true,
-    },
-    name: {
-        type: String,
-        required: true,
-    },
-    image: {
-        type: String,
-        required: true,
-    },
-    category: {
-        type: String,
-        required: true,
-    },
-    new_price: {
-        type: Number,
-        required: true,
-    },
-    old_price: {
-        type: Number,
-        required: true,
-    },
-    date: {
-        type: Date,
-        default: Date.now,
-    },
-    available: {
-        type: Boolean,
-        default: true,
-    },
-    description: {
-        type: String,
-        required: true,
-    },
-    stock: {
-        type: Number,
-        required: true,
-        default: 0,
-    },
-    sizes: {
-        type: Map,
-        of: Number,
-        default: {}, // Inicializar como un objeto vacío
-    }
-});
-
-const Product = mongoose.model("Product", ProductSchema);
 
 // Endpoint para agregar un producto
 app.post('/addproduct', async (req, res) => {
@@ -211,63 +142,6 @@ app.get('/fullproducts', async (req, res) => {
         res.status(500).json({ success: false, message: error.message });
     }
 });
-
-
-//creación de schema para el modelo de usuario
-
-const Users = mongoose.model('Users', new mongoose.Schema({
-    name: { type: String, required: true },
-    email: { type: String, unique: true, required: true },
-    password: { type: String, required: true },
-    photo: { type: String },
-    address: { type: String },
-    city: { type: String },
-    postal_code: { type: String },
-    phone: { type: String },
-    wishlist: { type: Array, default: [] },
-    cartData: [
-        {
-            product_id: { type: mongoose.Schema.Types.ObjectId, ref: "Product" },
-            size: { type: String, required: true },
-            quantity: { type: Number, required: true }
-        }
-    ],
-    date: { type: Date, default: Date.now },
-    role: { type: String, default: 'user' },
-    resetPasswordToken: { type: String },
-    resetPasswordExpires: { type: Date },
-    isVerified: { type: Boolean, default: false }, // Nuevo campo
-    verificationToken: { type: String }, // Nuevo campo
-})); 
-
-//creación de schema para el modelo de ordenes
-const OrderSchema = new mongoose.Schema({
-    user_id: { type: mongoose.Schema.Types.ObjectId, ref: "Users", required: true }, // Cambiado de "User" a "Users"
-    products: [
-        {
-            product_id: { type: mongoose.Schema.Types.ObjectId, ref: "Product", required: true },
-            size: { type: String, required: true },
-            quantity: { type: Number, required: true },
-            price: { type: Number, required: true },
-        },
-    ],
-    address: { type: String, required: true },
-    city: { type: String, required: true },
-    postal_code: { type: String, required: true },
-    total: { type: Number, required: true },
-    status: { type: String, enum: ["Pending", "Shipped", "Completed", "Cancelled"], default: "Pending" },
-    date: { type: Date, default: Date.now },
-    available: { type: Boolean, default: true },
-    payment_info: {
-        method: { type: String, required: true },
-        status: { type: String, enum: ["Pending", "Paid", "Failed"], default: "Pending" },
-        transaction_id: { type: String },
-    },
-});
-
-const Order = mongoose.model("Order", OrderSchema);
-module.exports = Order;
-
 
 // Modificación en el endpoint de registro (signup)
 app.post('/signup', async (req, res) => {
@@ -1059,16 +933,6 @@ app.listen(port, (error) => {
         console.log("Error : " + error)
     }
 })
-
-//creación de schema para el modelo de comentarios
-const CommentSchema = new mongoose.Schema({
-    productId: { type: mongoose.Schema.Types.ObjectId, ref: "Product", required: true },
-    author: { type: String, required: true },
-    text: { type: String, required: true },
-    date: { type: Date, default: Date.now },
-});
-
-const Comment = mongoose.model("Comment", CommentSchema);
 
 // Endpoint para obtener comentarios de un producto
 app.get('/api/comments/:productId', async (req, res) => {
