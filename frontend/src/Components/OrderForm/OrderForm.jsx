@@ -151,7 +151,7 @@ const OrderForm = () => {
                 </label>
                 <label>
                     Número de Celular:
-                    <input type="tel" name="phone" value={userData.phone} disabled />
+                    <input type="tel" name="phone" value={userData.phone} />
                 </label>
                 <label>
                     Dirección:
