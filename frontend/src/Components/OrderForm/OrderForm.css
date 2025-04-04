@@ -5,6 +5,8 @@
     border: 1px solid #ccc;
     border-radius: 8px;
     background-color: #f9f9f9;
+    position: relative;
+    top: 45px;
 }
 
 .order-form h1 {
@@ -39,4 +41,26 @@
 
 .order-form button:hover {
     background-color: #e25252;
+}
+@media(max-width: 500px){
+    .order-form input{
+        width: 87%;
+        margin-bottom: 10px;
+        font-size: 12px;
+    }
+    .order-form select{
+        width: 92%;
+        margin-bottom: 10px;
+        font-size: 12px;
+    }
+    .order-form{
+        width: 75%;
+        justify-items: end;
+    }
+    .order-form button {
+        width: 93%;
+    }
+    .payment-form{
+        width: 90%;
+    }
 }

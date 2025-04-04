@@ -230,6 +230,7 @@ const AddProduct = () => {
             <option value="" disabled>
               Seleccionar talla
             </option>
+            <option value="Unica">Unica</option>
             <option value="XS">XS</option>
             <option value="S">S</option>
             <option value="M">M</option>
