@@ -1128,3 +1128,20 @@ app.get('/verify-email/:token', async (req, res) => {
         });
     }
 });
+
+app.post('/check-email', async (req, res) => {
+    const email = req.body.email;
+
+    try {
+        // Verificar si el correo ya está registrado
+        const existingUser = await Users.findOne({ email });
+        if (existingUser) {
+            return res.status(200).json({ success: false, message: "El correo ya está registrado." });
+        }
+
+        res.status(200).json({ success: true, message: "El correo está disponible." });
+    } catch (error) {
+        console.error("Error al verificar el correo:", error);
+        res.status(500).json({ success: false, message: "Error interno del servidor." });
+    }
+});

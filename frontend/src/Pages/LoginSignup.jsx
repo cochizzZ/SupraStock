@@ -6,7 +6,7 @@ import Swal from 'sweetalert2'; // Importar SweetAlert2
 
 const LoginSignup = () => {
   const { handleLogin } = useContext(ShopContext);
-  const [state, setState] = useState("Iniciar Sesión");
+  const [state, setState] = useState("Registro");
   const [formData, setFormData] = useState({
     name: "",
     password: "",
@@ -93,6 +93,16 @@ const validatePassword = (password) => {
     return null; // Si pasa todas las validaciones
 };
 
+const validateEmail = async (email) => {
+    try {
+    const response = await axios.post("http://localhost:4000/check-email", { email });
+    return response.data.success;
+    } catch (error) {
+    console.error("Error al verificar el correo:", error);
+    return false;
+    }
+};
+
 const handleSignup = async () => {
     const passwordError = validatePassword(formData.password);
     if (passwordError) {
@@ -105,6 +115,19 @@ const handleSignup = async () => {
         return;
     }
 
+    // Validar si el correo ya existe
+    const emailExists = await validateEmail(formData.email);
+    if (!emailExists) {
+        Swal.fire({
+            title: "El correo ya existe",
+            text: "Por favor, utiliza un correo diferente.",
+            icon: "error",
+            confirmButtonText: "OK",
+        });
+        return;
+    }
+
+    // Continuar con el registro si el correo no existe
     try {
         const response = await axios.post("http://localhost:4000/signup", formData, {
             headers: { "Content-Type": "application/json" }
@@ -118,9 +141,10 @@ const handleSignup = async () => {
                 icon: "success",
                 confirmButtonColor: "#3085d6",
                 confirmButtonText: "OK",
+            }).then(() => {
+                // Redirigir a la página principal después de que el usuario haga clic en "OK"
+                window.location.replace("/");
             });
-
-            window.location.replace("/");
         } else {
             Swal.fire({
                 title: "Error",
