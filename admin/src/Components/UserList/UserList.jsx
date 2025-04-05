@@ -105,10 +105,12 @@ const UserList = () => {
           <div className="user-grid">
             {users.length > 0 ? (
               users.map((user) => (
+                
                 <div className="user-card" key={user._id}>
                   <p><strong>Usuario:</strong> {user.name}</p>
                   <p><strong>Email:</strong> {user.email}</p>
                   <p><strong>Rol:</strong> {user.role}</p>
+                  <p><strong>Estado: </strong> {user.active ? 'Activo' : 'Inactivo'}</p>
                   <div className="user-actions">
                     <button className="edit-btn" onClick={() => handleEdit(user)}>
                       <img src={lapicito} alt="Editar" />

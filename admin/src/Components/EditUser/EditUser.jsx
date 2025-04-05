@@ -10,6 +10,7 @@ const EditUser = ({ user, onUpdate }) => {
     role: 'user',
     address: '',
     phone: '',
+    active: '',
   });
 
   useEffect(() => {
@@ -21,12 +22,17 @@ const EditUser = ({ user, onUpdate }) => {
         role: user.role || 'user',
         address: user.address || '',
         phone: user.phone || '',
+        active: user.active !== undefined ? user.active : true,
       });
     }
   }, [user]);
 
   const handleChange = (e) => {
-    setUserDetails({ ...userDetails, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setUserDetails({
+      ...userDetails,
+      [name]: name === 'active' ? value === 'true' : value, // Convertir a booleano si es 'active'
+    });
   };
 
   const updateUser = async () => {
@@ -78,6 +84,7 @@ const EditUser = ({ user, onUpdate }) => {
       role: user.role || 'user',
       address: user.address || '',
       phone: user.phone || '',
+      active: user.active || 'true',
     });
     onUpdate();
   };
@@ -103,6 +110,12 @@ const EditUser = ({ user, onUpdate }) => {
 
       <label>Teléfono</label>
       <input type="text" name="phone" value={userDetails.phone} onChange={handleChange} />
+
+      <label>Estado</label>
+      <select name="active" value={userDetails.active ? 'true' : 'false'} onChange={handleChange}>
+        <option value="true">Activo</option>
+        <option value="false">Inactivo</option>
+      </select>
 
       <button className="update-btn" onClick={updateUser}>Actualizar</button>
       <button className="cancel-btn" onClick={handleCancel}>Cancelar</button>

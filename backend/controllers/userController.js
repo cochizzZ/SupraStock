@@ -53,7 +53,7 @@ exports.getUsers = async (req, res) => {
 
 exports.updateUserData = async (req, res) => {
     try {
-        const { name, email, photo, address, phone, role } = req.body;
+        const { name, email, address, phone, role, active } = req.body;
         const userId = req.params.id;
 
         // Verificar si el usuario existe
@@ -63,7 +63,7 @@ exports.updateUserData = async (req, res) => {
         }
 
         // Actualizar el usuario
-        user = await Users.findByIdAndUpdate(userId, { name, email, photo, address, phone, role }, { new: true });
+        user = await Users.findByIdAndUpdate(userId, { name, email, address, phone, role, active }, { new: true });
 
         res.json({ success: true, message: "Usuario actualizado", user });
     } catch (error) {
@@ -77,16 +77,20 @@ exports.updateUserData = async (req, res) => {
 exports.deleteUser = async (req, res) => {
     try {
         const { id } = req.params;
-        console.log("ID recibido en el backend:", id); // 👀 Verifica si el ID llega correctamente
+        console.log("ID recibido en el backend:", id);
 
         // Verificar si el ID es válido en MongoDB
         if (!mongoose.Types.ObjectId.isValid(id)) {
             return res.status(400).json({ message: "ID no válido" });
         }
 
-        const deletedUser = await Users.findByIdAndDelete(id);
+        const selectedUser = await Users.findById(id);
 
-        if (!deletedUser) {
+        selectedUser.active = false; // Cambiar el estado a inactivo
+
+        await selectedUser.save(); // Guardar los cambios en la base de datos
+
+        if (!selectedUser) {
             return res.status(404).json({ message: "Usuario no encontrado" });
         }
 

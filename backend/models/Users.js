@@ -22,6 +22,7 @@ const UsersSchema = mongoose.Schema({
     resetPasswordExpires: { type: Date },
     isVerified: { type: Boolean, default: false }, // Nuevo campo
     verificationToken: { type: String }, // Nuevo campo
+    active: { type: Boolean, default: true }, // Nuevo campo
 }); 
 
 module.exports = mongoose.model("Users", UsersSchema);
