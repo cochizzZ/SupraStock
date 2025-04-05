@@ -5,53 +5,82 @@ const Users = require('../models/Users');
 // Endpoint para obtener comentarios de un producto
 
 exports.getCommentsByProduct = async (req, res) => {
-    try {
-        // Buscar el producto por su campo `id` (número)
-        const product = await Product.findOne({ id: req.params.productId });
-        if (!product) {
-            return res.status(404).json({ success: false, message: "Producto no encontrado" });
-        }
+  try {
+    const productId = req.params.productId;
 
-        // Buscar comentarios asociados al ObjectId del producto
-        const comments = await Comment.find({ productId: product._id });
-        res.json(comments);
-    } catch (error) {
-        console.error("Error al obtener comentarios:", error);
-        res.status(500).json({ success: false, message: "Error interno del servidor" });
+    // Validar que productId sea un número válido
+    if (!Number.isInteger(Number(productId))) {
+      return res.status(400).json({
+        success: false,
+        message: 'El ID del producto debe ser un número válido.',
+      });
     }
+
+    const product = await Product.findOne({ id: productId });
+    if (!product) {
+      return res.status(404).json({ success: false, message: 'Producto no encontrado' });
+    }
+
+    const comments = await Comment.find({ productId: product._id });
+    res.json(comments);
+  } catch (error) {
+    console.error('Error al obtener comentarios:', error);
+    res.status(500).json({ success: false, message: 'Error interno del servidor' });
+  }
 };
 
 // Endpoint para agregar un comentario
 
 exports.addComment = async (req, res) => {
-    try {
-        const { productId, text } = req.body;
+  try {
+    const { productId, text } = req.body;
 
-        // Buscar el producto por su campo `id` (número)
-        const product = await Product.findOne({ id: productId });
-        if (!product) {
-            return res.status(404).json({ success: false, message: "Producto no encontrado" });
-        }
-
-        // Obtener el usuario autenticado
-        const user = await Users.findById(req.user.id);
-        if (!user) {
-            return res.status(404).json({ success: false, message: "Usuario no encontrado" });
-        }
-
-        // Crear y guardar el comentario con el ObjectId del producto
-        const newComment = new Comment({
-            productId: product._id,
-            author: user.name, // Usar el nombre del usuario autenticado
-            text,
-        });
-        await newComment.save();
-
-        res.json({ success: true, comment: newComment });
-    } catch (error) {
-        console.error("Error al agregar comentario:", error);
-        res.status(500).json({ success: false, message: "Error interno del servidor" });
+    // Validaciones
+    if (!productId || !text) {
+      return res.status(400).json({
+        success: false,
+        message: 'El ID del producto y el texto son obligatorios.',
+      });
     }
+
+    if (!Number.isInteger(Number(productId))) {
+      return res.status(400).json({
+        success: false,
+        message: 'El ID del producto debe ser un número válido.',
+      });
+    }
+
+    if (typeof text !== 'string' || text.trim() === '') {
+      return res.status(400).json({
+        success: false,
+        message: 'El texto del comentario no puede estar vacío.',
+      });
+    }
+
+    const product = await Product.findOne({ id: productId });
+    if (!product) {
+      return res.status(404).json({ success: false, message: 'Producto no encontrado' });
+    }
+
+    const user = await Users.findById(req.user.id);
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'Usuario no encontrado' });
+    }
+
+    // Crear y guardar el comentario
+    const newComment = new Comment({
+      productId: product._id,
+      author: user.name,
+      text,
+    });
+    const savedComment = await newComment.save();
+
+    // Responder con el comentario guardado
+    res.json({ success: true, comment: savedComment });
+  } catch (error) {
+    console.error('Error al agregar comentario:', error);
+    res.status(500).json({ success: false, message: 'Error interno del servidor' });
+  }
 };
 
 // Endpoint para eliminar un comentario (solo admin)

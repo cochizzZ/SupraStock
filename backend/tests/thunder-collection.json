@@ -1,0 +1,58 @@
+{
+	"info": {
+		"name": "Backend API Tests",
+		"_postman_id": "12345678-1234-1234-1234-123456789012",
+		"description": "Collection of API requests for unit testing the backend.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Get Users",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {},
+				"url": {
+					"raw": "{{baseUrl}}/users",
+					"host": ["{{baseUrl}}"],
+					"path": ["users"]
+				}
+			},
+			"response": [
+				{
+					"status": "200 OK",
+					"code": 200,
+					"body": "[{\"id\":1,\"name\":\"John Doe\"}]"
+				}
+			]
+		},
+		{
+			"name": "Create User",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"name\":\"Jane Doe\"}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/users",
+					"host": ["{{baseUrl}}"],
+					"path": ["users"]
+				}
+			},
+			"response": [
+				{
+					"status": "201 Created",
+					"code": 201,
+					"body": "{\"id\":2,\"name\":\"Jane Doe\"}"
+				}
+			]
+		}
+	]
+}

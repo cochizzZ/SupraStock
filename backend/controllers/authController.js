@@ -26,10 +26,18 @@ exports.verifyAdmin = async (req, res) => {
 
 // Endpoint de registro de usuario
 
-exports.singup = async (req, res) => {
+exports.signup = async (req, res) => {
     try {
         const { name, email, password } = req.body;
-        console.log(req.body)
+
+        // Validar el nombre del usuario
+        const nameRegex = /^[a-zA-Z\s]+$/; // Solo letras y espacios
+        if (!nameRegex.test(name)) {
+            return res.status(400).json({
+                success: false,
+                message: "El nombre no puede contener caracteres especiales.",
+            });
+        }
 
         // Validar la contraseña
         const passwordError = validatePassword(password);
@@ -53,17 +61,14 @@ exports.singup = async (req, res) => {
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
 
-        // Generar un token único para la verificación
-        const verificationToken = crypto.randomBytes(32).toString('hex');
-
-        // Crear el nuevo usuario (sin activar)
+        // Crear el nuevo usuario
+        const verificationToken = crypto.randomBytes(32).toString("hex");
         const user = new Users({
             name,
             email,
             password: hashedPassword,
             role: 'user',
-            isVerified: false, // Nuevo campo para verificar si el usuario está autenticado
-            verificationToken,
+            isVerified: false,
         });
 
         await user.save();
@@ -78,7 +83,7 @@ exports.singup = async (req, res) => {
         });
 
         // Enviar el correo de verificación
-        const verificationUrl = `http://localhost:3000/verify-email/${verificationToken}`;
+        const verificationUrl = `http://localhost:3000/verify-email/${user.verificationToken}`;
         const mailOptions = {
             to: email,
             subject: 'Verificación de correo electrónico',
