@@ -108,6 +108,14 @@ exports.login = async (req, res) => {
     if (user) {
         const passCompare = await bcrypt.compare(req.body.password, user.password);
         if (passCompare) {
+            // Validar si el usuario está activo
+            if (!user.active) {
+                return res.json({
+                    success: false,
+                    errors: "Usuario desactivado por la administración, comunícate por medio de la sección de contacto",
+                });
+            }
+
             const data = { user: { id: user._id } };
             const token = jwt.sign(data, 'secret_ecom');
             console.log("_id:", user._id);
