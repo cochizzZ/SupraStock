@@ -6,7 +6,7 @@ import Swal from 'sweetalert2'; // Importar SweetAlert2
 
 const LoginSignup = () => {
   const { handleLogin } = useContext(ShopContext);
-  const [state, setState] = useState("Registro");
+  const [state, setState] = useState("Iniciar Sesión");
   const [formData, setFormData] = useState({
     name: "",
     password: "",
