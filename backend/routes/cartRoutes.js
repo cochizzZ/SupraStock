@@ -4,7 +4,8 @@ const { fetchUser } = require('../middlewares/authMiddleware');
 
 const router = express.Router();
 
-// Route to get all products
+// Definición de rutas para el carrito
+
 router.post('/addtocart', fetchUser, addToCart);
 router.post('/removefromcart', fetchUser, removeFromCart);
 router.post('/getcart', fetchUser, getCart);

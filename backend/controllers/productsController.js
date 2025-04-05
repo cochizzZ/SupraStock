@@ -1,6 +1,6 @@
-//const User = require('../models/User');
 const Product = require('../models/Product');
-const mongoose = require('mongoose');
+
+// Endpoint para obtener todos los productos disponibles
 
 exports.allProducts = async (req, res) => {
     try {
@@ -10,6 +10,8 @@ exports.allProducts = async (req, res) => {
         res.status(500).json({ success: false, message: error.message });
     }
 };
+
+// Endpoint para obtener productos por categoría
 
 exports.removeProduct = async (req, res) => {
     try {
@@ -33,6 +35,8 @@ exports.removeProduct = async (req, res) => {
         res.status(500).json({ success: false, message: "Error interno del servidor" });
     }
 };
+
+// Endpoint para agregar un nuevo producto
 
 exports.addProduct = async (req, res) => {
     try {
@@ -77,6 +81,8 @@ exports.addProduct = async (req, res) => {
     }
 };
 
+// Endpoint para obtener todos los productos (incluyendo no disponibles)
+
 exports.fullProducts = async (req, res) => {
     try {
         const products = await Product.find({});
@@ -86,12 +92,16 @@ exports.fullProducts = async (req, res) => {
     }
 };
 
+// Endpoint para obtener productos más recientes (nuevas colecciones)
+
 exports.newCollections = async (req, res) => {
     let products = await Product.find({ available: true });
     let newcollection = products.slice(0).slice(-8);
     console.log("NewCollection Fetched");
     res.send(newcollection);
 };
+
+// Endpoint para obtener productos populares en mujeres
 
 exports.popularinWomen = async (req, res) => {
     try {
@@ -106,6 +116,8 @@ exports.popularinWomen = async (req, res) => {
         res.status(500).json({ success: false, message: "Error interno del servidor" });
     }
 };
+
+// Endpoint para actualizar un producto
 
 exports.updateProduct = async (req, res) => {
     try {
@@ -159,6 +171,7 @@ exports.updateProduct = async (req, res) => {
 };
 
 //Endpoint para obtener detalles de un producto
+
 exports.productDetails = async (req, res) => {
     try {
         console.log("Product ID:", req.params.productId);

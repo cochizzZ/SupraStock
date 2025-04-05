@@ -1,9 +1,9 @@
 const Product = require('../models/Product');
 const Comment = require('../models/Comments');
 const Users = require('../models/Users');
-const mongoose = require('mongoose');
 
 // Endpoint para obtener comentarios de un producto
+
 exports.getCommentsByProduct = async (req, res) => {
     try {
         // Buscar el producto por su campo `id` (número)
@@ -22,6 +22,7 @@ exports.getCommentsByProduct = async (req, res) => {
 };
 
 // Endpoint para agregar un comentario
+
 exports.addComment = async (req, res) => {
     try {
         const { productId, text } = req.body;
@@ -54,6 +55,7 @@ exports.addComment = async (req, res) => {
 };
 
 // Endpoint para eliminar un comentario (solo admin)
+
 exports.deleteComment = async (req, res) => {
     try {
         const user = await Users.findById(req.user.id);

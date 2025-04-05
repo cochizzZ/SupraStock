@@ -4,7 +4,8 @@ const { addOrder, getOrders, getUserOrders, updateOrder, updateOrderStatus, crea
 
 const router = express.Router();
 
-router.post('/addorder', addOrder)
+// Definición de rutas para las órdenes y estatísticas
+
 router.get('/api/orders', getOrders)
 router.get('/api/user/orders', fetchUser, getUserOrders)
 router.put('/orders/:orderId', updateOrder)

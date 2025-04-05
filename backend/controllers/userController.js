@@ -1,10 +1,11 @@
-const Product = require('../models/Product');
 const Users = require('../models/Users');
 const mongoose = require('mongoose');
 const validatePassword = require('../utils/validatePassword');
 const nodemailer = require('nodemailer');
 const crypto = require('crypto');
 const bcrypt = require("bcryptjs");
+
+// Endpoint para obtener el perfil del usuario
 
 exports.user = async (req, res) => {
     try {
@@ -15,6 +16,8 @@ exports.user = async (req, res) => {
         res.status(500).json({ success: false, message: "Error interno del servidor" });
     }
 };
+
+// Endpoint para actualizar el perfil del usuario
 
 exports.updateProfile = async (req, res) => {
     try {
@@ -32,6 +35,7 @@ exports.updateProfile = async (req, res) => {
 };
 
 // Endpoint para obtener todos los usuarios
+
 exports.getUsers = async (req, res) => {
     try {
         const users = await Users.find({});
@@ -46,6 +50,7 @@ exports.getUsers = async (req, res) => {
 };
 
 // Endpoint para actualizar datos de un usuario
+
 exports.updateUserData = async (req, res) => {
     try {
         const { name, email, photo, address, phone, role } = req.body;
@@ -68,6 +73,7 @@ exports.updateUserData = async (req, res) => {
 };
 
 // Endpoint para eliminar un usuario
+
 exports.deleteUser = async (req, res) => {
     try {
         const { id } = req.params;
@@ -92,6 +98,7 @@ exports.deleteUser = async (req, res) => {
 };
 
 // Endpoint para obtener a un usuario
+
 exports.getUser = async (req, res) => {
     try {
         const user = await Users.findById(req.params.id);
@@ -105,6 +112,7 @@ exports.getUser = async (req, res) => {
 };
 
 // Endpoint para solicitar restablecimiento de contraseña
+
 exports.forgotPassword = async (req, res) => {
     const { email } = req.body;
 
@@ -150,6 +158,7 @@ exports.forgotPassword = async (req, res) => {
 };
 
 // Endpoint para restablecer la contraseña
+
 exports.resetPassword = async (req, res) => {
     const { token } = req.params;
     const { newPassword } = req.body;
@@ -185,6 +194,7 @@ exports.resetPassword = async (req, res) => {
 };
 
 // Endpoint para verificar el token de restablecimiento de contraseña
+
 exports.verifyResetToken = async (req, res) => {
     try {
         const { token } = req.params;
@@ -216,6 +226,7 @@ exports.verifyResetToken = async (req, res) => {
     }
 };
 // Endpoint para verificar si el correo ya está registrado
+
 exports.checkEmail = async (req, res) => {
     const email = req.body.email;
 

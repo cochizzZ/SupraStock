@@ -1,11 +1,11 @@
-const Product = require('../models/Product');
 const Users = require('../models/Users');
-const mongoose = require('mongoose');
 const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
 const crypto = require('crypto');
 const validatePassword = require('../utils/validatePassword');
 const bcrypt = require("bcryptjs");
+
+// Endpoint para verificar el rol de administrador
 
 exports.verifyAdmin = async (req, res) => {
     const token = req.header('auth-token');

@@ -4,6 +4,8 @@ const { getCommentsByProduct, addComment, deleteComment } = require('../controll
 
 const router = express.Router();
 
+// Definición de rutas para los comentarios
+
 router.get('/api/comments/:productId', getCommentsByProduct);
 router.post('/api/comments', fetchUser, addComment);
 router.delete('/api/comments/:id', fetchUser, deleteComment);

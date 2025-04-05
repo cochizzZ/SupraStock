@@ -4,6 +4,8 @@ const { user, updateProfile, getUsers, updateUserData, deleteUser, getUser, forg
 
 const router = express.Router();
 
+// Definición de rutas para los usuarios y la autenticación
+
 router.get('/user', fetchUser, user);
 router.post('/updateprofile', fetchUser, updateProfile);
 router.get('/api/users', getUsers);

@@ -3,7 +3,8 @@ const { allProducts, removeProduct, addProduct, fullProducts, newCollections, po
 
 const router = express.Router();
 
-// Route to get all products
+// Definición de rutas para los productos
+
 router.get('/allproducts', allProducts);
 router.post('/removeproduct', removeProduct);
 router.post('/addproduct', addProduct);

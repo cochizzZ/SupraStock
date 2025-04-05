@@ -1,6 +1,7 @@
 const Product = require('../models/Product');
 const Users = require('../models/Users');
-const mongoose = require('mongoose');
+
+// Endpoint para agregar un producto al carrito
 
 exports.addToCart = async (req, res) => {
     try {
@@ -54,6 +55,8 @@ exports.addToCart = async (req, res) => {
     }
 };
 
+// Endpoint para eliminar un producto del carrito
+
 exports.removeFromCart = async (req, res) => {
     try {
         const { itemId, size } = req.body;
@@ -84,6 +87,8 @@ exports.removeFromCart = async (req, res) => {
     }
 };
 
+// Endpoint para obtener el carrito de un usuario
+
 exports.getCart = async (req, res) => {
     try {
         // Obtener el usuario con los productos del carrito ya poblados
@@ -105,6 +110,8 @@ exports.getCart = async (req, res) => {
         res.status(500).json({ success: false, message: "Error interno del servidor" });
     }
 };
+
+// Endpoint para limpiar el carrito
 
 exports.clearCart = async (req, res) => {
     try {
@@ -129,6 +136,8 @@ exports.clearCart = async (req, res) => {
         res.status(500).json({ success: false, message: "Error interno del servidor" });
     }
 };
+
+// Endpoint para actualizar el carrito
 
 exports.updateCart = async (req, res) => {
     try {

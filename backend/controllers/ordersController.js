@@ -4,40 +4,7 @@ const Users = require('../models/Users');
 const mongoose = require('mongoose');
 const stripe = require('stripe')('sk_test_51R6cNaBLRCJFKBKAttNOUBrZeJ83hiT7urfBaLEhNONIKDeqO9YeiAUmn0Pq5Ox23iseYtgbKX10s2IJuxTO0UFk00wjtRk5MZ');
 
-exports.addOrder = async (req, res) => {
-    try {
-        const { user_id, products, total, customer_info } = req.body;
-
-        if (!user_id || !products || !total || !customer_info) {
-            return res.status(400).json({
-                success: false,
-                message: "Los campos user_id, products, total y customer_info son obligatorios.",
-            });
-        }
-
-        const order = new Order({
-            user_id,
-            products,
-            total,
-            customer_info,
-            status: 'Pending',
-        });
-
-        await order.save();
-        console.log("Orden guardada:", order);
-
-        res.json({
-            success: true,
-            message: "Orden agregada correctamente",
-        });
-    } catch (error) {
-        console.error("Error al agregar orden:", error);
-        res.status(500).json({
-            success: false,
-            message: "Error interno del servidor",
-        });
-    }
-};
+// Endpoint para obtener todas las órdenes
 
 exports.getOrders = async (req, res) => {
     try {
@@ -59,6 +26,7 @@ exports.getOrders = async (req, res) => {
 };
 
 // Endpoint para obtener las órdenes de un usuario específico
+
 exports.getUserOrders = async (req, res) => {
     try {
         const orders = await Order.find({ user_id: req.user.id });
@@ -73,6 +41,7 @@ exports.getUserOrders = async (req, res) => {
 };
 
 // Endpoint para actualizar una orden
+
 exports.updateOrder = async (req, res) => {
     try {
         const { orderId } = req.params;
@@ -87,6 +56,7 @@ exports.updateOrder = async (req, res) => {
 };
 
 // Endpoint para actualizar el estado de una orden
+
 exports.updateOrderStatus = async (req, res) => {
     try {
         const { id } = req.params; // Obtener el ID de la orden desde los parámetros
@@ -137,7 +107,8 @@ exports.updateOrderStatus = async (req, res) => {
     }
 };
 
-// Endpoint para crear una orden 
+// Endpoint para crear una orden
+
 exports.createOrder = async (req, res) => {
     try {
         const { user_id, products, total, address, city, postal_code, payment_info } = req.body;
@@ -188,6 +159,7 @@ exports.createOrder = async (req, res) => {
 };
 
 // Endpoint para crear un pago con Stripe
+
 exports.createPayment = async (req, res) => {
     try {
         const { amount, currency } = req.body;
@@ -210,6 +182,7 @@ exports.createPayment = async (req, res) => {
 };
 
 // Endpoint para obtener estadisticas del sitio
+
 exports.getStatistics = async (req, res) => {
     try {
         const totalProducts = await Product.countDocuments({});
@@ -235,6 +208,7 @@ exports.getStatistics = async (req, res) => {
 };
 
 // Endpoint para obtener las ordenes para estadisticas
+
 exports.getOrdersForStatistics = async (req, res) => {
     try {
         const orders = await Order.find({});
