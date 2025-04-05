@@ -2,6 +2,9 @@ const Product = require('../models/Product');
 const Users = require('../models/Users');
 const mongoose = require('mongoose');
 const validatePassword = require('../utils/validatePassword');
+const nodemailer = require('nodemailer');
+const crypto = require('crypto');
+const bcrypt = require("bcryptjs");
 
 exports.user = async (req, res) => {
     try {

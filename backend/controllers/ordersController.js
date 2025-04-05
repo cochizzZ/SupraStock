@@ -2,6 +2,7 @@ const Order = require('../models/Orders');
 const Product = require('../models/Product');
 const Users = require('../models/Users');
 const mongoose = require('mongoose');
+const stripe = require('stripe')('sk_test_51R6cNaBLRCJFKBKAttNOUBrZeJ83hiT7urfBaLEhNONIKDeqO9YeiAUmn0Pq5Ox23iseYtgbKX10s2IJuxTO0UFk00wjtRk5MZ');
 
 exports.addOrder = async (req, res) => {
     try {

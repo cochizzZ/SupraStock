@@ -1,5 +1,6 @@
 const Product = require('../models/Product');
 const Comment = require('../models/Comments');
+const Users = require('../models/Users');
 const mongoose = require('mongoose');
 
 // Endpoint para obtener comentarios de un producto
