@@ -6,6 +6,7 @@ import defaultImage from '../Assets/404.jpg';
 const UserOrders = () => {
   const [orders, setOrders] = useState([]);
   const [products, setProducts] = useState({});
+  const [expandedOrder, setExpandedOrder] = useState(null); // Estado para controlar el acordeón
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -41,53 +42,69 @@ const UserOrders = () => {
     fetchOrders();
   }, []);
 
+  const toggleOrder = (orderId) => {
+    setExpandedOrder(expandedOrder === orderId ? null : orderId);
+  };
+
   return (
     <div className="user-orders-container">
       <h2>Historial de Compras</h2>
-      <table className="user-orders-table">
-        <thead>
-          <tr>
-            <th>Imagen</th>
-            <th>Producto</th>
-            <th>Cantidad</th>
-            <th>Precio</th>
-            <th>Total</th>
-            <th>Estado</th>
-            <th>Fecha</th>
-          </tr>
-        </thead>
-        <tbody>
-          {orders.length > 0 ? (
-            orders.map(order => (
-              order.products.map(product => {
-                const productDetails = products[product.product_id];
-                return (
-                  <tr key={product.product_id}>
-                    <td>
-                      {productDetails && (
-                        <img src={productDetails.image} alt={productDetails.name} className="product-image" onError={(e) => {
-                          e.target.onerror = null;
-                          e.target.src = defaultImage;
-                        }} />
-                      )}
-                    </td>
-                    <td>{productDetails ? productDetails.name : 'Cargando...'}</td>
-                    <td>{product.quantity}</td>
-                    <td>${product.price}</td>
-                    <td>${product.price * product.quantity}</td>
-                    <td>{order.status}</td>
-                    <td>{new Date(order.date).toLocaleString()}</td>
-                  </tr>
-                );
-              })
-            ))
-          ) : (
-            <tr>
-              <td colSpan="7">No hay órdenes disponibles</td>
-            </tr>
-          )}
-        </tbody>
-      </table>
+      {orders.length > 0 ? (
+        [...orders].reverse().map((order, index) => (
+          <div key={order._id} className="order-accordion">
+            <div className="order-header" onClick={() => toggleOrder(order._id)}>
+              <span>Orden #{orders.length - index}</span>
+              <span>Total: ${order.total}</span>
+              <span>{new Date(order.date).toLocaleString()}</span>
+            </div>
+            {expandedOrder === order._id && (
+              <div className="order-details">
+                <table className="user-orders-table">
+                  <thead>
+                    <tr>
+                      <th>Imagen</th>
+                      <th>Producto</th>
+                      <th>Cantidad</th>
+                      <th>Precio</th>
+                      <th>Total</th>
+                      <th>Estado</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {order.products.map(product => {
+                      const productDetails = products[product.product_id];
+                      return (
+                        <tr key={product.product_id}>
+                          <td>
+                            {productDetails && (
+                              <img
+                                src={productDetails.image}
+                                alt={productDetails.name}
+                                className="product-image"
+                                onError={(e) => {
+                                  e.target.onerror = null;
+                                  e.target.src = defaultImage;
+                                }}
+                              />
+                            )}
+                          </td>
+                          <td>{productDetails ? productDetails.name : 'Cargando...'}</td>
+                          <td>{product.quantity}</td>
+                          <td>${product.price}</td>
+                          <td>${product.price * product.quantity}</td>
+                          <td>{order.status}</td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        ))
+      ) : (
+        <p>No hay órdenes disponibles</p>
+      )}
     </div>
   );
 };
