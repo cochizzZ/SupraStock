@@ -40,124 +40,193 @@ const OrderDetailsModal = ({
 
   const generatePDF = async () => {
     const doc = new jsPDF();
+    const pageHeight = doc.internal.pageSize.height;
+    const pageWidth = doc.internal.pageSize.width;
+    const marginTop = 20;
+    const lineHeight = 10;
+
+    // Agregar logo y nombre en el encabezado
+    try {
+        const logo = await fetch("/logo.jpg") // Cambia la ruta si es necesario
+            .then((res) => res.blob())
+            .then((blob) => {
+                return new Promise((resolve) => {
+                    const reader = new FileReader();
+                    reader.onload = () => resolve(reader.result);
+                    reader.readAsDataURL(blob);
+                });
+            });
+
+        doc.addImage(logo, "JPEG", 10, marginTop - 5, 20, 20); // Logo (20x20)
+        doc.setFontSize(16);
+        doc.setFont("helvetica", "italic");
+        doc.setTextColor(150); // Gris
+        doc.text("BoutiqueAntojitos", 35, marginTop + 5);
+    } catch (error) {
+        console.error("Error al cargar el logo:", error);
+    }
+
+    // Línea separadora debajo del encabezado
+    doc.setDrawColor(0); // Negro
+    doc.setLineWidth(0.5);
+    doc.line(10, marginTop + 25, pageWidth - 10, marginTop + 25);
 
     // Título del documento
     doc.setFontSize(22);
     doc.setFont("helvetica", "bold");
-    doc.text("Detalles de la Orden", 105, 20, { align: "center" });
-
-    // Dibujar una línea debajo del título
-    doc.setDrawColor(0);
-    doc.setLineWidth(0.5);
-    doc.line(10, 25, 200, 25);
+    doc.setTextColor(0); // Negro
+    doc.text("Detalles de la Orden", 105, marginTop + 35, { align: "center" });
 
     // Información de la venta
+    let y = marginTop + 50; // Bajamos más el texto de detalle
     doc.setFontSize(16);
     doc.setFont("helvetica", "bold");
-    doc.text("Información de la Venta", 10, 35);
+    doc.text("Información de la Venta", 10, y);
 
+    y += lineHeight;
     doc.setFontSize(12);
     doc.setFont("helvetica", "normal");
-    doc.text(`ID de Orden: ${selectedOrder._id}`, 10, 45);
-    doc.text(`Estado: ${translateStatus(selectedOrder.status)}`, 10, 55);
-    doc.text(`Fecha: ${new Date(selectedOrder.date).toLocaleString()}`, 10, 65);
-    doc.text(`Total: $${formatPrice(selectedOrder.total)}`, 10, 75);
+    doc.text(`Estado: ${translateStatus(selectedOrder.status)}`, 10, y);
+    doc.text(`Fecha: ${new Date(selectedOrder.date).toLocaleString()}`, 10, y + lineHeight);
+    doc.text(`Total: $${formatPrice(selectedOrder.total)}`, 10, y + lineHeight * 2);
 
-    // Dibujar un rectángulo alrededor de la información de la venta
-    doc.setDrawColor(0);
-    doc.setLineWidth(0.5);
-    doc.rect(8, 30, 194, 50);
+    y += lineHeight * 3;
 
-    // Productos
+    // Consolidar productos con la misma ID y talla
+    const consolidatedProducts = selectedOrder.products.reduce((acc, product) => {
+        const key = `${product.product_id._id}-${product.size}`;
+        if (!acc[key]) {
+            acc[key] = { ...product, quantity: 0 };
+        }
+        acc[key].quantity += product.quantity;
+        return acc;
+    }, {});
+
+    const products = Object.values(consolidatedProducts);
+
+    // Encabezado de productos
     doc.setFontSize(16);
     doc.setFont("helvetica", "bold");
-    doc.text("Productos", 10, 90);
+    doc.text("Productos", 10, y);
 
-    let y = 100;
-    selectedOrder.products.forEach((product, index) => {
-      doc.setFontSize(12);
-      doc.setFont("helvetica", "bold");
-      doc.text(`${index + 1}. ${product.product_id.name}`, 10, y);
+    y += lineHeight;
+    doc.setFontSize(12);
+    doc.text("Imagen", 10, y);
+    doc.text("Nombre", 40, y);
+    doc.text("Talla", 100, y);
+    doc.text("Cantidad", 130, y);
+    doc.text("Precio", 160, y);
 
-      // Agregar la imagen del producto
-      const imageHeight = 30; // Altura de la imagen
-      doc.setFont("helvetica", "normal");
-      doc.text("Imagen:", 10, y + 5);
-      doc.addImage(product.product_id.image, "JPEG", 10, y + 10, 30, imageHeight);
+    y += lineHeight;
 
-      // Ajustar la posición vertical para el texto debajo de la imagen
-      const textStartY = y + imageHeight + 15; // Espaciado adicional debajo de la imagen
-      doc.text(`Talla: ${product.size}`, 10, textStartY);
-      doc.text(`Cantidad: ${product.quantity}`, 10, textStartY + 10);
-      doc.text(`Precio: $${formatPrice(product.price)}`, 10, textStartY + 20);
+    // Dibujar productos
+    for (const product of products) {
+        if (y + lineHeight > pageHeight - 60) { // Reservar espacio para la firma y pie de página
+            doc.addPage();
+            y = marginTop;
 
-      // Dibujar una línea separadora entre productos
-      doc.setDrawColor(200);
-      doc.setLineWidth(0.3);
-      doc.line(10, textStartY + 25, 200, textStartY + 25);
+            // Repetir encabezado en la nueva página
+            doc.setFontSize(16);
+            doc.setFont("helvetica", "bold");
+            doc.text("Productos (continuación)", 10, y);
 
-      // Incrementar la posición vertical para el siguiente producto
-      y = textStartY + 35;
-    });
+            y += lineHeight;
+            doc.setFontSize(12);
+            doc.text("Imagen", 10, y);
+            doc.text("Nombre", 40, y);
+            doc.text("Talla", 100, y);
+            doc.text("Cantidad", 130, y);
+            doc.text("Precio", 160, y);
 
-    // Información de contacto
-    doc.setFontSize(16);
-    doc.setFont("helvetica", "bold");
-    doc.text("Información de Contacto", 10, y);
+            y += lineHeight;
+        }
 
+        // Agregar imagen del producto
+        if (product.product_id.image) {
+            try {
+                const img = await fetch(product.product_id.image)
+                    .then((res) => res.blob())
+                    .then((blob) => {
+                        return new Promise((resolve) => {
+                            const reader = new FileReader();
+                            reader.onload = () => resolve(reader.result);
+                            reader.readAsDataURL(blob);
+                        });
+                    });
+
+                doc.addImage(img, "JPEG", 10, y - 8, 20, 20); // Imagen pequeña (20x20)
+            } catch (error) {
+                console.error("Error al cargar la imagen del producto:", error);
+            }
+        }
+
+        doc.setFontSize(12);
+        doc.setFont("helvetica", "normal");
+        doc.text(product.product_id.name, 40, y);
+        doc.text(product.size, 100, y);
+        doc.text(`${product.quantity}`, 130, y);
+        doc.text(`$${formatPrice(product.price)}`, 160, y);
+
+        y += lineHeight + 15; // Espacio adicional entre productos
+    }
+
+    // Título antes de la firma
     y += 10;
-    doc.setFontSize(12);
-    doc.setFont("helvetica", "normal");
-    doc.text(`Nombre: ${selectedOrder.user_id?.name || "N/A"}`, 10, y);
-    doc.text(`Correo: ${selectedOrder.user_id?.email || "N/A"}`, 10, y + 10);
-    doc.text(`Teléfono: ${selectedOrder.user_id?.phone || "N/A"}`, 10, y + 20);
-
-    // Dibujar un rectángulo alrededor de la información de contacto
-    doc.setDrawColor(0);
-    doc.setLineWidth(0.5);
-    doc.rect(8, y - 5, 194, 35);
-
-    y += 40;
-
-    // Información de envío
-    doc.setFontSize(16);
+    doc.setFontSize(14);
     doc.setFont("helvetica", "bold");
-    doc.text("Información de Envío", 10, y);
+    doc.text("Firma del vendedor", 10, y);
 
+    // Agregar firma del cliente
     y += 10;
-    doc.setFontSize(12);
-    doc.setFont("helvetica", "normal");
-    doc.text(`Ciudad: ${selectedOrder.city || "N/A"}`, 10, y);
-    doc.text(`Dirección: ${selectedOrder.address || "N/A"}`, 10, y + 10);
-    doc.text(`Código Postal: ${selectedOrder.postal_code || "N/A"}`, 10, y + 20);
+    try {
+        const firma = await fetch("/firma_cliente.png") // Cambia la ruta si es necesario
+            .then((res) => res.blob())
+            .then((blob) => {
+                return new Promise((resolve) => {
+                    const reader = new FileReader();
+                    reader.onload = () => resolve(reader.result);
+                    reader.readAsDataURL(blob);
+                });
+            });
 
-    // Dibujar un rectángulo alrededor de la información de envío
-    doc.setDrawColor(0);
-    doc.setLineWidth(0.5);
-    doc.rect(8, y - 5, 194, 35);
+        doc.addImage(firma, "PNG", 10, y, 50, 20); // Firma (50x20)
+    } catch (error) {
+        console.error("Error al cargar la firma:", error);
+    }
+
+    y += 30;
+
+    // Línea separadora encima del pie de página
+    doc.line(10, pageHeight - 30, pageWidth - 10, pageHeight - 30);
+
+    // Pie de página con redes sociales
+    const footerY = pageHeight - 20;
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "normal");
+    doc.text("Instagram: @domastore17", 10, footerY);
 
     // Guardar el PDF
     const pdfBlob = doc.output("blob");
 
     try {
-      const fileHandle = await window.showSaveFilePicker({
-        suggestedName: `Orden_${selectedOrder._id}.pdf`,
-        types: [
-          {
-            description: "Archivos PDF",
-            accept: { "application/pdf": [".pdf"] },
-          },
-        ],
-      });
+        const fileHandle = await window.showSaveFilePicker({
+            suggestedName: `Orden_${selectedOrder._id}.pdf`,
+            types: [
+                {
+                    description: "Archivos PDF",
+                    accept: { "application/pdf": [".pdf"] },
+                },
+            ],
+        });
 
-      const writableStream = await fileHandle.createWritable();
-      await writableStream.write(pdfBlob);
-      await writableStream.close();
-      console.log("Archivo guardado correctamente.");
+        const writableStream = await fileHandle.createWritable();
+        await writableStream.write(pdfBlob);
+        await writableStream.close();
+        console.log("Archivo guardado correctamente.");
     } catch (error) {
-      console.error("Error al guardar el archivo:", error);
+        console.error("Error al guardar el archivo:", error);
     }
-  };
+};
 
   const generateExcel = async () => {
     const workbook = new ExcelJS.Workbook();
