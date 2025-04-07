@@ -45,63 +45,65 @@ const UserOrders = () => {
   const toggleOrder = (orderId) => {
     setExpandedOrder(expandedOrder === orderId ? null : orderId);
   };
-
   return (
     <div className="user-orders-container">
       <h2>Historial de Compras</h2>
       {orders.length > 0 ? (
-        [...orders].reverse().map((order, index) => (
-          <div key={order._id} className="order-accordion">
-            <div className="order-header" onClick={() => toggleOrder(order._id)}>
-              <span>Orden #{orders.length - index}</span>
-              <span>Total: ${order.total}</span>
-              <span>{new Date(order.date).toLocaleString()}</span>
-            </div>
-            {expandedOrder === order._id && (
-              <div className="order-details">
-                <table className="user-orders-table">
-                  <thead>
-                    <tr>
-                      <th>Imagen</th>
-                      <th>Producto</th>
-                      <th>Cantidad</th>
-                      <th>Precio</th>
-                      <th>Total</th>
-                      <th>Estado</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {order.products.map(product => {
-                      const productDetails = products[product.product_id];
-                      return (
-                        <tr key={product.product_id}>
-                          <td>
-                            {productDetails && (
-                              <img
-                                src={productDetails.image}
-                                alt={productDetails.name}
-                                className="product-image"
-                                onError={(e) => {
-                                  e.target.onerror = null;
-                                  e.target.src = defaultImage;
-                                }}
-                              />
-                            )}
-                          </td>
-                          <td>{productDetails ? productDetails.name : 'Cargando...'}</td>
-                          <td>{product.quantity}</td>
-                          <td>${product.price}</td>
-                          <td>${product.price * product.quantity}</td>
-                          <td>{order.status}</td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
+        [...orders]
+          .filter(order => order.available) // Filtrar órdenes donde available es true
+          .reverse()
+          .map((order, index, filteredOrders) => (
+            <div key={order._id} className="order-accordion">
+              <div className="order-header" onClick={() => toggleOrder(order._id)}>
+                <span>Orden #{filteredOrders.length - index}</span> {/* Invertir el número de orden */}
+                <span>Total: ${order.total}</span>
+                <span>{new Date(order.date).toLocaleString()}</span>
               </div>
-            )}
-          </div>
-        ))
+              {expandedOrder === order._id && (
+                <div className="order-details">
+                  <table className="user-orders-table">
+                    <thead>
+                      <tr>
+                        <th>Imagen</th>
+                        <th>Producto</th>
+                        <th>Cantidad</th>
+                        <th>Precio</th>
+                        <th>Total</th>
+                        <th>Estado</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {order.products.map(product => {
+                        const productDetails = products[product.product_id];
+                        return (
+                          <tr key={product.product_id}>
+                            <td>
+                              {productDetails && (
+                                <img
+                                  src={productDetails.image}
+                                  alt={productDetails.name}
+                                  className="product-image"
+                                  onError={(e) => {
+                                    e.target.onerror = null;
+                                    e.target.src = defaultImage;
+                                  }}
+                                />
+                              )}
+                            </td>
+                            <td>{productDetails ? productDetails.name : 'Cargando...'}</td>
+                            <td>{product.quantity}</td>
+                            <td>${product.price}</td>
+                            <td>${product.price * product.quantity}</td>
+                            <td>{order.status}</td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          ))
       ) : (
         <p>No hay órdenes disponibles</p>
       )}

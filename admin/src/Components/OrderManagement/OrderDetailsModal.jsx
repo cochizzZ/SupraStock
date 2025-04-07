@@ -2,7 +2,7 @@ import React from "react";
 import { jsPDF } from "jspdf";
 import "./OrderManagement.css";
 import ExcelJS from "exceljs";
-import Swal from "sweetalert2"; // Importar SweetAlert2 para notificaciones
+import Swal from "sweetalert2";
 
 const OrderDetailsModal = ({
   selectedOrder,
@@ -13,7 +13,7 @@ const OrderDetailsModal = ({
   closeModal,
   translateStatus,
   formatPrice,
-  onUpdateOrderStatus, // Nueva función para actualizar el estado
+  onUpdateOrderStatus,
 }) => {
   if (!selectedOrder) return null;
 
