@@ -70,7 +70,7 @@
     align-items: center;
     margin-top: 25px;
     gap: 20px;
-    color: #5c5c5c;
+    color: #949494c4;
     font-size: 18px;
     font-weight: 500;
 }
@@ -87,10 +87,10 @@
 
 .password-tooltip {
     position: absolute;
-    right: 10px; /* Coloca el signo al lado derecho */
+    right: 25px; /* Coloca el signo al lado derecho */
     cursor: pointer;
-    font-weight: bold;
-    color: #363636;
+    font-size: 14px;
+    color: #9c9999;
 }
 
 .tooltip-content {
