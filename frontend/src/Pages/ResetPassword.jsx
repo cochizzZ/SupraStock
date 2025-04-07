@@ -8,7 +8,7 @@ const ResetPassword = () => {
     const [newPassword, setNewPassword] = useState('');
 
     const validatePassword = (password) => {
-        const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[\W_]).{8,}$/;
+        const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[-!@#$%^&*(),.?":{}|<>]).{8,}$/;
         if (!regex.test(password)) {
             console.log(password)
             return "La contraseña debe contener al menos 8 caracteres, una mayúscula, una minúscula y un carácter especial.";
