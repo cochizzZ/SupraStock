@@ -3,7 +3,7 @@ import "./EditProduct.css";
 import Swal from "sweetalert2";
 import defaultImage from '../../assets/404.jpg';
 
-const EditProduct = ({ product, onUpdate }) => {
+const EditProduct = ({ product, onUpdate, onCancel }) => {
   const [image, setImage] = useState(null);
   const [productDetails, setProductDetails] = useState({
     id: product.id,
@@ -32,7 +32,6 @@ const EditProduct = ({ product, onUpdate }) => {
     return Object.values(sizes).reduce((acc, curr) => acc + parseInt(curr || 0), 0);
   };
 
-  // Recalcular el stock automáticamente cuando cambien las tallas
   useEffect(() => {
     const updatedStock = calculateStock(productDetails.sizes);
     setProductDetails((prevDetails) => ({
@@ -72,8 +71,6 @@ const EditProduct = ({ product, onUpdate }) => {
   };
 
   const updateProduct = async () => {
-    console.log("Producto antes de enviar:", productDetails);
-
     if (!productDetails.name || !productDetails.category || !productDetails.new_price) {
       Swal.fire({
         icon: 'error',
@@ -97,8 +94,6 @@ const EditProduct = ({ product, onUpdate }) => {
         body: formData,
       }).then((resp) => resp.json());
 
-      console.log("Respuesta del servidor al subir imagen:", imageResponse);
-
       if (imageResponse?.success) {
         updatedProduct.image = imageResponse.image_url;
       } else {
@@ -111,7 +106,6 @@ const EditProduct = ({ product, onUpdate }) => {
       }
     }
 
-    console.log("Producto actualizado antes de enviar:", updatedProduct);
     const productResponse = await fetch('http://localhost:4000/updateproduct', {
       method: 'POST',
       headers: {
@@ -120,8 +114,6 @@ const EditProduct = ({ product, onUpdate }) => {
       },
       body: JSON.stringify(updatedProduct),
     }).then((resp) => resp.json());
-
-    console.log("Respuesta del servidor al actualizar producto:", productResponse);
 
     if (productResponse.success) {
       Swal.fire({
@@ -142,6 +134,8 @@ const EditProduct = ({ product, onUpdate }) => {
   return (
     <div className="edit-product">
       <h2 className="edit-product-title">Editar Producto</h2>
+  
+      <div className="section-title">Información del Producto</div>
       <div className="edit-product-itemfield">
         <p>Nombre del producto</p>
         <input
@@ -152,7 +146,7 @@ const EditProduct = ({ product, onUpdate }) => {
           placeholder="Escribe aquí"
         />
       </div>
-
+  
       <div className="edit-product-itemfield">
         <p>Descripción del producto</p>
         <input
@@ -163,7 +157,8 @@ const EditProduct = ({ product, onUpdate }) => {
           placeholder="Escribe aquí"
         />
       </div>
-
+  
+      <div className="section-title">Precios</div>
       <div className="editproduct-price">
         <div className="edit-product-itemfield">
           <p>Precio</p>
@@ -175,7 +170,7 @@ const EditProduct = ({ product, onUpdate }) => {
             placeholder="Ingrese el precio"
           />
         </div>
-
+  
         <div className="edit-product-itemfield">
           <p>Precio de oferta</p>
           <input
@@ -187,18 +182,19 @@ const EditProduct = ({ product, onUpdate }) => {
           />
         </div>
       </div>
-
+  
+      <div className="section-title">Stock y Categoría</div>
       <div className="edit-product-itemfield">
         <p>Cantidad en stock</p>
         <input
           value={productDetails.stock}
-          readOnly // Hacer que el campo sea de solo lectura
+          readOnly
           type="number"
           name="stock"
           placeholder="Ingrese la cantidad en stock"
         />
       </div>
-
+  
       <div className="edit-product-itemfield">
         <p>Categoría del producto</p>
         <select
@@ -215,7 +211,8 @@ const EditProduct = ({ product, onUpdate }) => {
           <option value="kid">Niños</option>
         </select>
       </div>
-
+  
+      <div className="section-title">Imagen del Producto</div>
       <div className="edit-product-itemfield">
         <label htmlFor="file-input">
           <img
@@ -224,58 +221,61 @@ const EditProduct = ({ product, onUpdate }) => {
             className="edit-product-thumbnail-img"
             onError={(e) => {
               e.target.onerror = null;
-              e.target.src = defaultImage; 
+              e.target.src = defaultImage;
             }}
           />
         </label>
         <input onChange={imageHandler} type="file" name="image" id="file-input" hidden />
       </div>
-
-      <div className="edit-product-itemfield">
-        <p>Tallas disponibles</p>
-        <div className="sizes-input">
-          <select
-            value={sizeInput}
-            onChange={(e) => setSizeInput(e.target.value)}
-            className="size-select"
-          >
-            <option value="" disabled>Seleccionar talla</option>
-            <option value="Unica">Unica</option>
-            <option value="XS">XS</option>
-            <option value="S">S</option>
-            <option value="M">M</option>
-            <option value="L">L</option>
-            <option value="XL">XL</option>
-            <option value="XXL">XXL</option>
-          </select>
-          <input
-            value={sizeStockInput}
-            onChange={(e) => setSizeStockInput(e.target.value)}
-            type="number"
-            placeholder="Cantidad"
-          />
-          <button onClick={addSizeHandler}>Agregar</button>
-        </div>
-        <div className="sizes-list">
-          {Object.keys(productDetails.sizes).map((size, index) => (
-            <div key={index} className="size-item">
-              {size} - 
-              <input
-                type="number"
-                value={productDetails.sizes[size]}
-                onChange={(e) => updateSizeHandler(size, e.target.value)}
-                className="size-quantity-input"
-              />
-              unidades
-              <button onClick={() => removeSizeHandler(size)}>Eliminar</button>
-            </div>
-          ))}
-        </div>
+  
+      <div className="section-title">Tallas Disponibles</div>
+      <div className="sizes-input">
+        <select
+          value={sizeInput}
+          onChange={(e) => setSizeInput(e.target.value)}
+          className="size-select"
+        >
+          <option value="" disabled>Seleccionar talla</option>
+          <option value="Unica">Unica</option>
+          <option value="XS">XS</option>
+          <option value="S">S</option>
+          <option value="M">M</option>
+          <option value="L">L</option>
+          <option value="XL">XL</option>
+          <option value="XXL">XXL</option>
+        </select>
+        <input
+          value={sizeStockInput}
+          onChange={(e) => setSizeStockInput(e.target.value)}
+          type="number"
+          placeholder="Cantidad"
+        />
+        <button onClick={addSizeHandler}>Agregar</button>
       </div>
-
-      <button onClick={updateProduct} className="editproduct-btn">
-        ACTUALIZAR
-      </button>
+      <div className="sizes-list">
+        {Object.keys(productDetails.sizes).map((size, index) => (
+          <div key={index} className="size-item">
+            {size} - 
+            <input
+              type="number"
+              value={productDetails.sizes[size]}
+              onChange={(e) => updateSizeHandler(size, e.target.value)}
+              className="size-quantity-input"
+            />
+            unidades
+            <button onClick={() => removeSizeHandler(size)}>Eliminar</button>
+          </div>
+        ))}
+      </div>
+  
+      <div className="edit-product-buttons">
+        <button onClick={updateProduct} className="editproduct-btn">
+          ACTUALIZAR
+        </button>
+        <button onClick={onCancel} className="cancel-btn">
+          CANCELAR
+        </button>
+      </div>
     </div>
   );
 };
