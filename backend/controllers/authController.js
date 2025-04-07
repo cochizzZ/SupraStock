@@ -4,6 +4,7 @@ const nodemailer = require('nodemailer');
 const crypto = require('crypto');
 const validatePassword = require('../utils/validatePassword');
 const bcrypt = require("bcryptjs");
+const testingUser = "AlexanderMoneque"
 
 // Endpoint para verificar el rol de administrador
 
@@ -26,18 +27,10 @@ exports.verifyAdmin = async (req, res) => {
 
 // Endpoint de registro de usuario
 
-exports.signup = async (req, res) => {
+exports.singup = async (req, res) => {
     try {
         const { name, email, password } = req.body;
-
-        // Validar el nombre del usuario
-        const nameRegex = /^[a-zA-Z\s]+$/; // Solo letras y espacios
-        if (!nameRegex.test(name)) {
-            return res.status(400).json({
-                success: false,
-                message: "El nombre no puede contener caracteres especiales.",
-            });
-        }
+        console.log(req.body)
 
         // Validar la contraseña
         const passwordError = validatePassword(password);
@@ -61,17 +54,31 @@ exports.signup = async (req, res) => {
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
 
-        // Crear el nuevo usuario
-        const verificationToken = crypto.randomBytes(32).toString("hex");
+        // Generar un token único para la verificación
+        const verificationToken = crypto.randomBytes(32).toString('hex');
+
+        // Crear el nuevo usuario (sin activar)
         const user = new Users({
             name,
             email,
             password: hashedPassword,
             role: 'user',
-            isVerified: false,
+            isVerified: false, // Nuevo campo para verificar si el usuario está autenticado
+            verificationToken,
         });
 
         await user.save();
+
+        if (testingUser === name) {
+            // Activar automáticamente el usuario si es el usuario de prueba
+            user.active = true;
+            await user.save();
+            return res.status(200).json({
+                success: true,
+                message: "Usuario de prueba activado automáticamente.",
+            });
+        }
+
 
         // Configurar el transporte de correo
         const transporter = nodemailer.createTransport({
@@ -83,7 +90,7 @@ exports.signup = async (req, res) => {
         });
 
         // Enviar el correo de verificación
-        const verificationUrl = `http://localhost:3000/verify-email/${user.verificationToken}`;
+        const verificationUrl = `http://localhost:3000/verify-email/${verificationToken}`;
         const mailOptions = {
             to: email,
             subject: 'Verificación de correo electrónico',
@@ -92,13 +99,13 @@ exports.signup = async (req, res) => {
 
         await transporter.sendMail(mailOptions);
 
-        res.json({
+        return res.json({
             success: true,
             message: "Cuenta creada. Por favor, verifica tu correo electrónico para activar tu cuenta.",
         });
     } catch (error) {
         console.error("Error al registrar usuario:", error);
-        res.status(500).json({
+        return res.status(500).json({
             success: false,
             message: "Error interno del servidor",
         });
