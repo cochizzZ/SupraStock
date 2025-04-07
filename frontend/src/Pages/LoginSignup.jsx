@@ -171,7 +171,29 @@ const handleSignup = async () => {
         <div className="loginsignup-fields">
           {state === "Registro" ? <input name='name' value={formData.name} onChange={changeHandler} onKeyDown={handleKeyDown} type="text" placeholder='Tu nombre' /> : <></>}
           <input name='email' value={formData.email} onChange={changeHandler} onKeyDown={handleKeyDown} type="email" placeholder='Correo Electrónico' />
-          <input name='password' value={formData.password} onChange={changeHandler} onKeyDown={handleKeyDown} type="password" placeholder='Contraseña' />
+          <div className="password-container">
+            <input
+              name="password"
+              value={formData.password}
+              onChange={changeHandler}
+              onKeyDown={handleKeyDown}
+              type="password"
+              placeholder="Contraseña"
+            />
+            <span className="password-tooltip">
+              ?
+              <div className="tooltip-content">
+                <p>La contraseña debe contener:</p>
+                <ul>
+                  <li>Al menos 8 caracteres</li>
+                  <li>Una letra mayúscula</li>
+                  <li>Una letra minúscula</li>
+                  <li>Un número</li>
+                  <li>Un carácter especial</li>
+                </ul>
+              </div>
+            </span>
+          </div>
         </div>
         <button onClick={() => { state === "Iniciar Sesión" ? login() : handleSignup() }}>Continuar</button>
         {state === "Registro"
