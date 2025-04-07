@@ -28,7 +28,7 @@ exports.verifyAdmin = async (req, res) => {
 
 // Endpoint de registro de usuario
 
-exports.singup = async (req, res) => {
+exports.signup = async (req, res) => {
     try {
         const { name, email, password } = req.body;
 
