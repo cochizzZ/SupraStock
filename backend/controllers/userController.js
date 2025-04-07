@@ -4,6 +4,7 @@ const validatePassword = require('../utils/validatePassword');
 const nodemailer = require('nodemailer');
 const crypto = require('crypto');
 const bcrypt = require("bcryptjs");
+const { getColombiaTime } = require('../utils/timezone');
 
 // Endpoint para obtener el perfil del usuario
 
@@ -128,11 +129,11 @@ exports.forgotPassword = async (req, res) => {
 
         // Generar un token único
         const resetToken = crypto.randomBytes(32).toString('hex');
-        const resetTokenExpiry = Date.now() + 3600000; // 1 hora de validez
+        const resetTokenExpiry = getColombiaTime().getTime() + 3600000; // 1 hora de validez
 
         // Guardar el token y su expiración en el usuario
         user.resetPasswordToken = resetToken;
-        user.resetPasswordExpires = resetTokenExpiry;
+        user.resetPasswordExpires = new Date(resetTokenExpiry); // Usar la fecha ajustada al timezone de Colombia
         await user.save();
 
         // Configurar el transporte de correo
@@ -149,7 +150,7 @@ exports.forgotPassword = async (req, res) => {
         const mailOptions = {
             to: user.email,
             subject: 'Restablecimiento de contraseña',
-            text: `Haz clic en el siguiente enlace para restablecer tu contraseña: ${resetUrl} esta url es valida por 1 hora`,
+            text: `Haz clic en el siguiente enlace para restablecer tu contraseña: ${resetUrl}. Este enlace es válido por 1 hora.`,
         };
 
         await transporter.sendMail(mailOptions);
@@ -176,7 +177,7 @@ exports.resetPassword = async (req, res) => {
 
         const user = await Users.findOne({
             resetPasswordToken: token,
-            resetPasswordExpires: { $gt: Date.now() }, // Verificar que el token no haya expirado
+            resetPasswordExpires: { $gt: getColombiaTime() }, // Comparar con la hora ajustada al timezone de Colombia
         });
 
         if (!user) {

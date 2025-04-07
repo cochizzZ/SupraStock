@@ -130,12 +130,6 @@ exports.createOrder = async (req, res) => {
             });
         }
 
-        // Ajustar la fecha a la zona horaria de Colombia
-        const now = new Date();
-        const colombiaOffset = -5 * 60; // Colombia está en UTC-5
-        const localOffset = now.getTimezoneOffset();
-        const colombiaTime = new Date(now.getTime() + (colombiaOffset - localOffset) * 60 * 1000);
-
         // Crear la nueva orden con los datos proporcionados
         const newOrder = new Order({
             user_id,
@@ -146,7 +140,6 @@ exports.createOrder = async (req, res) => {
             postal_code,
             payment_info,
             status: 'Pending',
-            date: colombiaTime, // Establecer la fecha ajustada
         });
 
         console.log("Orden creada:", newOrder);
