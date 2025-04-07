@@ -124,7 +124,7 @@ const Dashboard = () => {
           <h2>Estadísticas</h2>
           <div className="statistics-item">
             <i className="fas fa-box"></i>
-            <p>Total de Productos: {statistics.totalProducts}</p>
+            <p>Total de Productos Disponibles: {statistics.totalProducts}</p>
           </div>
           <div className="statistics-item">
             <i className="fas fa-users"></i>

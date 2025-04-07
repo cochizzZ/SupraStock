@@ -44,14 +44,6 @@
     font-weight: 700;
 }
 
-.productdisplay-right-stars {
-    display: flex;
-    align-items: center;
-    margin-top: 8px;
-    gap: 5px;
-    font-size: 14px;
-}
-
 .productdisplay-right-prices {
     display: flex;
     margin: 20px 0px;

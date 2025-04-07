@@ -185,7 +185,7 @@ exports.createPayment = async (req, res) => {
 
 exports.getStatistics = async (req, res) => {
     try {
-        const totalProducts = await Product.countDocuments({});
+        const totalProducts = await Product.countDocuments({ available: true });
         const totalUsers = await Users.countDocuments({});
         const totalOrders = await Order.countDocuments({});
         const totalSales = await Order.aggregate([

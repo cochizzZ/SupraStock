@@ -1,3 +1,4 @@
+const mongoose = require("mongoose");
 const Product = require('../models/Product');
 const Users = require('../models/Users');
 
@@ -5,26 +6,30 @@ const Users = require('../models/Users');
 
 exports.addToCart = async (req, res) => {
     try {
-        console.log(req.body);
         const { itemId, size, quantity } = req.body;
 
         // Validar entrada
-        if (!itemId || !size || !quantity || quantity <= 0) {
-            return res.status(400).json({ success: false, message: "ID del producto, talla y cantidad son obligatorios y deben ser válidos." });
+        if (!itemId || !size || quantity === undefined) {
+            return res.status(400).json({ success: false, message: "ID del producto, talla y cantidad son obligatorios." });
+        }
+        if (!Number.isInteger(quantity) || quantity <= 0) {
+            return res.status(400).json({ success: false, message: "La cantidad debe ser un número entero positivo." });
+        }
+        const sizeRegex = /^[a-zA-Z0-9]+$/; // Solo letras y números
+        if (!sizeRegex.test(size)) {
+            return res.status(400).json({ success: false, message: "La talla no puede contener caracteres especiales." });
         }
 
-        // Buscar el ObjectId del producto
+        // Buscar el producto
         const product = await Product.findOne({ id: itemId });
         if (!product) {
             return res.status(404).json({ success: false, message: "Producto no encontrado." });
         }
 
-        // Verificar que el campo sizes esté definido
+        // Verificar talla y cantidad
         if (!product.sizes || !product.sizes.has(size)) {
             return res.status(400).json({ success: false, message: `La talla ${size} no está disponible para este producto.` });
         }
-
-        // Verificar la cantidad disponible en la talla especificada
         const availableQuantity = product.sizes.get(size);
         if (availableQuantity < quantity) {
             return res.status(400).json({ success: false, message: `Solo hay ${availableQuantity} unidades disponibles en la talla ${size}.` });
@@ -36,6 +41,7 @@ exports.addToCart = async (req, res) => {
             return res.status(404).json({ success: false, message: "Usuario no encontrado." });
         }
 
+        // Agregar o actualizar el producto en el carrito
         const existingCartItem = user.cartData.find(item => item.product_id.equals(product._id) && item.size === size);
         if (existingCartItem) {
             if (existingCartItem.quantity + quantity > availableQuantity) {
@@ -46,7 +52,7 @@ exports.addToCart = async (req, res) => {
             user.cartData.push({ product_id: product._id, size, quantity });
         }
 
-        // Guardar los cambios en el usuario
+        // Guardar los cambios
         await user.save();
         res.json({ success: true, message: "Producto agregado al carrito", cart: user.cartData });
     } catch (error) {
@@ -58,33 +64,43 @@ exports.addToCart = async (req, res) => {
 // Endpoint para eliminar un producto del carrito
 
 exports.removeFromCart = async (req, res) => {
-    try {
-        const { itemId, size } = req.body;
+  try {
+    const { itemId, size } = req.body;
 
-        if (!itemId || !size) {
-            return res.status(400).json({ success: false, message: "ID del producto y talla son obligatorios." });
-        }
-
-        // Buscar el usuario
-        const user = await Users.findById(req.user.id);
-
-        if (!user) {
-            return res.status(404).json({ success: false, message: "Usuario no encontrado." });
-        }
-
-        // Eliminar el producto específico del carrito
-        user.cartData = user.cartData.filter(item => {
-            return !(item.product_id.equals(itemId) && item.size === size);
-        });
-
-        // Guardar los cambios en el usuario
-        await user.save();
-
-        res.json({ success: true, message: "Producto eliminado del carrito", cart: user.cartData });
-    } catch (error) {
-        console.error("Error al eliminar del carrito:", error);
-        res.status(500).json({ success: false, message: "Error interno del servidor" });
+    if (!itemId || !size) {
+      return res.status(400).json({
+        success: false,
+        message: "ID del producto y talla son obligatorios.",
+      });
     }
+
+    const user = await Users.findById(req.user.id);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "Usuario no encontrado.",
+      });
+    }
+
+    // Filtrar el producto a eliminar
+    user.cartData = user.cartData.filter(
+      (item) => !(item.product_id === itemId && item.size === size)
+    );
+
+    await user.save();
+
+    res.json({
+      success: true,
+      message: "Producto eliminado del carrito",
+      cart: user.cartData,
+    });
+  } catch (error) {
+    console.error("Error al eliminar del carrito:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error interno del servidor.",
+    });
+  }
 };
 
 // Endpoint para obtener el carrito de un usuario
@@ -92,17 +108,15 @@ exports.removeFromCart = async (req, res) => {
 exports.getCart = async (req, res) => {
     try {
         // Obtener el usuario con los productos del carrito ya poblados
-        let user = await Users.findById(req.user.id).populate({
-            path: 'cartData.product_id',
-            select: 'name image new_price'
-        });
-
+        const user = await Users.findById(req.user.id);
         if (!user) {
             return res.status(404).json({ success: false, message: "Usuario no encontrado" });
         }
 
+        const populatedUser = await user.populate("cartData.product_id");
+
         // Filtrar productos que realmente existen (por si algunos fueron eliminados)
-        let validCartData = user.cartData.filter(item => item.product_id !== null);
+        let validCartData = populatedUser.cartData.filter(item => item.product_id !== null);
 
         res.json({ success: true, cart: validCartData });
     } catch (error) {
@@ -141,7 +155,6 @@ exports.clearCart = async (req, res) => {
 
 exports.updateCart = async (req, res) => {
     try {
-        console.log(req.body)
         const { itemId, size, quantity } = req.body;
 
         // Validar entrada
@@ -149,6 +162,50 @@ exports.updateCart = async (req, res) => {
             return res.status(400).json({
                 success: false,
                 message: "ID del producto, talla y cantidad son obligatorios y deben ser válidos.",
+            });
+        }
+        if (!Number.isInteger(quantity) || quantity <= 0) {
+            return res.status(400).json({
+                success: false,
+                message: "La cantidad debe ser un número entero positivo.",
+            });
+        }
+        const sizeRegex = /^[a-zA-Z0-9]+$/; // Solo letras y números
+        if (!sizeRegex.test(size)) {
+            return res.status(400).json({
+                success: false,
+                message: "La talla no puede contener caracteres especiales.",
+            });
+        }
+
+        if (!mongoose.Types.ObjectId.isValid(itemId)) {
+            return res.status(400).json({
+                success: false,
+                message: "El ID del producto no es válido.",
+            });
+        }
+
+        // Buscar el producto
+        const product = await Product.findById(itemId);
+        if (!product) {
+            return res.status(404).json({
+                success: false,
+                message: "Producto no encontrado.",
+            });
+        }
+
+        // Verificar si la talla existe y la cantidad disponible
+        if (!product.sizes || !product.sizes.has(size)) {
+            return res.status(400).json({
+                success: false,
+                message: `La talla ${size} no está disponible para este producto.`,
+            });
+        }
+        const availableQuantity = product.sizes.get(size);
+        if (quantity > availableQuantity) {
+            return res.status(400).json({
+                success: false,
+                message: `Solo hay ${availableQuantity} unidades disponibles en la talla ${size}.`,
             });
         }
 
