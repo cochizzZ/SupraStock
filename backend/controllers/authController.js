@@ -4,6 +4,7 @@ const nodemailer = require('nodemailer');
 const crypto = require('crypto');
 const validatePassword = require('../utils/validatePassword');
 const bcrypt = require("bcryptjs");
+const validateName = require('../utils/validateName');
 
 // Endpoint para verificar el rol de administrador
 
@@ -31,11 +32,11 @@ exports.signup = async (req, res) => {
         const { name, email, password } = req.body;
 
         // Validar el nombre del usuario
-        const nameRegex = /^[a-zA-Z\s]+$/; // Solo letras y espacios
-        if (!nameRegex.test(name)) {
+        const nameError = validateName(name);
+        if (nameError) {
             return res.status(400).json({
                 success: false,
-                message: "El nombre no puede contener caracteres especiales.",
+                message: nameError,
             });
         }
 
@@ -69,6 +70,7 @@ exports.signup = async (req, res) => {
             password: hashedPassword,
             role: 'user',
             isVerified: false,
+            verificationToken,
         });
 
         await user.save();
