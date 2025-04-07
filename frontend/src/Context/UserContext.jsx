@@ -36,9 +36,9 @@ const UserContextProvider = ({ children }) => {
         const data = await response.json();
         if (data.success) {
             setUser(data.user); // Actualizar el estado del usuario
-            alert('Perfil actualizado correctamente');
+            return data;
         } else {
-            alert('Error al actualizar el perfil');
+            return data; 
         }
     } catch (error) {
         console.error('Error al actualizar el perfil:', error);

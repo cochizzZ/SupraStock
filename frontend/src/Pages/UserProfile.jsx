@@ -1,5 +1,6 @@
 import React, { useContext, useState, useEffect } from 'react';
 import { UserContext } from '../Context/UserContext';
+import Swal from 'sweetalert2'; // Importar SweetAlert2
 import './CSS/UserProfile.css';
 
 const UserProfile = () => {
@@ -27,13 +28,33 @@ const UserProfile = () => {
   }, [user]);
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    updateUser(formData);
-  };
+    try {
+        const response = await updateUser(formData); // Llamar a la función para actualizar el perfil
+        if (response.success) {
+            Swal.fire({
+                title: '¡Éxito!',
+                text: 'Tu perfil ha sido actualizado correctamente.',
+                icon: 'success',
+                confirmButtonText: 'OK',
+            });
+        }
+    } catch (error) {
+        console.error('Error al actualizar el perfil:', error);
+        Swal.fire({
+            title: 'Error',
+            text: 'Hubo un problema al actualizar tu perfil.',
+            icon: 'error',
+            confirmButtonText: 'Cerrar',
+        });
+    }
+    return false; // Evita cualquier comportamiento adicional del navegador
+};
 
   if (!user) {
     return <p>Loading...</p>;
@@ -43,7 +64,6 @@ const UserProfile = () => {
     <div className="user-profile">
       <h1>Perfil de Usuario</h1>
       <form onSubmit={handleSubmit}>
-        {/* Sección de Datos del Usuario */}
         <div className="user-info-section">
           <h2>Datos del Usuario</h2>
           <label>
@@ -60,9 +80,8 @@ const UserProfile = () => {
           </label>
         </div>
 
-        {/* Sección de Dirección */}
         <div className="address-section">
-          <h2>Datos de Envio</h2>
+          <h2>Dirección</h2>
           <label>
             Dirección de Envío:
             <input type="text" name="address" value={formData.address} onChange={handleChange} />
