@@ -8,7 +8,7 @@ import defaultImage from '../Assets/404.jpg';
 const Item = ({ id, image, name, new_price, old_price, sizes }) => {
   const { addToCart } = useContext(ShopContext);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [selectedSize, setSelectedSize] = useState('');
+  const [selectedSize, setSelectedSize] = useState('Unica'||'XS'||'S'||'M'||'L'||'XL'||'XXL'||'XXXL');
   const [quantity, setQuantity] = useState(1);
   const dropdownRef = useRef(null);
 
