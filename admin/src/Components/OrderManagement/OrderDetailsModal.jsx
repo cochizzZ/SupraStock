@@ -199,11 +199,25 @@ const OrderDetailsModal = ({
     // Línea separadora encima del pie de página
     doc.line(10, pageHeight - 30, pageWidth - 10, pageHeight - 30);
 
-    // Pie de página con redes sociales
-    const footerY = pageHeight - 20;
-    doc.setFontSize(10);
-    doc.setFont("helvetica", "normal");
-    doc.text("Instagram: @domastore17", 10, footerY);
+    // Pie de página con logo de Instagram y texto
+    try {
+        const instagramLogo = await fetch("/instagram_logo.png") // Cambia la ruta si es necesario
+            .then((res) => res.blob())
+            .then((blob) => {
+                return new Promise((resolve) => {
+                    const reader = new FileReader();
+                    reader.onload = () => resolve(reader.result);
+                    reader.readAsDataURL(blob);
+                });
+            });
+
+        doc.addImage(instagramLogo, "PNG", 10, pageHeight - 25, 10, 10); // Logo de Instagram (10x10)
+        doc.setFontSize(12);
+        doc.setFont("helvetica", "normal");
+        doc.text("@Domastore17", 25, pageHeight - 17); // Texto al lado del logo
+    } catch (error) {
+        console.error("Error al cargar el logo de Instagram:", error);
+    }
 
     // Guardar el PDF
     const pdfBlob = doc.output("blob");
