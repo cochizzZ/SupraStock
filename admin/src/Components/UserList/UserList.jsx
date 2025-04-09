@@ -31,58 +31,74 @@ const UserList = () => {
   }, []);
 
   // Eliminar usuario
-  const removeUser = async (id) => {
+  const removeUser = async (id, email) => {
+    if (email === "Administrador@gmail.com") {
+      Swal.fire({
+        title: "Acción no permitida",
+        text: "No puedes desactivar las credenciales del administrador.",
+        icon: "warning",
+        confirmButtonText: "OK",
+      });
+      return;
+    }
+
     const result = await Swal.fire({
-      title: '¿Estás seguro?',
-      text: 'No podrás revertir esta acción',
-      icon: 'warning',
+      title: "¿Estás seguro?",
+      text: "No podrás revertir esta acción",
+      icon: "warning",
       showCancelButton: true,
-      confirmButtonColor: '#3085d6',
-      cancelButtonColor: '#d33',
-      confirmButtonText: 'Sí, eliminar',
-      cancelButtonText: 'Cancelar',
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Sí, eliminar",
+      cancelButtonText: "Cancelar",
     });
-  
+
     if (!result.isConfirmed) return;
-  
+
     try {
       const response = await fetch(`http://localhost:4000/api/users/${id}`, {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
       });
-  
+
       if (!response.ok) {
-        throw new Error('No se pudo eliminar el usuario');
+        throw new Error("No se pudo eliminar el usuario");
       }
-  
+
       Swal.fire({
-        title: '¡Eliminado!',
-        text: 'El usuario ha sido eliminado correctamente.',
-        icon: 'success',
+        title: "¡Eliminado!",
+        text: "El usuario ha sido eliminado correctamente.",
+        icon: "success",
         timer: 2000,
         showConfirmButton: false,
       });
-  
+
       console.log(`Usuario con ID ${id} eliminado correctamente`);
-  
+
       // Actualizar lista de usuarios después de eliminar
       fetchUsers();
     } catch (error) {
-      console.error('Error al eliminar usuario:', error);
+      console.error("Error al eliminar usuario:", error);
       Swal.fire({
-        title: 'Error',
-        text: 'No se pudo eliminar el usuario.',
-        icon: 'error',
+        title: "Error",
+        text: "No se pudo eliminar el usuario.",
+        icon: "error",
       });
     }
   };
+
   // Abrir el formulario de edición
   const handleEdit = (user) => {
-    console.log('Editando usuario:', user);
-    if (!user._id) {
-      alert('Error: el usuario no tiene un ID válido.');
+    if (user.email === "Administrador@gmail.com") {
+      Swal.fire({
+        title: "Acción no permitida",
+        text: "No puedes editar las credenciales del administrador.",
+        icon: "warning",
+        confirmButtonText: "OK",
+      });
       return;
     }
+    console.log("Editando usuario:", user);
     setEditingUser(user);
   };
 
@@ -112,16 +128,18 @@ const UserList = () => {
                   <p><strong>Rol:</strong> {user.role}</p>
                   <p><strong>Estado: </strong> {user.active ? 'Activo' : 'Inactivo'}</p>
                   <div className="user-actions">
+                    <button
+                      className="delete-btn"
+                      onClick={() => {
+                        console.log("Eliminando usuario con ID:", user._id);
+                        removeUser(user._id, user.email); // Pasar también el correo del usuario
+                      }}
+                    >
+                      <img src={cross_icon} alt="Eliminar" />
+                    </button>
                     <button className="edit-btn" onClick={() => handleEdit(user)}>
                       <img src={lapicito} alt="Editar" />
                     </button>
-                    <button className="delete-btn" onClick={() => {
-                     console.log("Eliminando usuario con ID:", user._id); // 👀 Verifica aquí
-                      removeUser(user._id);
-                      }}>
-                     <img src={cross_icon} alt="Eliminar" />
-                      </button>
-
                   </div>
                 </div>
               ))
